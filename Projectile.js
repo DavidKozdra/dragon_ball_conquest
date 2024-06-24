@@ -1,13 +1,16 @@
 import { GameObject } from './GameObject.js';
 
 class Projectile extends GameObject {
-  constructor(x, y, size, color, speedX, speedY, damage) {
+  constructor(x, y, size, color, dirX, dirY, speed, damage) {
     super('projectile', x, y);
     this.size = size;
     this.radius = size / 2;
     this.color = color;
-    this.speedX = speedX;
-    this.speedY = speedY;
+    this.dirX = dirX;
+    this.dirY = dirY;
+    this.speed = speed;
+    this.speedX = dirX * speed;
+    this.speedY = dirY * speed;
     this.damage = damage;
     this.alive = true; // Add a flag to track if the projectile is alive
   }

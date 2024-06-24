@@ -80,16 +80,12 @@ class Player extends GameObject {
       this.isFlying = false; // Stop flying if ki is depleted
     }
 
-    // Update projectiles
+    // Update projectiles and remove dead ones
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       let projectile = this.projectiles[i];
       projectile.update();
-      if (projectile.x < 0 || projectile.x > canvasWidth || projectile.y < 0 || projectile.y > canvasHeight) {
-        this.projectiles.splice(i, 1); // Remove off-screen projectiles
-      }
-
-      if (!projectile.alive) {
-        this.projectiles.splice(i, 1); // Remove dead projectiles
+      if (!projectile.alive || projectile.x < 0 || projectile.x > canvasWidth || projectile.y < 0 || projectile.y > canvasHeight) {
+        this.projectiles.splice(i, 1); // Remove dead or off-screen projectiles
       }
     }
 
@@ -152,19 +148,26 @@ class Player extends GameObject {
     let magnitude = Math.sqrt(dx * dx + dy * dy);
     dx /= magnitude;
     dy /= magnitude;
-
+  
+    // Apply diagonal offset considering projectile size and player size
+    let offset = (this.width / 2) + (this.currentAttackPower / 2) + 5; // Additional 5 units for a buffer
+    let offsetX = dx * offset;
+    let offsetY = dy * offset;
+  
     this.projectiles.push(new Projectile(
-      (this === player1) ? (this.x + this.currentAttackPower + 20) : (this.x - this.currentAttackPower), 
-      this.y, 
-      this.currentAttackPower, 
+      this.x + offsetX,
+      this.y + offsetY,
+      this.currentAttackPower,
       this.spirit,
-      dx * 5, 
-      dy * 5, 
+      dx,
+      dy,
+      5, // Speed of the projectile
       this.currentAttackPower
     ));
-
+  
     this.currentAttackPower = 0;
   }
+  
 
   toggleFlying() {
     if (this.canFly && this.flyToggleCooldown == 0) {

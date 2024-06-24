@@ -12,21 +12,8 @@ let timer = 120;
 let gameState = 'playing';
 let winner = '';
 
-
 let player1, player2;
 let lastUpPressTime = 0;
-
-function setup() {
-  resetGame()
-  createCanvas(canvasWidth, canvasHeight);
-  for (let i = 0; i < 10; i++) {
-    clouds.push({ x: random(-100, 300), y: random(0, 250) });
-  }
-  setInterval(() => {
-    if (timer > 0 && gameState === 'playing') timer--;
-  }, 1000);
-}
-
 
 function setGameState(state) {
   gameState = state;
@@ -36,13 +23,29 @@ function setWinner(player) {
   winner = player;
 }
 
-function resetGame() {
+function setup() {
+  createCanvas(canvasWidth, canvasHeight);
+
   const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
   const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
 
   player1 = new Player(0, 200, 88, 67, moveKeysPlayer1); // 'X' and 'C' keys
   player2 = new Player(300, 200, 78, 66, moveKeysPlayer2); // 'N' and 'B' keys
 
+  for (let i = 0; i < 10; i++) {
+    clouds.push({ x: random(-100, 300), y: random(0, 250) });
+  }
+  setInterval(() => {
+    if (timer > 0 && gameState === 'playing') timer--;
+  }, 1000);
+}
+
+function resetGame() {
+  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
+  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
+
+  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1);
+  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2);
   timer = 120;
   clouds = [];
   for (let i = 0; i < 10; i++) {
@@ -81,7 +84,7 @@ function draw() {
     clouds[i].x += random(0, 0.5); // Adjusting cloud speed
     ellipse(clouds[i].x, clouds[i].y, 80, 40);
   }
-  //console.log(player1.projectiles.length)
+  
   for (let i = 0; i < player1.projectiles.length; i++) {
     player1.projectiles[i].draw();
   }
@@ -162,4 +165,4 @@ function keyPressed() {
   }
 }
 
-export { setup, draw, keyPressed, resetGame, canvasWidth, canvasHeight, player1, player2,gameState,setGameState,winner, setWinner};
+export { setup, draw, keyPressed, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner };
