@@ -30,7 +30,8 @@ class Player extends GameObject {
     this.chargeKey = chargeKey;
     this.meleeKey = meleeKey;
     this.moveKeys = moveKeys; // Object containing move keys
-    this.jumpForce = 10;
+    this.jumpForce = 20;
+    this.shortHopForce = 100; // Adjusted for a reasonable short hop
     this.costOfFlying = 0.05;
     this.width = 10; // Player width
     this.height = 10; // Player height
@@ -38,6 +39,9 @@ class Player extends GameObject {
     this.alive = true;
     this.friction = 0.9; // Friction to slow down movement
     this.maxSpeed = 5; // Maximum speed
+    this.maxJumpDuration = 300; // Adjusted for a reasonable max jump duration
+    this.jumpKeyPressTime = 0;
+    this.isJumping = false;
   }
 
   get health() {
@@ -99,7 +103,6 @@ class Player extends GameObject {
     this.velocityX *= this.friction;
     this.velocityY *= this.friction;
 
-    console.log( "VEL Y ",this.velocityY)
     // Update position
     this.x += this.velocityX;
     this.y += this.velocityY;
@@ -121,6 +124,10 @@ class Player extends GameObject {
     // Constrain the player within the canvas bounds
     this.x = constrain(this.x, 0, canvasWidth - this.width);
     this.y = constrain(this.y, 0, canvasHeight - this.height);
+
+    if (this.isJumping) {
+      this.jump();
+    }
   }
 
   applyGravity() {
@@ -233,17 +240,80 @@ class Player extends GameObject {
     }
   }
 
-  jump() {
-    console.log("jump")
+  startJump() {
     if (this.grounded) {
-      this.velocityY = -this.jumpForce; // Apply negative force to jump
-      this.grounded = false;
+      this.jumpKeyPressTime = millis();
+      this.isJumping = true;
+    } else {
+      this.toggleFlying();
+    }
+  }
+
+  jump() {
+    let currentTime = millis();
+    let jumpDuration = currentTime - this.jumpKeyPressTime;
+    let jumpForce = this.shortHopForce;
+
+    if (jumpDuration < this.maxJumpDuration) {
+      jumpForce += (this.jumpForce - this.shortHopForce) * (jumpDuration / this.maxJumpDuration);
+      this.velocityY = -jumpForce;
+    } else {
+      this.isJumping = false;
     }
   }
 
   applyKnockback(dx, dy, force) {
     this.velocityX += dx * force;
     this.velocityY += dy * force;
+  }
+
+  dash(direction) {
+    if (this.ki < this.costOfFlying * 50) {
+      return; // Not enough ki for dashing
+    }
+    console.log("dash")
+
+    const dashSpeed = 200; // Adjust dash speed as needed
+    if (direction === this.moveKeys.left) {
+      this.x -= dashSpeed;
+      this.accelerationX = 0;
+    } else if (direction === this.moveKeys.right) {
+      this.x += dashSpeed;
+      this.accelerationX = 0;
+    } else if (direction === this.moveKeys.up) {
+      this.y -= dashSpeed;
+      this.accelerationY = 0;
+    } else if (direction === this.moveKeys.down) {
+      this.y += dashSpeed;
+      this.accelerationY = 0;
+    }
+
+    this.ki -= this.costOfFlying * 50;
+  }
+
+  handleKeyDown(keyCode) {
+    if (keyCode === this.moveKeys.up) {
+      this.startJump();
+    }
+  }
+
+  handleKeyUp(keyCode) {
+    if (keyCode === this.moveKeys.up) {
+      this.isJumping = false;
+    }
+  }
+
+  handleKeyPress(keyCode) {
+    const currentTime = millis();
+
+    // Handle dash
+    if (keyCode === this.moveKeys.left || keyCode === this.moveKeys.right) {
+      console.log("dash")
+      if (currentTime - this.lastLeftRightPressTime < 200) { // 300 ms for double press detection
+        this.dash(keyCode);
+      }
+      this.lastLeftRightPressTime = currentTime;
+    }
   }
 
   onCollision(other) {

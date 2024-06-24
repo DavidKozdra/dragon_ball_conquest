@@ -160,13 +160,17 @@ let lastUpPressTimePlayer2 = 0;
 function keyPressed() {
   const currentTime = millis();
 
+  player1.handleKeyPress(keyCode);
+  player2.handleKeyPress(keyCode);
+
   // Handle player 1 jump and fly toggle
   if (keyCode === player1.moveKeys.up) {
     if (currentTime - lastUpPressTimePlayer1 < 300) { // 300 ms for double press detection
       console.log("flying")
       player1.toggleFlying();
     } else {
-      player1.jump(); // Single press to jump
+      console.log("start")
+      player1.startJump(); // Single press to jump
     }
     lastUpPressTimePlayer1 = currentTime;
   }
@@ -176,7 +180,7 @@ function keyPressed() {
     if (currentTime - lastUpPressTimePlayer2 < 300) { // 300 ms for double press detection
       player2.toggleFlying();
     } else {
-      player2.jump(); // Single press to jump
+      player2.startJump(); // Single press to jump
     }
     lastUpPressTimePlayer2 = currentTime;
   }
@@ -192,4 +196,14 @@ function keyPressed() {
 }
 
 
-export { setup, draw, keyPressed, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner };
+function keyReleased() {
+  if (keyCode === player1.moveKeys.up) {
+    player1.isJumping = false;
+  }
+
+  if (keyCode === player2.moveKeys.up) {
+    player2.isJumping = false;
+  }
+}
+
+export { setup, draw, keyPressed,keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner };
