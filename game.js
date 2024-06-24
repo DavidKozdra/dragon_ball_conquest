@@ -17,12 +17,7 @@ let player1, player2;
 let lastUpPressTime = 0;
 
 function setup() {
-  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
-  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
-
-  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1); // 'X' and 'C' keys
-  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2); // 'N' and 'B' keys
-
+  resetGame()
   createCanvas(canvasWidth, canvasHeight);
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
@@ -42,8 +37,12 @@ function setWinner(player) {
 }
 
 function resetGame() {
-  player1 = new Player(0, 200, 88, 67);
-  player2 = new Player(300, 200, 78, 66);
+  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
+  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
+
+  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1); // 'X' and 'C' keys
+  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2); // 'N' and 'B' keys
+
   timer = 120;
   clouds = [];
   for (let i = 0; i < 10; i++) {
