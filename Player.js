@@ -4,7 +4,7 @@ import { canvasWidth, canvasHeight , player1, player2,gameState,setGameState,set
 import { Projectile } from './Projectile.js';
 
 class Player extends GameObject {
-    constructor(x, y, attackKey, chargeKey) {
+    constructor(x, y, attackKey, chargeKey,moveKeys) {
       super('player');
       this.x = x;
       this.y = y;
@@ -24,6 +24,8 @@ class Player extends GameObject {
       this.spirit = [0, 0, 200];
       this.attackKey = attackKey;
       this.chargeKey = chargeKey;
+
+        this.moveKeys = moveKeys; // Object containing move keys
       this.jumpForce = 10;
       this.costOfFlying = .05;
     }
@@ -92,19 +94,19 @@ class Player extends GameObject {
     }
   
     applyMovement() {
-      if (keyIsDown(LEFT_ARROW)) {
-        this.x -= 2;
+        if (keyIsDown(this.moveKeys.left)) {
+          this.x -= 2;
+        }
+        if (keyIsDown(this.moveKeys.right)) {
+          this.x += 2;
+        }
+        if (keyIsDown(this.moveKeys.up) && this.isFlying) {
+          this.y -= 2; // Move up if flying
+        }
+        if (keyIsDown(this.moveKeys.down) && this.isFlying) {
+          this.y += 2; // Move down if flying
+        }
       }
-      if (keyIsDown(RIGHT_ARROW)) {
-        this.x += 2;
-      }
-      if (keyIsDown(UP_ARROW) && this.isFlying) {
-        this.y -= 2; // Move up if flying
-      }
-      if (keyIsDown(DOWN_ARROW) && this.isFlying) {
-        this.y += 2; // Move down if flying
-      }
-    }
   
     applyCharging() {
       if (keyIsDown(this.chargeKey)) { // Charging key for charging ki

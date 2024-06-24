@@ -12,12 +12,17 @@ let timer = 120;
 let gameState = 'playing';
 let winner = '';
 
-let player1 = new Player(0, 200, 88, 67); // 'X' and 'C' keys
-let player2 = new Player(300, 200, 78, 66); // 'N' and 'B' keys
 
+let player1, player2;
 let lastUpPressTime = 0;
 
 function setup() {
+  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
+  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
+
+  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1); // 'X' and 'C' keys
+  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2); // 'N' and 'B' keys
+
   createCanvas(canvasWidth, canvasHeight);
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
@@ -26,6 +31,7 @@ function setup() {
     if (timer > 0 && gameState === 'playing') timer--;
   }, 1000);
 }
+
 
 function setGameState(state) {
   gameState = state;
@@ -141,11 +147,18 @@ function draw() {
 
 function keyPressed() {
   const currentTime = millis();
-  if (keyCode === UP_ARROW) {
+  if (keyCode === player1.moveKeys.up) {
     if (currentTime - lastUpPressTime < 300) { // 300 ms for double press detection
       player1.toggleFlying();
     } else {
       player1.jump(); // Single press to jump
+    }
+    lastUpPressTime = currentTime;
+  } else if (keyCode === player2.moveKeys.up) {
+    if (currentTime - lastUpPressTime < 300) { // 300 ms for double press detection
+      player2.toggleFlying();
+    } else {
+      player2.jump(); // Single press to jump
     }
     lastUpPressTime = currentTime;
   }
