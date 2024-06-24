@@ -77,6 +77,15 @@ function checkCollisions() {
 }
 
 function draw() {
+  if (gameState === 'paused') {
+
+    fill(255);
+    textSize(32); 
+    stroke(10);
+    textAlign(CENTER, CENTER);
+    text(` Paused!`, canvasWidth / 2, canvasHeight / 2);
+    return 
+  }
   background(10, 100, 220); // This sets the background color each frame
   
   fill(255);
@@ -85,6 +94,8 @@ function draw() {
     ellipse(clouds[i].x, clouds[i].y, 80, 40);
   }
   
+
+
   for (let i = 0; i < player1.projectiles.length; i++) {
     player1.projectiles[i].draw();
   }
@@ -93,6 +104,7 @@ function draw() {
     player2.projectiles[i].draw();
   }
 
+  
   player1.update();
   player1.draw();
 
@@ -162,6 +174,15 @@ function keyPressed() {
       player2.jump(); // Single press to jump
     }
     lastUpPressTime = currentTime;
+  }
+
+  if ( keyCode === 32 ) {
+    if (gameState === 'paused') {
+      gameState = 'playing';
+    } else {
+      gameState = 'paused';
+    }
+  
   }
 }
 
