@@ -76,6 +76,12 @@ function checkCollisions() {
   }
 }
 function draw() {
+
+  if (timer === 0) {
+    setGameState('gameOver');
+    setWinner(player1.health > player2.health ? 'Player 1' : 'Player 2');
+  }
+
   if (gameState === 'paused') {
     fill(255);
     textSize(32); 
@@ -175,6 +181,15 @@ let lastUpPressTimePlayer1 = 0;
 let lastUpPressTimePlayer2 = 0;
 
 function keyPressed() {
+  // Handle game pause
+  if (keyCode === 32) { // Space bar for pause
+    if (gameState === 'paused') {
+      gameState = 'playing';
+    } else {
+      gameState = 'paused';
+    }
+  }
+  if (gameState === 'paused') return; // Skip updates if game is paused
   const currentTime = millis();
 
   player1.handleKeyPress(keyCode);
@@ -202,14 +217,7 @@ function keyPressed() {
     lastUpPressTimePlayer2 = currentTime;
   }
 
-  // Handle game pause
-  if (keyCode === 32) { // Space bar for pause
-    if (gameState === 'paused') {
-      gameState = 'playing';
-    } else {
-      gameState = 'paused';
-    }
-  }
+
 }
 
 

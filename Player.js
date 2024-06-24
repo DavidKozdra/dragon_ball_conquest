@@ -81,7 +81,7 @@ class Player extends GameObject {
 
   update() {
     if (!this.alive) return; // Skip updates if player is dead
-
+    if (gameState === 'paused') return; // Skip updates if game is paused
     this.applyGravity();
     this.applyCharging();
     this.applyMovement();
