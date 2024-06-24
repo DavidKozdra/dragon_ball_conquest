@@ -1,9 +1,10 @@
 import { GameObject } from './GameObject.js';
 import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, resetGame } from './game.js';
 import { Projectile } from './Projectile.js';
+import { Fist } from './fist.js';
 
 class Player extends GameObject {
-  constructor(x, y, attackKey, chargeKey, moveKeys) {
+  constructor(x, y, attackKey, chargeKey, moveKeys, meleeKey) {
     super('player');
     this.x = x;
     this.y = y;
@@ -17,18 +18,26 @@ class Player extends GameObject {
     this.flyToggleCooldown = 0;
     this.kiRate = 1;
     this.grounded = false;
+    this.velocityX = 0;
     this.velocityY = 1;
+    this.accelerationX = 0;
+    this.accelerationY = 0;
     this.projectiles = [];
+    this.fists = [new Fist(this, 5, 5)]; // Create fists once and reuse them
     this.currentAttackPower = 0;
     this.spirit = [0, 0, 200];
     this.attackKey = attackKey;
     this.chargeKey = chargeKey;
+    this.meleeKey = meleeKey;
     this.moveKeys = moveKeys; // Object containing move keys
     this.jumpForce = 10;
     this.costOfFlying = 0.05;
     this.width = 10; // Player width
     this.height = 10; // Player height
+    this.size = 10; // Size of the player
     this.alive = true;
+    this.friction = 0.9; // Friction to slow down movement
+    this.maxSpeed = 5; // Maximum speed
   }
 
   get health() {
@@ -60,6 +69,11 @@ class Player extends GameObject {
       fill(100, 100, 100); // Gray color if dead
     }
     rect(this.x, this.y, this.width, this.height);
+
+    // Draw fists
+    for (let fist of this.fists) {
+      fist.draw();
+    }
   }
 
   update() {
@@ -70,6 +84,7 @@ class Player extends GameObject {
     this.applyMovement();
     this.checkGrounded();
     this.applyAttacking();
+    this.applyMelee();
 
     if (this.flyToggleCooldown > 0) {
       this.flyToggleCooldown--;
@@ -80,6 +95,15 @@ class Player extends GameObject {
       this.isFlying = false; // Stop flying if ki is depleted
     }
 
+    // Apply friction
+    this.velocityX *= this.friction;
+    this.velocityY *= this.friction;
+
+    console.log( "VEL Y ",this.velocityY)
+    // Update position
+    this.x += this.velocityX;
+    this.y += this.velocityY;
+
     // Update projectiles and remove dead ones
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       let projectile = this.projectiles[i];
@@ -87,6 +111,11 @@ class Player extends GameObject {
       if (!projectile.alive || projectile.x < 0 || projectile.x > canvasWidth || projectile.y < 0 || projectile.y > canvasHeight) {
         this.projectiles.splice(i, 1); // Remove dead or off-screen projectiles
       }
+    }
+
+    // Update fists
+    for (let fist of this.fists) {
+      fist.update();
     }
 
     // Constrain the player within the canvas bounds
@@ -97,23 +126,36 @@ class Player extends GameObject {
   applyGravity() {
     if (!this.isFlying) {
       this.velocityY += this.gravity;
-      this.y += this.velocityY;
     }
   }
 
   applyMovement() {
     if (keyIsDown(this.moveKeys.left)) {
-      this.x -= 2;
+      this.accelerationX = -0.5;
+    } else if (keyIsDown(this.moveKeys.right)) {
+      this.accelerationX = 0.5;
+    } else {
+      this.accelerationX = 0;
     }
-    if (keyIsDown(this.moveKeys.right)) {
-      this.x += 2;
+
+    if (this.isFlying) {
+      if (keyIsDown(this.moveKeys.up)) {
+        this.accelerationY = -0.5; // Move up if flying (negative direction in p5.js)
+      } else if (keyIsDown(this.moveKeys.down)) {
+        this.accelerationY = 0.5; // Move down if flying
+      } else {
+        this.accelerationY = 0;
+      }
+    } else {
+      this.accelerationY = 0;
     }
-    if (keyIsDown(this.moveKeys.up) && this.isFlying) {
-      this.y -= 2; // Move up if flying
-    }
-    if (keyIsDown(this.moveKeys.down) && this.isFlying) {
-      this.y += 2; // Move down if flying
-    }
+
+    this.velocityX += this.accelerationX;
+    this.velocityY += this.accelerationY;
+
+    // Limit the speed
+    this.velocityX = constrain(this.velocityX, -this.maxSpeed, this.maxSpeed);
+    this.velocityY = constrain(this.velocityY, -this.maxSpeed, this.maxSpeed);
   }
 
   applyCharging() {
@@ -140,6 +182,12 @@ class Player extends GameObject {
     }
   }
 
+  applyMelee() {
+    for (let fist of this.fists) {
+      fist.alive = keyIsDown(this.meleeKey); // Toggle fist activity based on melee key
+    }
+  }
+
   releaseKiAttack() {
     // Calculate direction vector
     let targetPlayer = this === player1 ? player2 : player1;
@@ -148,12 +196,12 @@ class Player extends GameObject {
     let magnitude = Math.sqrt(dx * dx + dy * dy);
     dx /= magnitude;
     dy /= magnitude;
-  
+
     // Apply diagonal offset considering projectile size and player size
     let offset = (this.width / 2) + (this.currentAttackPower / 2) + 5; // Additional 5 units for a buffer
     let offsetX = dx * offset;
     let offsetY = dy * offset;
-  
+
     this.projectiles.push(new Projectile(
       this.x + offsetX,
       this.y + offsetY,
@@ -164,10 +212,9 @@ class Player extends GameObject {
       5, // Speed of the projectile
       this.currentAttackPower
     ));
-  
+
     this.currentAttackPower = 0;
   }
-  
 
   toggleFlying() {
     if (this.canFly && this.flyToggleCooldown == 0) {
@@ -177,9 +224,9 @@ class Player extends GameObject {
   }
 
   checkGrounded() {
-    if (this.y >= 340) {
-      this.y = 340;
-      this.velocityY = 0;
+    if (this.y >= 335) {
+      this.y = 335;
+      this.accelerationY = 0;
       this.grounded = true;
     } else {
       this.grounded = false;
@@ -187,10 +234,16 @@ class Player extends GameObject {
   }
 
   jump() {
+    console.log("jump")
     if (this.grounded) {
-      this.velocityY = -this.jumpForce;
+      this.velocityY = -this.jumpForce; // Apply negative force to jump
       this.grounded = false;
     }
+  }
+
+  applyKnockback(dx, dy, force) {
+    this.velocityX += dx * force;
+    this.velocityY += dy * force;
   }
 
   onCollision(other) {

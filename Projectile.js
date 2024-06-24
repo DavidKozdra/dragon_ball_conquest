@@ -33,6 +33,11 @@ class Projectile extends GameObject {
     if (other.type === 'player') {
       other.health -= this.damage;
       this.alive = false; // Remove projectile after hitting player
+
+      // Apply knockback
+      let dx = this.dirX;
+      let dy = this.dirY;
+      other.applyKnockback(dx, dy, this.damage);
     }
 
     if (other.type === 'projectile') {

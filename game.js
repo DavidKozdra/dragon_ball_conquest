@@ -29,8 +29,8 @@ function setup() {
   const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
   const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
 
-  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1); // 'X' and 'C' keys
-  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2); // 'N' and 'B' keys
+  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1, 90); // 'X', 'C', and 'Z' keys
+  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2, 77); // 'N', 'B', and 'M' keys
 
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
@@ -44,8 +44,8 @@ function resetGame() {
   const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
   const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
 
-  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1);
-  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2);
+  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1, 90);
+  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2, 77);
   timer = 120;
   clouds = [];
   for (let i = 0; i < 10; i++) {
@@ -65,7 +65,7 @@ function restartClouds() {
 }
 
 function checkCollisions() {
-  let allObjects = [...player1.projectiles, ...player2.projectiles, player1, player2];
+  let allObjects = [...player1.projectiles, ...player2.projectiles, ...player1.fists, ...player2.fists, player1, player2];
   for (let i = 0; i < allObjects.length; i++) {
     for (let j = i + 1; j < allObjects.length; j++) {
       if (collides(allObjects[i], allObjects[j])) {
@@ -78,14 +78,14 @@ function checkCollisions() {
 
 function draw() {
   if (gameState === 'paused') {
-
     fill(255);
     textSize(32); 
     stroke(10);
     textAlign(CENTER, CENTER);
-    text(` Paused!`, canvasWidth / 2, canvasHeight / 2);
-    return 
+    text(`Paused!`, canvasWidth / 2, canvasHeight / 2);
+    return;
   }
+  
   background(10, 100, 220); // This sets the background color each frame
   
   fill(255);
@@ -93,8 +93,6 @@ function draw() {
     clouds[i].x += random(0, 0.5); // Adjusting cloud speed
     ellipse(clouds[i].x, clouds[i].y, 80, 40);
   }
-  
-
 
   for (let i = 0; i < player1.projectiles.length; i++) {
     player1.projectiles[i].draw();
@@ -104,37 +102,36 @@ function draw() {
     player2.projectiles[i].draw();
   }
 
-  
   player1.update();
   player1.draw();
 
   player2.update();
   player2.draw();
   
-  //ground
+  // Ground
   fill(0, 100, 0);
   rect(0, 350, 400, 50);
   
-  //UI
-  //player1 health
+  // UI
+  // Player1 health
   fill(10, 10, 10);
   rect(0, 20, player1.maxHealth, 10);
   fill(200, 0, 0);
   rect(0, 20, player1.health, 10);
 
-  //player1 ki 
+  // Player1 ki 
   fill(10, 10, 10);
   rect(0, 50, player1.maxKi, 10);
   fill(10, 0, 200);
   rect(0, 50, player1.ki, 10);
 
-  //player2 health
+  // Player2 health
   fill(10, 10, 10);
   rect(canvasWidth - player2.maxHealth, 20, player2.maxHealth, 10);
   fill(200, 0, 0);
   rect(canvasWidth - player2.health, 20, player2.health, 10);
 
-  //player2 ki
+  // Player2 ki
   fill(10, 10, 10);
   rect(canvasWidth - player2.maxKi, 50, player2.maxKi, 10);
   fill(10, 0, 200);
@@ -157,33 +154,42 @@ function draw() {
     text(`${winner} Wins!`, canvasWidth / 2, canvasHeight / 2);
   }
 }
+let lastUpPressTimePlayer1 = 0;
+let lastUpPressTimePlayer2 = 0;
 
 function keyPressed() {
   const currentTime = millis();
+
+  // Handle player 1 jump and fly toggle
   if (keyCode === player1.moveKeys.up) {
-    if (currentTime - lastUpPressTime < 300) { // 300 ms for double press detection
+    if (currentTime - lastUpPressTimePlayer1 < 300) { // 300 ms for double press detection
+      console.log("flying")
       player1.toggleFlying();
     } else {
       player1.jump(); // Single press to jump
     }
-    lastUpPressTime = currentTime;
-  } else if (keyCode === player2.moveKeys.up) {
-    if (currentTime - lastUpPressTime < 300) { // 300 ms for double press detection
+    lastUpPressTimePlayer1 = currentTime;
+  }
+
+  // Handle player 2 jump and fly toggle
+  if (keyCode === player2.moveKeys.up) {
+    if (currentTime - lastUpPressTimePlayer2 < 300) { // 300 ms for double press detection
       player2.toggleFlying();
     } else {
       player2.jump(); // Single press to jump
     }
-    lastUpPressTime = currentTime;
+    lastUpPressTimePlayer2 = currentTime;
   }
 
-  if ( keyCode === 32 ) {
+  // Handle game pause
+  if (keyCode === 32) { // Space bar for pause
     if (gameState === 'paused') {
       gameState = 'playing';
     } else {
       gameState = 'paused';
     }
-  
   }
 }
+
 
 export { setup, draw, keyPressed, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner };

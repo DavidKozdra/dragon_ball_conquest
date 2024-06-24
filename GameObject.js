@@ -74,6 +74,10 @@ class GameObject {
     if (obj1.type === 'projectile' && obj2.type === 'projectile') {
       return circleCollidesCircle(obj1, obj2);
     }
+
+    if (obj1.type === 'fist' && obj2.type === 'player') {
+      return squareCollidesSquare(obj1, obj2);
+    }
   
     return false;
   }
