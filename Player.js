@@ -54,7 +54,6 @@ class Player extends GameObject {
       this.alive = false;
       setGameState('gameOver');
       setWinner(this === player1 ? 'Player 2' : 'Player 1');
-      setTimeout(resetGame, 4000); // Restart the game after 4 seconds
     }
   }
 
@@ -68,7 +67,7 @@ class Player extends GameObject {
 
   draw() {
     if (this.alive) {
-      fill(200, 20, 100);
+      fill(this == player1 ? 200 : 0, 20, 100);
     } else {
       fill(100, 100, 100); // Gray color if dead
     }

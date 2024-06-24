@@ -75,7 +75,6 @@ function checkCollisions() {
     }
   }
 }
-
 function draw() {
   if (gameState === 'paused') {
     fill(255);
@@ -113,11 +112,19 @@ function draw() {
   rect(0, 350, 400, 50);
   
   // UI
+  textSize(16);
+  fill(0);
+  noStroke();
+  textAlign(LEFT, CENTER);
+  text('Player 1', 0, 10);
+  textAlign(RIGHT, CENTER);
+  text('Player 2', canvasWidth, 10);
+  
   // Player1 health
   fill(10, 10, 10);
-  rect(0, 20, player1.maxHealth, 10);
+  rect(0, 30, player1.maxHealth, 10);
   fill(200, 0, 0);
-  rect(0, 20, player1.health, 10);
+  rect(0, 30, player1.health, 10);
 
   // Player1 ki 
   fill(10, 10, 10);
@@ -127,9 +134,9 @@ function draw() {
 
   // Player2 health
   fill(10, 10, 10);
-  rect(canvasWidth - player2.maxHealth, 20, player2.maxHealth, 10);
+  rect(canvasWidth - player2.maxHealth, 30, player2.maxHealth, 10);
   fill(200, 0, 0);
-  rect(canvasWidth - player2.health, 20, player2.health, 10);
+  rect(canvasWidth - player2.health, 30, player2.health, 10);
 
   // Player2 ki
   fill(10, 10, 10);
@@ -139,9 +146,11 @@ function draw() {
 
   // Timer
   fill(255);
+  stroke(0);
+  strokeWeight(2);
   textSize(32);
   textAlign(CENTER, CENTER);
-  text(timer, canvasWidth / 2, 30);
+  text(timer, canvasWidth / 2, 50);
 
   restartClouds();
 
@@ -152,8 +161,16 @@ function draw() {
     textSize(32);
     textAlign(CENTER, CENTER);
     text(`${winner} Wins!`, canvasWidth / 2, canvasHeight / 2);
+
+    textSize(16);
+    text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
+
+    if (keyIsPressed && keyCode === 13) {
+      resetGame()
+    }
   }
 }
+
 let lastUpPressTimePlayer1 = 0;
 let lastUpPressTimePlayer2 = 0;
 
