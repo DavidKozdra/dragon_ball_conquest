@@ -81,9 +81,8 @@ function draw() {
     clouds[i].x += random(0, 0.5); // Adjusting cloud speed
     ellipse(clouds[i].x, clouds[i].y, 80, 40);
   }
-  console.log(player1.projectiles.length)
+  //console.log(player1.projectiles.length)
   for (let i = 0; i < player1.projectiles.length; i++) {
-    console.log(player1.projectiles[i])
     player1.projectiles[i].draw();
   }
 
