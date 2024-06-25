@@ -10,9 +10,9 @@ class Player {
     this.meleeKey = meleeKey;
     this.moveKeys = moveKeys; // Object containing move keys
     this.controllable = false
-
     this.char = charictarController
-
+    this.keyPressTimes = {};
+    this.doubleTapThreshold = 300; // Threshold in milliseconds
     this.team = [];
   }
 
@@ -40,14 +40,37 @@ class Player {
 
 
 
-  handleKeyDown(keyCode) {
-    // make direction and map movement to our char 
 
-    // charictar 
-    if (keyCode === this.moveKeys.up) {
-      this.char.startJump()
+  handleKeyDown(keyCode) {
+    const currentTime = Date.now();
+    
+    if (!this.keyPressTimes[keyCode]) {
+      this.keyPressTimes[keyCode] = [];
     }
- 
+
+    this.keyPressTimes[keyCode].push(currentTime);
+
+    // Remove old key press times
+    this.keyPressTimes[keyCode] = this.keyPressTimes[keyCode].filter(time => currentTime - time <= this.doubleTapThreshold);
+
+    if (this.keyPressTimes[keyCode].length >= 2) {
+      this.handleDoubleTap(keyCode);
+      this.keyPressTimes[keyCode] = []; // Reset after handling double-tap
+    }
+  }
+
+  handleDoubleTap(keyCode) {
+    if (keyCode === this.moveKeys.up) {
+      this.char.startJump();
+    }
+
+    if (keyCode === this.moveKeys.left) {
+      this.char.dash("left");
+    }
+
+    if (keyCode === this.moveKeys.right) {
+      this.char.dash("right");
+    }
   }
   
 

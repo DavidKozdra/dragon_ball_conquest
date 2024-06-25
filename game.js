@@ -63,8 +63,6 @@ let menus = [
 
       player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1);
       player2 = new AI( char2);
-    
-
 
     }
   }
