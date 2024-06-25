@@ -4,7 +4,7 @@ import { Projectile } from './Projectile.js';
 import { Fist } from './fist.js';
 
 class charController extends GameObject {
-  constructor(x, y, controllable=true) {
+  constructor(x, y, controllable=true, spirit=[0, 0, 200]) {
     super('player');
     this.x = x;
     this.y = y;
@@ -25,7 +25,7 @@ class charController extends GameObject {
     this.projectiles = [];
     this.fists = [new Fist(this, 5, 5)]; // Create fists once and reuse them
     this.currentAttackPower = 0;
-    this.spirit = [0, 0, 200];
+    this.spirit =spirit;
     this.jumpForce = 20;
     this.shortHopForce = 100; // Adjusted for a reasonable short hop
     this.costOfFlying = 0.05;
@@ -50,8 +50,6 @@ class charController extends GameObject {
     this._health = constrain(value, 0, this.maxHealth);
     if (this._health <= 0 && gameState === 'playing') {
       this.alive = false;
-      setGameState('gameOver');
-      setWinner(this === player1 ? 'Player 2' : 'Player 1');
     }
   }
 
@@ -65,7 +63,7 @@ class charController extends GameObject {
 
   draw() {
     if (this.alive) {
-      fill(this == player1 ? 200 : 0, 20, 100);
+      fill(this.spirit[0], this.spirit[1], this.spirit[2]); 
     } else {
       fill(100, 100, 100); // Gray color if dead
     }
@@ -169,7 +167,6 @@ class charController extends GameObject {
   
 
   applyCharging() {
-      console.log("charging")
       if (this.ki < this.maxKi) {
         this.ki += this.kiRate;
     }
@@ -221,7 +218,6 @@ class charController extends GameObject {
 
     this.currentAttackPower = 0;
 
-    console.log("releaseKiAttack !!!", this.projectiles)
   }
 
   toggleFlying() {
@@ -273,7 +269,6 @@ class charController extends GameObject {
     this.velocityY += dy * force;
   }
   dash(direction) {
-    console.log("dash", direction);
     if (this.ki < this.costOfFlying * 50) {
       return; // Not enough ki for dashing
     }

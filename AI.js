@@ -1,6 +1,6 @@
 import { GameObject } from './GameObject.js';
 import { canvasWidth, canvasHeight, player1, gameState, setGameState, setWinner, resetGame } from './game.js';
-
+import { Playing_Agent } from './Playing_Agent.js';
 // Define the states for the AI
 const AIState = {
   IDLE: 'idle',
@@ -12,13 +12,15 @@ const AIState = {
   AVOIDING: 'avoiding',
 };
 
-class AI {
-  constructor(characterController) {
+class AI extends Playing_Agent{
+  constructor(characterController, team) {
+    super(characterController, team=team)
     this.char = characterController;
     this.state = AIState.IDLE; // Initial state
   }
 
   update() {
+    super.update()
     const distanceToPlayer1 = dist(this.char.x, this.char.y, player1.char.x, player1.char.y);
     const nearestProjectile = this.findNearestProjectile();
     const distanceToProjectile = nearestProjectile ? dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) : Infinity;

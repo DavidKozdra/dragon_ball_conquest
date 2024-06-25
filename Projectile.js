@@ -38,6 +38,8 @@ class Projectile extends GameObject {
       let dx = this.dirX;
       let dy = this.dirY;
       other.applyKnockback(dx, dy, this.damage);
+
+      // destroy projectile
     }
 
     if (other.type === 'projectile') {

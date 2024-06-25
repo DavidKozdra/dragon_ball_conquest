@@ -6,8 +6,6 @@ import {AI} from './AI.js';
 let clouds = [];
 let delta = 1;
 
-const costOfFlying = 0.1;
-const jumpForce = 5;
 let canvasWidth = 400;
 let canvasHeight = 400;
 let timer = 120;
@@ -15,7 +13,6 @@ let gameState = 'main_menu';
 let winner = '';
 
 let player1, player2;
-let lastUpPressTime = 0;
 
 function setGameState(state) {
   gameState = state;
@@ -43,11 +40,15 @@ let menus = [
       gameState = 'playing';
 
       // set up player 1 and 2 with character controllers 
-      let char1 = new charController(0, 200);
-      let char2 = new charController(300, 200);
+      let char1 = new charController(0, 200,true);
+      let char2 = new charController(300, 200, true,[100,0,2]);
 
-      player1 = new Player(88,67 , { left: 65, right: 68, up: 87, down: 83 }, 90, char1);
-      player2 = new Player(78,66 , { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, char2);
+      let char3 = new charController(300, 200, true,[100,0,2]);
+
+      let team = [char1, char2];
+
+      player1 = new Player(88,67 , { left: 65, right: 68, up: 87, down: 83 }, 90, char1, team=[char1]);
+      player2 = new Player(78,66 , { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, char2, team=[char2,char3]);
     }
   },
   {
@@ -59,10 +60,13 @@ let menus = [
 
       // set up player 1 and 2 with character controllers
       let char1 = new charController(0, 200);
-      let char2 = new charController(300, 200, false);
+      let char2 = new charController(300, 200, false, [100,0,2]);
+      let char3 = new charController(300, 200, false, [10,0,200]);
 
-      player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1);
-      player2 = new AI( char2);
+      let char4 = new charController(300, 200, false, [10,100,100]);
+
+      player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1,[char1]);
+      player2 = new AI( char2, [char2,char3, char4]);
 
     }
   }
@@ -71,9 +75,9 @@ let menus = [
 let buttonNext, buttonPrevious, buttonSelect;
 
 function onWindowResize() {
-  canvasWidth = window.innerWidth;
-  canvasHeight = window.innerHeight;
-  resizeCanvas(canvasWidth, canvasHeight);
+  //canvasWidth = window.innerWidth;
+  //canvasHeight = window.innerHeight;
+  //resizeCanvas(canvasWidth, canvasHeight);
   positionButtons();
 }
 
@@ -142,13 +146,6 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');
   window.addEventListener('resize', onWindowResize);
-
-  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
-  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
-
-  player1 = new Player(65, 68, moveKeysPlayer1, 90, new charController(0, 200)); // 'X', 'C', and 'Z' keys
-  player2 = new Player(LEFT_ARROW, RIGHT_ARROW, moveKeysPlayer2, 77, new charController(300, 200)); // 'N', 'B', and 'M' keys
-
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
   }
@@ -237,17 +234,23 @@ function draw() {
 
 
 
-    player1.char.update();
-    if(!player1.char.isControllable){
-      player1.update();
-    }
-    player1.char.draw();
+    player1.update();
+    if(player1.char) {
 
-    player2.char.update();
-    if(!player2.char.isControllable){
-      player2.update();
+      player1.char.update();
+      player1.char.draw();
+  
+    }else {
+      return
     }
-    player2.char.draw();
+
+    player2.update();
+    if(player2.char) {
+      player2.char.update();
+      player2.char.draw();
+  }else {
+    return
+  }
 
     for (let i = 0; i < player1.char.projectiles.length; i++) {
       player1.char.projectiles[i].draw();
@@ -345,8 +348,6 @@ function draw() {
   
 }
 
-let lastUpPressTimePlayer1 = 0;
-let lastUpPressTimePlayer2 = 0;
 
 function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
@@ -379,7 +380,6 @@ function keyPressed() {
 
       if (player2.char.isControllable)
       {
-
       player2.handleKeyDown(keyCode);
       player2.handleKeyPress(keyCode);
       }
@@ -388,6 +388,11 @@ function keyPressed() {
 }
 
 function keyReleased() {
+
+  if (gameState === 'paused') return; // Skip updates if game is paused
+
+  if (gameState === 'main_menu') return;
+
   if (player1.char.isControllable)
     {
   if (keyCode === player1.moveKeys.up) {

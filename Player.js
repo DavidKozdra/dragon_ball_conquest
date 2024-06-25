@@ -2,42 +2,18 @@ import { GameObject } from './GameObject.js';
 import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, resetGame } from './game.js';
 import { Projectile } from './Projectile.js';
 import { Fist } from './fist.js';
+import { Playing_Agent } from './Playing_Agent.js';
 
-class Player {
-  constructor(attackKey, chargeKey, moveKeys, meleeKey,charictarController) {
+class Player extends Playing_Agent{
+  constructor(attackKey, chargeKey, moveKeys, meleeKey,charictarController, team) {
+    super (charictarController, team)
     this.attackKey = attackKey;
     this.chargeKey = chargeKey;
     this.meleeKey = meleeKey;
     this.moveKeys = moveKeys; // Object containing move keys
     this.controllable = false
-
-    this.char = charictarController
-
-    this.team = [];
+    this.char = charictarController || team[0];
   }
-
-  get health() {
-    return this._health;
-  }
-
-  set health(value) {
-    this._health = constrain(value, 0, this.maxHealth);
-    if (this._health <= 0 && gameState === 'playing') {
-      this.alive = false;
-      setGameState('gameOver');
-      setWinner(this === player1 ? 'Player 2' : 'Player 1');
-    }
-  }
-
-  get ki() {
-    return this._ki;
-  }
-
-  set ki(value) {
-    this._ki = constrain(value, 0, this.maxKi);
-  }
-
-
 
 
   handleKeyDown(keyCode) {
@@ -64,10 +40,8 @@ class Player {
   }
 
   handleKeyPress(keyCode) {
-    console.log(this.char.isControllable)
     if (!this.char.isControllable) return
     const currentTime = millis();
-    console.log(keyCode, this.moveKeys.left , this.moveKeys.right)
     if (keyCode === this.moveKeys.left || keyCode === this.moveKeys.right) {
       if (currentTime - this.lastLeftRightPressTime < 200) { // 300 ms for double press detection
 
@@ -79,9 +53,6 @@ class Player {
     }
   }
 
-  onCollision(other) {
-    // Handle collision with other objects if necessary
-  }
 }
 
 export { Player };
