@@ -1,5 +1,7 @@
 import { Player } from './Player.js';
 import { collides } from './GameObject.js';
+import { charController } from './Charictar_controller.js';
+import {AI} from './AI.js';
 
 let clouds = [];
 let delta = 1;
@@ -39,6 +41,13 @@ let menus = [
     onselect: () => {
       console.log('Couch Multiplayer');
       gameState = 'playing';
+
+      // set up player 1 and 2 with character controllers 
+      let char1 = new charController(0, 200);
+      let char2 = new charController(300, 200);
+
+      player1 = new Player(88,67 , { left: 65, right: 68, up: 87, down: 83 }, 90, char1);
+      player2 = new Player(78,66 , { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, char2);
     }
   },
   {
@@ -46,7 +55,17 @@ let menus = [
     image: 'single.png',
     onselect: () => {
       console.log('Single Player');
-      gameState = 'ai_playing';
+      gameState = 'playing';
+
+      // set up player 1 and 2 with character controllers
+      let char1 = new charController(0, 200);
+      let char2 = new charController(300, 200, false);
+
+      player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1);
+      player2 = new AI( char2);
+    
+
+
     }
   }
 ];
@@ -78,7 +97,7 @@ function RenderMainMenu() {
   // Show buttons
   background(200, 200, 220);
   fill(0);
-  stroke(0)
+  stroke(0);
   textSize(32);
   textAlign(CENTER, CENTER);
   text('Dragon Ball Conquest', canvasWidth / 2, canvasHeight / 2 - 50);
@@ -93,13 +112,9 @@ function RenderMainMenu() {
   // Placeholder for image
   rect(canvasWidth / 2 - 50, canvasHeight / 2 + 60, 100, 100);
 
-// images 1 and 3 
-
-rect(canvasWidth / 2 - 250, canvasHeight / 2 + 60, 80, 80);
-
-
-rect(canvasWidth / 2 + 170, canvasHeight / 2 + 60, 80, 80);
-
+  // images 1 and 3 
+  rect(canvasWidth / 2 - 250, canvasHeight / 2 + 60, 80, 80);
+  rect(canvasWidth / 2 + 170, canvasHeight / 2 + 60, 80, 80);
 
   // Create navigation buttons if not already created
   if (!buttonNext) {
@@ -133,8 +148,8 @@ function setup() {
   const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
   const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
 
-  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1, 90); // 'X', 'C', and 'Z' keys
-  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2, 77); // 'N', 'B', and 'M' keys
+  player1 = new Player(65, 68, moveKeysPlayer1, 90, new charController(0, 200)); // 'X', 'C', and 'Z' keys
+  player2 = new Player(LEFT_ARROW, RIGHT_ARROW, moveKeysPlayer2, 77, new charController(300, 200)); // 'N', 'B', and 'M' keys
 
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
@@ -145,18 +160,14 @@ function setup() {
 }
 
 function resetGame() {
-  const moveKeysPlayer1 = { left: 65, right: 68, up: 87, down: 83 }; // 'A', 'D', 'W', 'S' keys
-  const moveKeysPlayer2 = { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }; // Arrow keys
 
-  player1 = new Player(0, 200, 88, 67, moveKeysPlayer1, 90);
-  player2 = new Player(300, 200, 78, 66, moveKeysPlayer2, 77);
-  timer = 120;
   clouds = [];
   for (let i = 0; i < 10; i++) {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
   }
-  gameState = 'playing';
   winner = '';
+
+  menus[currentMenu].onselect();
 }
 
 function restartClouds() {
@@ -169,7 +180,7 @@ function restartClouds() {
 }
 
 function checkCollisions() {
-  let allObjects = [...player1.projectiles, ...player2.projectiles, ...player1.fists, ...player2.fists, player1, player2];
+  let allObjects = [...player1.char.projectiles, ...player2.char.projectiles, ...player1.char.fists, ...player2.char.fists, player1.char, player2.char];
   for (let i = 0; i < allObjects.length; i++) {
     for (let j = i + 1; j < allObjects.length; j++) {
       if (collides(allObjects[i], allObjects[j])) {
@@ -183,7 +194,7 @@ function checkCollisions() {
 function draw() {
   if (timer === 0) {
     setGameState('gameOver');
-    setWinner(player1.health > player2.health ? 'Player 1' : 'Player 2');
+    setWinner(player1.char.health > player2.char.health ? 'Player 1' : 'Player 2');
   }
 
   if (gameState === 'paused') {
@@ -226,19 +237,27 @@ function draw() {
       ellipse(clouds[i].x, clouds[i].y, 80, 40);
     }
 
-    for (let i = 0; i < player1.projectiles.length; i++) {
-      player1.projectiles[i].draw();
+
+
+    player1.char.update();
+    if(!player1.char.isControllable){
+      player1.update();
+    }
+    player1.char.draw();
+
+    player2.char.update();
+    if(!player2.char.isControllable){
+      player2.update();
+    }
+    player2.char.draw();
+
+    for (let i = 0; i < player1.char.projectiles.length; i++) {
+      player1.char.projectiles[i].draw();
     }
 
-    for (let i = 0; i < player2.projectiles.length; i++) {
-      player2.projectiles[i].draw();
+    for (let i = 0; i < player2.char.projectiles.length; i++) {
+      player2.char.projectiles[i].draw();
     }
-
-    player1.update();
-    player1.draw();
-
-    player2.update();
-    player2.draw();
 
     // Ground
     fill(0, 100, 0);
@@ -255,27 +274,27 @@ function draw() {
 
     // Player1 health
     fill(10, 10, 10);
-    rect(0, 30, player1.maxHealth, 10);
+    rect(0, 30, player1.char.maxHealth, 10);
     fill(200, 0, 0);
-    rect(0, 30, player1.health, 10);
+    rect(0, 30, player1.char.health, 10);
 
     // Player1 ki
     fill(10, 10, 10);
-    rect(0, 50, player1.maxKi, 10);
+    rect(0, 50, player1.char.maxKi, 10);
     fill(10, 0, 200);
-    rect(0, 50, player1.ki, 10);
+    rect(0, 50, player1.char.ki, 10);
 
     // Player2 health
     fill(10, 10, 10);
-    rect(canvasWidth - player2.maxHealth, 30, player2.maxHealth, 10);
+    rect(canvasWidth - player2.char.maxHealth, 30, player2.char.maxHealth, 10);
     fill(200, 0, 0);
-    rect(canvasWidth - player2.health, 30, player2.health, 10);
+    rect(canvasWidth - player2.char.health, 30, player2.char.health, 10);
 
     // Player2 ki
     fill(10, 10, 10);
-    rect(canvasWidth - player2.maxKi, 50, player2.maxKi, 10);
+    rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
     fill(10, 0, 200);
-    rect(canvasWidth - player2.ki, 50, player2.ki, 10);
+    rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
 
     // Timer
     fill(255);
@@ -303,6 +322,29 @@ function draw() {
       resetGame();
     }
   }
+
+  // Handle continuous movement
+  if (gameState === 'playing') {
+    if (player1.char.isControllable) {
+      if (keyIsDown(player1.moveKeys.left)) player1.char.applyMovement('left');
+      if (keyIsDown(player1.moveKeys.right)) player1.char.applyMovement('right');
+      
+      if (keyIsDown(player1.moveKeys.up)) player1.char.applyMovement('up');
+      if (keyIsDown(player1.moveKeys.down)) player1.char.applyMovement('down');
+      if (keyIsDown(player1.attackKey)) player1.char.applyAttacking();
+      if (keyIsDown(player1.chargeKey)) player1.char.applyCharging();
+      if (keyIsDown(player1.meleeKey)) player1.char.applyMelee();
+    }
+  
+    if (player2.char.isControllable) {
+      if (keyIsDown(player2.moveKeys.left)) player2.char.applyMovement('left');
+      if (keyIsDown(player2.moveKeys.right)) player2.char.applyMovement('right');
+      if (keyIsDown(player2.attackKey)) player2.char.applyAttacking();
+      if (keyIsDown(player2.chargeKey)) player2.char.applyCharging();
+      if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
+    }
+  }
+  
 }
 
 let lastUpPressTimePlayer1 = 0;
@@ -312,6 +354,7 @@ function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
     if (gameState === 'paused') {
       gameState = 'playing';
+      buttonSelect.hide();
     } else if (gameState === 'playing') {
       gameState = 'paused';
     }
@@ -329,43 +372,49 @@ function keyPressed() {
       menus[currentMenu].onselect();
     }
     return;
-  }
+  } else if (gameState === 'playing') {
 
-  if (gameState === "playing") {
-    const currentTime = millis();
+    if(player1.char.isControllable)
+      {
 
-    player1.handleKeyPress(keyCode);
-    player2.handleKeyPress(keyCode);
-
-    // Handle player 1 jump and fly toggle
-    if (keyCode === player1.moveKeys.up) {
-      if (currentTime - lastUpPressTimePlayer1 < 300) { // 300 ms for double press detection
-        player1.toggleFlying();
-      } else {
-        player1.startJump(); // Single press to jump
+      player1.handleKeyDown(keyCode);
       }
-      lastUpPressTimePlayer1 = currentTime;
-    }
 
-    // Handle player 2 jump and fly toggle
-    if (keyCode === player2.moveKeys.up) {
-      if (currentTime - lastUpPressTimePlayer2 < 300) { // 300 ms for double press detection
-        player2.toggleFlying();
-      } else {
-        player2.startJump(); // Single press to jump
+      if (player2.char.isControllable)
+      {
+
+      player2.handleKeyDown(keyCode);
       }
-      lastUpPressTimePlayer2 = currentTime;
-    }
+
   }
 }
 
 function keyReleased() {
+  if (player1.char.isControllable)
+    {
   if (keyCode === player1.moveKeys.up) {
-    player1.isJumping = false;
+    player1.char.stopJump();
   }
+}
 
-  if (keyCode === player2.moveKeys.up) {
-    player2.isJumping = false;
+  if (player2.char.isControllable)
+    {
+      if (keyCode === player2.moveKeys.up) {
+        player2.char.stopJump();
+      }
+
+    }
+
+  if (gameState === 'playing') {
+    if (player1.char.isControllable)
+    {
+    player1.handleKeyUp(keyCode);
+    }
+
+    if (player2.char.isControllable)
+    {
+    player2.handleKeyUp(keyCode);
+    }
   }
 }
 
