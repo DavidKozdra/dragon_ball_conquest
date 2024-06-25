@@ -39,6 +39,7 @@ class charController extends GameObject {
     this.jumpKeyPressTime = 0;
     this.isJumping = false;
     this.isControllable = controllable;
+    this.dashSpeed = 200;
   }
 
   get health() {
@@ -272,15 +273,16 @@ class charController extends GameObject {
     this.velocityY += dy * force;
   }
   dash(direction) {
+    console.log("dash", direction);
     if (this.ki < this.costOfFlying * 50) {
       return; // Not enough ki for dashing
     }
     console.log("dash");
-  
-    const dashSpeed = 200; // Adjust dash speed as needed
+    let dashSpeed = this.dashSpeed;
   
     switch (direction) {
       case 'left':
+        console.log("dash left")
         this.x -= dashSpeed;
         this.accelerationX = 0;
         break;

@@ -371,17 +371,17 @@ function keyPressed() {
     }
     return;
   } else if (gameState === 'playing') {
-
     if(player1.char.isControllable)
       {
-
       player1.handleKeyDown(keyCode);
+      player1.handleKeyPress(keyCode);
       }
 
       if (player2.char.isControllable)
       {
 
       player2.handleKeyDown(keyCode);
+      player2.handleKeyPress(keyCode);
       }
 
   }

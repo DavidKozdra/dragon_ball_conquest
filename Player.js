@@ -10,9 +10,9 @@ class Player {
     this.meleeKey = meleeKey;
     this.moveKeys = moveKeys; // Object containing move keys
     this.controllable = false
+
     this.char = charictarController
-    this.keyPressTimes = {};
-    this.doubleTapThreshold = 300; // Threshold in milliseconds
+
     this.team = [];
   }
 
@@ -40,37 +40,15 @@ class Player {
 
 
 
-
   handleKeyDown(keyCode) {
-    const currentTime = Date.now();
-    
-    if (!this.keyPressTimes[keyCode]) {
-      this.keyPressTimes[keyCode] = [];
-    }
+    // make direction and map movement to our char 
 
-    this.keyPressTimes[keyCode].push(currentTime);
-
-    // Remove old key press times
-    this.keyPressTimes[keyCode] = this.keyPressTimes[keyCode].filter(time => currentTime - time <= this.doubleTapThreshold);
-
-    if (this.keyPressTimes[keyCode].length >= 2) {
-      this.handleDoubleTap(keyCode);
-      this.keyPressTimes[keyCode] = []; // Reset after handling double-tap
-    }
-  }
-
-  handleDoubleTap(keyCode) {
+    // charictar 
     if (keyCode === this.moveKeys.up) {
-      this.char.startJump();
+      this.char.startJump()
     }
 
-    if (keyCode === this.moveKeys.left) {
-      this.char.dash("left");
-    }
 
-    if (keyCode === this.moveKeys.right) {
-      this.char.dash("right");
-    }
   }
   
 
@@ -86,15 +64,16 @@ class Player {
   }
 
   handleKeyPress(keyCode) {
-    if (!this.controllable) return
-
+    console.log(this.char.isControllable)
+    if (!this.char.isControllable) return
     const currentTime = millis();
-
-    // Handle dash
+    console.log(keyCode, this.moveKeys.left , this.moveKeys.right)
     if (keyCode === this.moveKeys.left || keyCode === this.moveKeys.right) {
-      console.log("dash")
       if (currentTime - this.lastLeftRightPressTime < 200) { // 300 ms for double press detection
-        this.dash(keyCode);
+
+        console.log("dash")
+        let dir = keyCode === this.moveKeys.left ? "left" : "right";
+        this.char.dash(dir);
       }
       this.lastLeftRightPressTime = currentTime;
     }
