@@ -342,8 +342,8 @@ function draw() {
       if (keyIsDown(player2.moveKeys.left)) player2.char.applyMovement('left');
       if (keyIsDown(player2.moveKeys.right)) player2.char.applyMovement('right');
 
-      if (keyIsDown(player1.moveKeys.up)) player2.char.applyMovement('up');
-      if (keyIsDown(player1.moveKeys.down)) player2.char.applyMovement('down');
+      if (keyIsDown(player2.moveKeys.up)) player2.char.applyMovement('up');
+      if (keyIsDown(player2.moveKeys.down)) player2.char.applyMovement('down');
       if (keyIsDown(player2.attackKey)) player2.char.applyAttacking();
       if (keyIsDown(player2.chargeKey)) player2.char.applyCharging();
       if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
