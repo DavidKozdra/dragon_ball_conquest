@@ -81,6 +81,7 @@ class charController extends GameObject {
     this.applyGravity();
     this.applyMovement();
     this.checkGrounded();
+    console.log(this.y)
 
     if (this.flyToggleCooldown > 0) {
       this.flyToggleCooldown--;
@@ -143,7 +144,7 @@ class charController extends GameObject {
         break;
       case 'up':
         if (this.isFlying) {
-          this.accelerationY = -0.6; // Move up if flying (negative direction in p5.js)
+          this.accelerationY = -0.5; // Move up if flying (negative direction in p5.js)
         }
         break;
       case 'down':
@@ -247,8 +248,6 @@ class charController extends GameObject {
   }
   stopJump() {
     this.isJumping = false;
-
-
   }
 
   jump() {

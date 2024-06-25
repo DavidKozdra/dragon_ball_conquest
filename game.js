@@ -179,6 +179,7 @@ function checkCollisions() {
   for (let i = 0; i < allObjects.length; i++) {
     for (let j = i + 1; j < allObjects.length; j++) {
       if (collides(allObjects[i], allObjects[j])) {
+        console.log('collision');
         allObjects[i].onCollision(allObjects[j]);
         allObjects[j].onCollision(allObjects[i]);
       }
@@ -340,6 +341,9 @@ function draw() {
     if (player2.char.isControllable) {
       if (keyIsDown(player2.moveKeys.left)) player2.char.applyMovement('left');
       if (keyIsDown(player2.moveKeys.right)) player2.char.applyMovement('right');
+
+      if (keyIsDown(player1.moveKeys.up)) player2.char.applyMovement('up');
+      if (keyIsDown(player1.moveKeys.down)) player2.char.applyMovement('down');
       if (keyIsDown(player2.attackKey)) player2.char.applyAttacking();
       if (keyIsDown(player2.chargeKey)) player2.char.applyCharging();
       if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
@@ -394,7 +398,7 @@ function keyReleased() {
   if (gameState === 'main_menu') return;
 
   if (player1.char.isControllable)
-    {
+  {
   if (keyCode === player1.moveKeys.up) {
     player1.char.stopJump();
   }
@@ -411,12 +415,13 @@ function keyReleased() {
   if (gameState === 'playing') {
     if (player1.char.isControllable)
     {
-    player1.handleKeyUp(keyCode);
+      player1.handleKeyUp(keyCode);
     }
 
     if (player2.char.isControllable)
     {
-    player2.handleKeyUp(keyCode);
+      console.log("key released")
+      player2.handleKeyUp(keyCode);
     }
   }
 }

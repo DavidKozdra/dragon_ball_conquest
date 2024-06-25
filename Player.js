@@ -23,8 +23,6 @@ class Player extends Playing_Agent{
     if (keyCode === this.moveKeys.up) {
       this.char.startJump()
     }
-
-
   }
   
 
