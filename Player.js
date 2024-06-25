@@ -42,6 +42,8 @@ class Player extends GameObject {
     this.maxJumpDuration = 300; // Adjusted for a reasonable max jump duration
     this.jumpKeyPressTime = 0;
     this.isJumping = false;
+    
+    this.controllable = false
   }
 
   get health() {
@@ -303,6 +305,8 @@ class Player extends GameObject {
   }
 
   handleKeyPress(keyCode) {
+    if (!this.controllable) return
+
     const currentTime = millis();
 
     // Handle dash
