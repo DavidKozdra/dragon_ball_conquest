@@ -12,25 +12,21 @@ class Fist extends GameObject {
     this.direction = 1;
     this.oscillateDistance = 5; // Distance to oscillate left and right
 
-    this.width = 5;
-    this.height = 5;
+    this.width = 8;
+    this.height = 8;
   }
 
   update() {
     if (this.alive) {
-      let targetPlayer = this.player === player1 ? player2 : player1;
-      
-      // Calculate direction vector towards the opposing player
-      let dx = targetPlayer.x - this.player.x;
-      let dy = targetPlayer.y - this.player.y;
-      let magnitude = Math.sqrt(dx * dx + dy * dy);
-      dx /= magnitude;
-      dy /= magnitude;
 
-      // Update fist position to follow the opposing player with oscillation
-      this.x = this.player.x + this.offsetX + (this.direction * random(1, this.oscillateDistance)) + dx;
-      this.y = this.player.y + this.offsetY + dy;
+      this.x += 1 + (this.direction * random(1, this.oscillateDistance));
+      this.y += 1;
       this.direction = -this.direction; // Toggle direction to oscillate
+
+      
+      // Ensure the fist stays within the player's bounds
+      this.x = Math.max(this.player.x + 5, Math.min(this.x, this.player.x + this.player.width - this.width));
+      this.y = Math.max(this.player.y, Math.min(this.y, this.player.y + this.player.height - this.height));
     }
   }
 
@@ -38,23 +34,33 @@ class Fist extends GameObject {
     if (this.alive) {
       fill(255, 0, 0); // Color of the fist
       rect(this.x, this.y, this.size, this.size);
+    }else {
     }
   }
 
   onCollision(other) {
     if (this.alive && other.type === 'player' && other !== this.player) {
-      other.health -= 10; // Damage to the other player
+      other.health -= 1; // Damage to the other player
       this.alive = false; // Deactivate fist after hitting
 
       // Apply force knockback
-      let dx = other.x - this.player.x; // Knockback direction from the fist to the other player
-      let dy = other.y - this.player.y;
+      let dx = other.x - this.x; // Knockback direction from the fist to the other player
+      let dy = other.y - this.y;
       let distance = Math.sqrt(dx * dx + dy * dy);
-      dx /= distance;
-      dy /= distance;
-      other.applyKnockback(dx, dy, 10); // Apply knockback force
+      if (distance > 0) {
+        dx /= distance;
+        dy /= distance;
+      }
+
+      // Apply knockback force
+      other.applyKnockback(dx, dy, 1);
     }
   }
+}
+
+// Example random function if not already defined
+function random(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 export { Fist };

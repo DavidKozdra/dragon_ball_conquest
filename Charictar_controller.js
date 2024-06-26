@@ -81,7 +81,6 @@ class charController extends GameObject {
     this.applyGravity();
     this.applyMovement();
     this.checkGrounded();
-    console.log(this.y)
 
     if (this.flyToggleCooldown > 0) {
       this.flyToggleCooldown--;
@@ -180,17 +179,29 @@ class charController extends GameObject {
       }
       return;
     }
-      this.ki -= 1;
-      this.currentAttackPower += 1;
-    
-
+    this.ki -= 1; // Drain ki while charging
+    this.currentAttackPower += 1;
   }
+  
 
   applyMelee() {
     for (let fist of this.fists) {
+      // Set the fist to be alive
       fist.alive = true;
+  
+      // Clear any existing timeout to avoid conflicts
+      if (fist.timeout) {
+        clearTimeout(fist.timeout);
+      }
+  
+      // Set the fist to be not alive after the specified duration
+      fist.timeout = setTimeout(() => {
+        fist.alive = false;
+        fist.timeout = null; // Clear the reference to the timeout
+      }, 100); // 3.5 minutes
     }
   }
+  
 
   releaseKiAttack() {
     // Calculate direction vector
@@ -200,26 +211,26 @@ class charController extends GameObject {
     let magnitude = Math.sqrt(dx * dx + dy * dy);
     dx /= magnitude;
     dy /= magnitude;
-
+  
     // Apply diagonal offset considering projectile size and player size
     let offset = (this.width / 2) + (this.currentAttackPower / 2) + 5; // Additional 5 units for a buffer
     let offsetX = dx * offset;
     let offsetY = dy * offset;
-
+  
     this.projectiles.push(new Projectile(
       this.x + offsetX,
       this.y + offsetY,
-      this.currentAttackPower,
+      this.currentAttackPower, // Size of the projectile based on attack power
       this.spirit,
       dx,
       dy,
       5, // Speed of the projectile
-      this.currentAttackPower
+      this.currentAttackPower // Damage of the projectile based on attack power
     ));
-
+  
     this.currentAttackPower = 0;
-
   }
+  
 
   toggleFlying() {
     if (this.canFly && this.flyToggleCooldown == 0) {

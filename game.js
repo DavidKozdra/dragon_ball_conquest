@@ -8,7 +8,9 @@ let delta = 1;
 
 let canvasWidth = 400;
 let canvasHeight = 400;
-let timer = 120;
+
+let timerOValue = 120
+let timer = timerOValue;
 let gameState = 'main_menu';
 let winner = '';
 
@@ -68,6 +70,8 @@ let menus = [
       player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1,[char1]);
       player2 = new AI( char2, [char2,char3, char4]);
 
+      console.log("?????????//")
+
     }
   }
 ];
@@ -104,10 +108,10 @@ function RenderMainMenu() {
   textAlign(CENTER, CENTER);
   text('Dragon Ball Conquest', canvasWidth / 2, canvasHeight / 2 - 50);
   textSize(16);
-  text('Use < and > to navigate, Enter to select', canvasWidth / 2, canvasHeight / 2);
+  //text('Use < and > to navigate, Enter to select', canvasWidth / 2, canvasHeight / 2);
 
   let menu = menus[currentMenu];
-  fill(255);
+  fill(0);
   textSize(16);
   textAlign(CENTER, CENTER);
   text(menu.name, canvasWidth / 2, canvasHeight / 2 + 50);
@@ -161,7 +165,7 @@ function resetGame() {
     clouds.push({ x: random(-100, 300), y: random(0, 250) });
   }
   winner = '';
-
+  timer = timerOValue
   menus[currentMenu].onselect();
 }
 
@@ -187,10 +191,23 @@ function checkCollisions() {
   }
 }
 
+function add(total, num){
+  print(num)
+  return total + num
+}
+
 function draw() {
   if (timer === 0) {
     setGameState('gameOver');
-    setWinner(player1.char.health > player2.char.health ? 'Player 1' : 'Player 2');
+   // the winner is set by player team health total
+   winner = () => {
+    let player1Health = player1.team.reduce(add, 0)
+    let player2Health = player2.team.reduce(add,0)
+    console.log(player1Health, player2Health )
+    return player1Health > player2Health
+   }
+
+    setWinner( winner()? 'Player 1' : 'Player 2');
   }
 
   if (gameState === 'paused') {
@@ -321,8 +338,10 @@ function draw() {
     text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
 
     if (keyIsPressed && keyCode === 13) {
+      console.log("reset")
       resetGame();
     }
+    console.log(gameState)
   }
 
   // Handle continuous movement

@@ -36,6 +36,7 @@ class Playing_Agent {
   }
 
   removeChar(indexToRemove) {
+    console.log("remove");
     if (this.team.length === 1) {
       setGameState('gameOver');
       setWinner(this === player1 ? 'Player 2' : 'Player 1');
