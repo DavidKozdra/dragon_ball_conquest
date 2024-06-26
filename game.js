@@ -26,7 +26,10 @@ function setWinner(player) {
 
 let currentMenu = 0;
 let menus = [
-  {
+ 
+
+  /*
+   {
     name: 'Network Multiplayer',
     image: 'net.png',
     onselect: () => {
@@ -34,6 +37,7 @@ let menus = [
       gameState = 'net_playing';
     }
   },
+  */
   {
     name: 'Couch Multiplayer',
     image: 'couch.png',

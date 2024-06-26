@@ -201,7 +201,6 @@ class charController extends GameObject {
       }, 100); // 3.5 minutes
     }
   }
-  
 
   releaseKiAttack() {
     // Calculate direction vector

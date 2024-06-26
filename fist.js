@@ -34,7 +34,6 @@ class Fist extends GameObject {
     if (this.alive) {
       fill(255, 0, 0); // Color of the fist
       rect(this.x, this.y, this.size, this.size);
-    }else {
     }
   }
 
