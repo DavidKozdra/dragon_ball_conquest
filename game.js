@@ -259,27 +259,27 @@ function displayCharacterSelectionPanel(playerIndex, charIndex) {
 function startGame() {
   gameState = 'playing';
 
-  let char1Data = selectedCharacters[0][0];
-  let char2Data = selectedCharacters[1][0];
+  let team1 = selectedCharacters[0].map(charData => {
+    let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
+    char.fists = [new Fist(char, 5, 5)];
+    return char;
+  });
 
-  let char1 = new charController(0, 200, char1Data.isControllable, char1Data.spirit, char1Data.name);
-  let char2 = new charController(300, 200, char2Data.isControllable, char2Data.spirit, char2Data.name);
+  let team2 = selectedCharacters[1].map(charData => {
+    let char = new charController(300, 200, charData.isControllable, charData.spirit, charData.name);
+    char.fists = [new Fist(char, 5, 5)];
+    return char;
+  });
 
-  char1.fists = [new Fist(char1, 5, 5)];
-  char2.fists = [new Fist(char2, 5, 5)];
+  player1 = team1.some(char => char.isControllable) 
+    ? new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, team1[0], team1) 
+    : new AI(team1[0], team1);
 
-  if (!char1.isControllable) {
-    player1 = new AI(char1, [char1]);
-  } else {
-    player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1, [char1]);
-  }
-
-  if (!char2.isControllable) {
-    player2 = new AI(char2, [char2]);
-  } else {
-    player2 = new Player(78, 66, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, char2, [char2]);
-  }
+  player2 = team2.some(char => char.isControllable) 
+    ? new Player(78, 66, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, team2[0], team2) 
+    : new AI(team2[0], team2);
 }
+
 
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
