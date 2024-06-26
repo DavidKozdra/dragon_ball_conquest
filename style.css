@@ -5,3 +5,12 @@ html, body {
 canvas {
   display: block;
 }
+
+
+.char-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #ccc;
+  border: 1px solid #999;
+  cursor: pointer;
+}

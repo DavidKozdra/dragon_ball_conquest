@@ -4,7 +4,7 @@ import { Projectile } from './Projectile.js';
 import { Fist } from './fist.js';
 
 class charController extends GameObject {
-  constructor(x, y, controllable=true, spirit=[0, 0, 200]) {
+  constructor(x, y, controllable=true, spirit=[0, 0, 200], name) {
     super('player');
     this.x = x;
     this.y = y;
@@ -40,6 +40,8 @@ class charController extends GameObject {
     this.isJumping = false;
     this.isControllable = controllable;
     this.dashSpeed = 200;
+
+    this.name = name;
   }
 
   get health() {
