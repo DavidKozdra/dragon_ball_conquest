@@ -215,7 +215,8 @@ class AI extends Playing_Agent {
 
   dist(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-  }releaseKiAttack() {
+  }
+  releaseKiAttack() {
     const currentTime = Date.now();
     const timeHeld = currentTime - this.lastAttackTime;
     console.log("AI key blast time", timeHeld);
@@ -233,8 +234,8 @@ class AI extends Playing_Agent {
     dx /= magnitude;
     dy /= magnitude;
   
-    // Apply diagonal offset considering projectile size and player size
-    let offset = (this.char.width / 2) + (this.attackPower / 2) + 5; // Additional 5 units for a buffer
+    // Increase offset distance to ensure the projectile does not spawn near the AI
+    let offset = (this.char.width / 2) + (this.attackPower / 2) + 20; // Increase the buffer distance
     let offsetX = dx * offset;
     let offsetY = dy * offset;
   
