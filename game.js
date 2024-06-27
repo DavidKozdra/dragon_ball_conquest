@@ -303,12 +303,36 @@ function resetGame() {
   menus[currentMenu].onselect();
 }
 
+let clusters = [];
 function restartClouds() {
+    //vary the size of the clouds and x and y by a bit
+
+  // bounds to reset if a cloud is off
   for (let i = 0; i < clouds.length; i++) {
-    if (clouds[i].x + delta > 600) {
-      clouds[i].x = random(-70, 5);
-      clouds[i].y = random(-2, 300);
+    if (clouds[i].x > 400) {
+      clouds[i].x = 0;
     }
+    if (clouds[i].y > 400) {
+      clouds[i].y = 0;
+    }
+  }
+  
+
+
+    // set up clusters
+  for (let i = 0; i < clouds.length; i++) {
+
+    let cluster = [];
+    cluster.push(clouds[i]);
+
+    // for all in this cluster make them close to each other
+    for (let j = 0; j < cluster.length; j++) {
+      cluster[j].x += random(-1, 1);
+      cluster[j].y += random(-1, 1);
+    }
+
+
+    clusters.push(cluster);
   }
 }
 
@@ -325,10 +349,17 @@ function checkCollisions() {
   }
 }
 
+
+//utils
 function add(total, num) {
   print(num);
   return total + num;
 }
+
+function either(num1, num2) {
+  return Math.random() > 0.5 ? num1 : num2;
+}
+
 
 function draw() {
   if (timer === 0) {
@@ -384,10 +415,30 @@ function draw() {
   if (gameState === 'playing') {
     background(10, 100, 220); // This sets the background color each frame
 
-    fill(255);
-    for (let i = 0; i < clouds.length; i++) {
+    /*
+        for (let i = 0; i < clouds.length; i++) {
+
+      fill(255);
       clouds[i].x += random(0, 0.5); // Adjusting cloud speed
       ellipse(clouds[i].x, clouds[i].y, 80, 40);
+
+      fill(200)
+      ellipse(clouds[i].x, clouds[i].y, 60, 20);
+    }
+      Cloud logic 
+
+      need to "cluster them"
+    */
+
+
+    for (let i = 0; i < clusters.length; i++) {
+      for (let j = 0; j < clusters[i].length; j++) {
+        fill(255);
+        clusters[i][j].x += random(0, 0.1); // Adjusting cloud speed
+        ellipse(clusters[i][j].x, clusters[i][j].y, 80, 40);
+
+      }
+      fill(200)
     }
 
     player1.update();
