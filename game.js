@@ -4,8 +4,10 @@ import { charController } from './Charictar_controller.js';
 import { AI } from './AI.js';
 import { Fist } from './fist.js'; // Assuming Fist is defined in a separate file
 import { characters } from './characters.js';
+import { add } from './utils.js';
 
-let clouds = [];
+import { SetUpClusters, drawClouds, clouds } from './clouds.js';
+
 let delta = 1;
 
 let canvasWidth = 400;
@@ -296,16 +298,12 @@ function setup() {
 }
 
 function resetGame() {
-  clouds = [];
-  for (let i = 0; i < 10; i++) {
-    clouds.push({ x: random(-100, 300), y: random(0, 250) });
-  }
+  SetUpClusters();
   winner = '';
   timer = timerOValue;
   menus[currentMenu].onselect();
 }
 
-let clusters = [];
 function restartClouds() {
     //vary the size of the clouds and x and y by a bit
 
@@ -324,32 +322,6 @@ function restartClouds() {
 
 }
 
-function SetUpClusters(){
-  for (let i = 0; i < 50; i++) {
-    clouds.push({ x: random(-100, 300), y: random(0, 250), w: either(90, 80), h: either(30, 40)});
-  }
-
-      let cur_Cluster = [];
-      let total_in_cluster = 0;
-      let cluser_x = 0;
-      let cluser_y = 0;
-      // set up clusters
-      for (let i = 0; i < clouds.length; i++) {
-        if (total_in_cluster < 5) {
-          // make this a cluster through the x and y as well 
-          clouds[i].x = cluser_x + random(-50, 100);
-          clouds[i].y = cluser_y + random(-10, 5);
-          cur_Cluster.push(clouds[i]);
-          total_in_cluster++;
-        } else {
-          clusters.push(cur_Cluster);
-          cur_Cluster = [];
-          total_in_cluster = 0;
-          cluser_x = random(0, 400);
-          cluser_y = random(0, 400);
-        }
-      }
-}
 
 function checkCollisions() {
   let allObjects = [...player1.char.projectiles, ...player2.char.projectiles, ...player1.char.fists, ...player2.char.fists, player1.char, player2.char];
@@ -365,15 +337,7 @@ function checkCollisions() {
 }
 
 
-//utils
-function add(total, num) {
-  print(num);
-  return total + num;
-}
 
-function either(num1, num2) {
-  return Math.random() > 0.5 ? num1 : num2;
-}
 
 
 function draw() {
@@ -432,16 +396,7 @@ function draw() {
 
 
 
-    for (let i = 0; i < clusters.length; i++) {
-      for (let j = 0; j < clusters[i].length; j++) {
-        fill(255);
-        clusters[i][j].x += random(0, 0.1); // Adjusting cloud speed
-        ellipse(clusters[i][j].x, clusters[i][j].y, clusters[i][j].h, clusters[i][j].w);
-
-      }
-      fill(200)
-    }
-
+    drawClouds()
     player1.update();
     if (player1.char) {
       player1.char.update();
