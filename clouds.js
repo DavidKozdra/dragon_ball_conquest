@@ -1,12 +1,14 @@
 import { either } from './utils.js';
 
-
 let clouds = [];
 
 let clusters = [];
 
+
 function SetUpClusters(){
-    for (let i = 0; i < 50; i++) {
+
+    let initialCloudNum = random(1, 50);
+    for (let i = 0; i < initialCloudNum; i++) {
       clouds.push({ x: random(-100, 300), y: random(0, 250), w: either(90, 80), h: either(30, 40)});
     }
   
