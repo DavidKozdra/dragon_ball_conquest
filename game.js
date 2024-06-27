@@ -285,12 +285,14 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');
   window.addEventListener('resize', onWindowResize);
-  for (let i = 0; i < 10; i++) {
-    clouds.push({ x: random(-100, 300), y: random(0, 250) });
-  }
+
   setInterval(() => {
     if (timer > 0 && gameState === 'playing') timer--;
   }, 1000);
+
+
+  
+  SetUpClusters();
 }
 
 function resetGame() {
@@ -319,21 +321,34 @@ function restartClouds() {
   
 
 
-    // set up clusters
-  for (let i = 0; i < clouds.length; i++) {
 
-    let cluster = [];
-    cluster.push(clouds[i]);
+}
 
-    // for all in this cluster make them close to each other
-    for (let j = 0; j < cluster.length; j++) {
-      cluster[j].x += random(-1, 1);
-      cluster[j].y += random(-1, 1);
-    }
-
-
-    clusters.push(cluster);
+function SetUpClusters(){
+  for (let i = 0; i < 50; i++) {
+    clouds.push({ x: random(-100, 300), y: random(0, 250), w: either(90, 80), h: either(30, 40)});
   }
+
+      let cur_Cluster = [];
+      let total_in_cluster = 0;
+      let cluser_x = 0;
+      let cluser_y = 0;
+      // set up clusters
+      for (let i = 0; i < clouds.length; i++) {
+        if (total_in_cluster < 5) {
+          // make this a cluster through the x and y as well 
+          clouds[i].x = cluser_x + random(-50, 100);
+          clouds[i].y = cluser_y + random(-10, 5);
+          cur_Cluster.push(clouds[i]);
+          total_in_cluster++;
+        } else {
+          clusters.push(cur_Cluster);
+          cur_Cluster = [];
+          total_in_cluster = 0;
+          cluser_x = random(0, 400);
+          cluser_y = random(0, 400);
+        }
+      }
 }
 
 function checkCollisions() {
@@ -415,27 +430,13 @@ function draw() {
   if (gameState === 'playing') {
     background(10, 100, 220); // This sets the background color each frame
 
-    /*
-        for (let i = 0; i < clouds.length; i++) {
-
-      fill(255);
-      clouds[i].x += random(0, 0.5); // Adjusting cloud speed
-      ellipse(clouds[i].x, clouds[i].y, 80, 40);
-
-      fill(200)
-      ellipse(clouds[i].x, clouds[i].y, 60, 20);
-    }
-      Cloud logic 
-
-      need to "cluster them"
-    */
 
 
     for (let i = 0; i < clusters.length; i++) {
       for (let j = 0; j < clusters[i].length; j++) {
         fill(255);
         clusters[i][j].x += random(0, 0.1); // Adjusting cloud speed
-        ellipse(clusters[i][j].x, clusters[i][j].y, 80, 40);
+        ellipse(clusters[i][j].x, clusters[i][j].y, clusters[i][j].h, clusters[i][j].w);
 
       }
       fill(200)
