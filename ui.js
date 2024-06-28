@@ -104,9 +104,13 @@ function initializeButtons() {
     toggleButton.class('game-button');
     toggleButton.size(70, 50);
     toggleButton.mousePressed(() => {
+        if(selectedCharacters[0].length === 0) {
+            return;
+        }
         selectedCharacters[0].forEach((char, index) => {
             char.isControllable = !char.isControllable;
         });
+        toggleButton.html(selectedCharacters[0][0].isControllable ? 'Human' : 'AI');
     });
 
 
@@ -114,10 +118,15 @@ function initializeButtons() {
     toggleButton2.class('game-button');
     toggleButton2.size(70, 50);
     toggleButton2.mousePressed(() => {
+        if(selectedCharacters[1].length === 0) {
+            return;
+        }
         selectedCharacters[1].forEach((char, index) => {
 
             char.isControllable = !char.isControllable;
         });
+        toggleButton2.html(selectedCharacters[1][0].isControllable ? 'Human' : 'AI');
+
     });
 
   Inputs.push({ object: buttonNext, valid_game_state: 'main_menu', name: 'Next' });
