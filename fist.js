@@ -52,7 +52,7 @@ class Fist extends GameObject {
       }
 
       // Apply knockback force
-      other.applyKnockback(dx, dy, 1);
+      other.applyKnockback(dx, dy, random(1,10));
     }
   }
 }

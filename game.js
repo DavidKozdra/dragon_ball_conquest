@@ -173,12 +173,18 @@ function draw() {
     rect(0, 350, canvasWidth, 50);
 
     // UI
-    textSize(16);
     fill(0);
+    rect(0,0,100,40)
+    textSize(16);
+    fill(255);
     noStroke();
     textAlign(LEFT, CENTER);
     text('Player 1', 0, 10);
+
+    fill(0)
+    rect(canvasWidth - 100,0,100,40)
     textAlign(RIGHT, CENTER);
+    fill(255)
     text('Player 2', canvasWidth, 10);
 
     // Player1 health

@@ -100,9 +100,9 @@ function initializeButtons() {
         setGameState('main_menu');
     });
 
-    toggleButton = createButton('Toggle Player 1');
+    toggleButton = createButton('Human');
     toggleButton.class('game-button');
-    toggleButton.size(100, 50);
+    toggleButton.size(70, 50);
     toggleButton.mousePressed(() => {
         selectedCharacters[0].forEach((char, index) => {
             char.isControllable = !char.isControllable;
@@ -110,9 +110,9 @@ function initializeButtons() {
     });
 
 
-    toggleButton2 = createButton('Toggle Player 2');
+    toggleButton2 = createButton('Human');
     toggleButton2.class('game-button');
-    toggleButton2.size(100, 50);
+    toggleButton2.size(70, 50);
     toggleButton2.mousePressed(() => {
         selectedCharacters[1].forEach((char, index) => {
 
@@ -143,8 +143,8 @@ function positionButtons() {
   const canvas = document.getElementById('game-canvas');
   const rect = canvas.getBoundingClientRect();
 
-  toggleButton.position(-200, 0);
-  toggleButton2.position(100,0);
+  toggleButton.position(-200, 150);
+  toggleButton2.position(100,150);
 
   buttonNext.position(rect.right - 60, rect.top + rect.height / 2 - 25);
   buttonPrevious.position(rect.left + 10, rect.top + rect.height / 2 - 25);
