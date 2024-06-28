@@ -16,21 +16,25 @@ const AIState = {
 
 class AI extends Playing_Agent {
   constructor(characterController, team) {
-    super(characterController, team);
-    this.char = characterController;
+    super(team[0], team);
+    this.char = team[0];
     this.state = AIState.IDLE;
     this.dashTimer = 0;
     this.attackPower = 0;
     this.inactivityThreshold = 2000; // 2 seconds
-    this.lastPlayerPosition = { x: player1.char.x, y: player1.char.y };
+    this.enemy = (player1 == this) ? player2 : player1;
+    this.lastPlayerPosition = { x: 0, y: 0 };
     this.lastMoveTime = Date.now();
     this.lastAttackTime = 0; // Initialize lastAttackTime
   }
 
   update() {
+    if(this.enemy == null){
+      return
+    }
     super.update();
     this.updatePlayerPosition();
-    const distanceToPlayer1 = this.dist(this.char.x, this.char.y, player1.char.x, player1.char.y);
+    const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
     const distanceToProjectile = nearestProjectile ? this.dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) : Infinity;
     const currentTime = Date.now();
@@ -71,8 +75,8 @@ class AI extends Playing_Agent {
 
   updatePlayerPosition() {
     const currentTime = Date.now();
-    if (player1.char.x !== this.lastPlayerPosition.x || player1.char.y !== this.lastPlayerPosition.y) {
-      this.lastPlayerPosition = { x: player1.char.x, y: player1.char.y };
+    if (this.enemy.char.x !== this.lastPlayerPosition.x || this.enemy.char.y !== this.lastPlayerPosition.y) {
+      this.lastPlayerPosition = { x: this.enemy.char.x, y: this.enemy.char.y };
       this.lastMoveTime = currentTime;
     }
   }
@@ -136,11 +140,11 @@ class AI extends Playing_Agent {
       this.state = AIState.IDLE;
     } else {
       // Move dynamically away from the player based on player's velocity
-      const dx = this.char.x - player1.char.x;
-      const dy = this.char.y - player1.char.y;
+      const dx = this.char.x - this.enemy.char.x;
+      const dy = this.char.y - this.enemy.char.y;
       const angle = Math.atan2(dy, dx);
-      const playerVelocityX = player1.char.velocityX;
-      const playerVelocityY = player1.char.velocityY;
+      const playerVelocityX = this.enemy.char.velocityX;
+      const playerVelocityY = this.enemy.char.velocityY;
       const moveX = Math.cos(angle) + (playerVelocityX > 0 ? 1 : -1);
       const moveY = Math.sin(angle) + (playerVelocityY > 0 ? 1 : -1);
       const speed = 5;
@@ -167,7 +171,7 @@ class AI extends Playing_Agent {
   }
 
   handleDashingState() {
-    const direction = this.char.x < player1.char.x ? 'right' : 'left';
+    const direction = this.char.x < this.enemy.char.x ? 'right' : 'left';
     this.char.dash(direction);
     this.dashTimer = 100; // Set a cooldown for dashing to prevent constant dashing
     this.state = AIState.IDLE;
@@ -183,7 +187,7 @@ class AI extends Playing_Agent {
     let nearestProjectile = null;
     let minDistance = Infinity;
 
-    for (const projectile of player1.char.projectiles) {
+    for (const projectile of this.enemy.char.projectiles) {
       const distance = this.dist(this.char.x, this.char.y, projectile.x, projectile.y);
       if (distance < minDistance) {
         minDistance = distance;

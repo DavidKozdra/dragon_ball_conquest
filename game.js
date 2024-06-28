@@ -36,6 +36,10 @@ function setWinner(player) {
 function startGame() {
   gameState = 'playing';
 
+  console.log(selectedCharacters[0], selectedCharacters[1])
+
+
+  console.log("player1 ")
   let team1 = selectedCharacters[0].map(charData => {
     let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
     char.fists = [new Fist(char, 5, 5)];
@@ -50,7 +54,10 @@ function startGame() {
 
   player1 = team1.some(char => char.isControllable) 
     ? new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, team1[0], team1) 
-    : new AI(team1[0], team1);
+    : new AI(selectedCharacters[0][0], team1);
+
+    console.log("player1 ", player1)
+
 
   player2 = team2.some(char => char.isControllable) 
     ? new Player(78, 66, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, team2[0], team2) 
@@ -135,10 +142,10 @@ function draw() {
     background(10, 100, 220); // This sets the background color each frame
 
 
-
     drawClouds()
     player1.update();
     if (player1.char) {
+      console.log("player1.char" , player1.char)
       player1.char.update();
       player1.char.draw();
     } else {
