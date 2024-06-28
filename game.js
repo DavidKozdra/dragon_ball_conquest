@@ -25,6 +25,10 @@ function setGameState(state) {
   gameState = state;
 }
 
+function getGameState() {
+  return gameState;
+}
+
 function setWinner(player) {
   winner = player;
 }
@@ -311,4 +315,4 @@ function keyReleased() {
   }
 }
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, startGame };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState,getGameState, setWinner, startGame };

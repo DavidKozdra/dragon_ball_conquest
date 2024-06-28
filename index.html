@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game</title>
+  <style src="style.css"></style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+
   <script type="module">
     import { setup, draw, keyPressed, keyReleased } from './game.js';
 
@@ -30,6 +32,36 @@
       margin-top: 20px;
       font-family: Arial, sans-serif;
     }
+    html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+
+
+.char-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #ccc;
+  border: 1px solid #999;
+  cursor: pointer;
+}
+
+
+.hidden {
+  display: none;
+}
+
+.game-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #999;
+  cursor: pointer;
+  border-radius: 20px;
+}
   </style>
 </head>
 <body>

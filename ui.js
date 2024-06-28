@@ -1,4 +1,4 @@
-import { canvasWidth, canvasHeight, startGame, setGameState, gameState } from './game.js';
+import { canvasWidth, canvasHeight, startGame, setGameState, gameState,getGameState } from './game.js';
 import { characters } from './characters.js';
 
 let selectedCharacters = [null, null]; // Keeps track of selected characters for player1 and player2
@@ -22,7 +22,7 @@ let menus = [
   }
 ];
 
-let buttonNext, buttonPrevious, buttonSelect, buttonAddPlayer1, buttonAddPlayer2, buttonPlay, buttonBack, unpauseButton, startGameButton;
+let buttonNext, buttonPrevious, buttonSelect, buttonAddPlayer1, buttonAddPlayer2, buttonPlay, buttonBack, unpauseButton, startGameButton, backToMainButton;
 let player1Div, player2Div;
 
 var Inputs = [];
@@ -43,7 +43,7 @@ function initializeButtons() {
     currentMenu = (currentMenu - 1 + menus.length) % menus.length;
   });
 
-  buttonPlay = createButton('Play');
+  buttonPlay = createButton('Select');
   buttonPlay.class('game-button');
   buttonPlay.size(100, 50);
   buttonPlay.mousePressed(() => {
@@ -93,6 +93,12 @@ function initializeButtons() {
         }
     });
 
+    backToMainButton = createButton('Back to Main Menu');
+    backToMainButton.class('game-button');
+    backToMainButton.size(100, 50);
+    backToMainButton.mousePressed(() => {
+        setGameState('main_menu');
+    });
 
 
   Inputs.push({ object: buttonNext, valid_game_state: 'main_menu', name: 'Next' });
@@ -105,6 +111,8 @@ function initializeButtons() {
   Inputs.push({ object: buttonBack, valid_game_state: 'char_select', name: 'Back' });
   Inputs.push({ object: buttonSelect, valid_game_state: 'paused', name: 'Back to Main Menu' });
   Inputs.push({ object: unpauseButton, valid_game_state: 'paused', name: 'unPause' });
+  Inputs.push({ object: backToMainButton, valid_game_state: 'paused', name: 'Back to Main Menu' });
+  
 
   // Position buttons initially
   positionButtons();
@@ -122,6 +130,18 @@ function positionButtons() {
   buttonBack.position(rect.left + 10, rect.bottom - 60);
   unpauseButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 100);
   startGameButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 150);
+  backToMainButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 100);
+
+  // loop through inputs and bound them to the canvas size
+    for (let i = 0; i < Inputs.length; i++) {
+        //limit or 
+        if (Inputs[i].object.position().x > rect.width + rect.x) {
+            Inputs[i].object.position(rect.width - 100, Inputs[i].object.position().y);
+        }
+        
+    }
+
+
 }
 
 function RenderMainMenu() {
@@ -139,7 +159,6 @@ function RenderMainMenu() {
   text(menu.name, canvasWidth / 2, canvasHeight / 2 + 50);
   rect(canvasWidth / 2 - 50, canvasHeight / 2 + 60, 100, 100);
 
-  UpdateUI();
   positionButtons();
 }
 
@@ -159,6 +178,7 @@ function RenderCharacterSelector() {
   player1Div.style('height', '50px');
   player1Div.style('overflow-x', 'scroll');
   player1Div.style('display', 'flex');
+  player1Div.addClass('charSelectDiv')
   panels.push({ object: player1Div, valid_game_state: 'char_select', name: 'player1Div' });
 
   if (selectedCharacters[0]) {
@@ -179,6 +199,8 @@ function RenderCharacterSelector() {
   player2Div.style('height', '50px');
   player2Div.style('overflow-x', 'scroll');
   player2Div.style('display', 'flex');
+
+  player2Div.addClass('charSelectDiv')
   panels.push({ object: player2Div, valid_game_state: 'char_select', name: 'player2Div' });
 
   if (selectedCharacters[1]) {
@@ -192,9 +214,6 @@ function RenderCharacterSelector() {
     });
   }
 
-  UpdateUI();
-  UpdatePanels();
-  positionButtons();
 }
 
 function displayCharacterSelectionPanel(playerIndex, charIndex) {
@@ -206,6 +225,8 @@ function displayCharacterSelectionPanel(playerIndex, charIndex) {
   panel.style('display', 'flex');
   panel.style('justify-content', 'space-around');
   panel.style('background-color', 'rgba(0, 0, 0, 0.5)');
+
+  panel.addClass('charSelectDiv')
 
   characters.forEach(char => {
     const charButton = createButton(char.name);
@@ -245,12 +266,13 @@ function findInputByName(name) {
 function UpdateUI(){
     for (let i = 0; i < Inputs.length; i++) {
       if (gameState === Inputs[i].valid_game_state) {
-        console.log(Inputs[i].name);
         Inputs[i].object.show();
       } else {
         Inputs[i].object.hide();
       }
     }
+    UpdatePanels()
+    
 }
 
 function UpdatePanels() {
@@ -261,6 +283,19 @@ function UpdatePanels() {
       panels[i].object.addClass('hidden');
     }
   }
+
+
+  let char_select_control_UI = document.getElementsByClassName('charSelectDiv');
+
+  for (var i =0 ; i<char_select_control_UI.length; i++) {
+    if (gameState === 'char_select') {
+      char_select_control_UI[i].style.display = 'flex';
+    } else {
+      char_select_control_UI[i].style.display = 'none';
+    }
+  
+  }
+ 
 }
 
 function onWindowResize() {
