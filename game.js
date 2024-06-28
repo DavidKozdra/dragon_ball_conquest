@@ -6,7 +6,9 @@ import { Fist } from './fist.js'; // Assuming Fist is defined in a separate file
 import { characters } from './characters.js';
 import { add } from './utils.js';
 
-import { SetUpClusters, drawClouds, clouds } from './clouds.js';
+import { UpdateUI,RenderMainMenu, RenderCharacterSelector, positionButtons, menus, currentMenu, selectedCharacters, onWindowResize,initializeButtons} from './ui.js';
+
+import { SetUpClusters, drawClouds,checkBoundsClouds } from './clouds.js';
 
 let delta = 1;
 
@@ -19,243 +21,12 @@ let gameState = 'main_menu';
 let winner = '';
 
 let player1, player2;
-let selectedCharacters = [null, null]; // Keeps track of selected characters for player1 and player2
-
 function setGameState(state) {
   gameState = state;
 }
 
 function setWinner(player) {
   winner = player;
-}
-
-let currentMenu = 0;
-let menus = [
-  {
-    name: 'Play',
-    image: 'char_select.png',
-    onselect: () => {
-      console.log('Character Selection');
-      gameState = 'char_select';
-    }
-  }
-];
-
-let buttonNext, buttonPrevious, buttonSelect, buttonAddPlayer1, buttonAddPlayer2, buttonPlay, buttonBotToggle1, buttonBotToggle2, buttonBack;
-
-function onWindowResize() {
-  positionButtons();
-}
-
-function positionButtons() {
-  const canvas = document.getElementById('game-canvas');
-  const rect = canvas.getBoundingClientRect();
-  if (buttonNext) {
-    buttonNext.position(rect.right - 60, rect.top + rect.height / 2 - 25);
-  }
-  if (buttonPrevious) {
-    buttonPrevious.position(rect.left + 10, rect.top + rect.height / 2 - 25);
-  }
-  if (buttonSelect) {
-    buttonSelect.position(rect.left + rect.width / 2 - 50, rect.bottom + 20);
-  }
-  if (buttonBotToggle1) {
-    buttonBotToggle1.position(rect.left + rect.width / 2 - 150, rect.bottom + 50);
-  }
-  if (buttonBotToggle2) {
-    buttonBotToggle2.position(rect.left + rect.width / 2 + 50, rect.bottom + 50);
-  }
-  if (buttonPlay) {
-    buttonPlay.position(rect.left + rect.width / 2 - 50, rect.bottom - 220);
-  }
-  if (buttonBack) {
-    buttonBack.position(rect.left + 10, rect.bottom - 60);
-  }
-}
-
-function RenderMainMenu() {
-  background(200, 200, 220);
-  fill(0);
-  stroke(0);
-  textSize(32);
-  textAlign(CENTER, CENTER);
-  text('Dragon Ball Conquest', canvasWidth / 2, canvasHeight / 2 - 50);
-  textSize(16);
-
-  let menu = menus[currentMenu];
-  fill(0);
-  textSize(16);
-  textAlign(CENTER, CENTER);
-  text(menu.name, canvasWidth / 2, canvasHeight / 2 + 50);
-  rect(canvasWidth / 2 - 50, canvasHeight / 2 + 60, 100, 100);
-
-  if (!buttonNext) {
-    buttonNext = createButton('>');
-    buttonNext.class('game-button');
-    buttonNext.size(50, 50);
-    buttonNext.mousePressed(() => {
-      currentMenu = (currentMenu + 1) % menus.length;
-    });
-  }
-
-  if (!buttonPrevious) {
-    buttonPrevious = createButton('<');
-    buttonPrevious.class('game-button');
-    buttonPrevious.size(50, 50);
-    buttonPrevious.mousePressed(() => {
-      currentMenu = (currentMenu - 1 + menus.length) % menus.length;
-    });
-  }
-
-  if (!buttonPlay) {
-    buttonPlay = createButton('Play');
-    buttonPlay.class('game-button');
-    buttonPlay.size(100, 50);
-    buttonPlay.mousePressed(() => {
-      menus[currentMenu].onselect();
-    });
-  }
-
-  buttonNext.show();
-  buttonPrevious.show();
-  buttonPlay.show();
-  positionButtons();
-}
-
-function RenderCharacterSelector() {
-  background(200, 200, 220);
-  fill(0);
-  stroke(0);
-  textSize(32);
-  textAlign(CENTER, CENTER);
-  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 100);
-  textSize(16);
-
-  // Display player 1 and player 2 selected characters as buttons
-  fill(0);
-  textAlign(LEFT, CENTER);
-  text('Player 1:', canvasWidth / 4 - 50, canvasHeight / 2 - 150);
-  const player1Div = createDiv();
-  player1Div.position(canvasWidth / 4 - 50, canvasHeight / 2 - 130);
-  player1Div.style('width', '200px');
-  player1Div.style('height', '50px');
-  player1Div.style('overflow-x', 'scroll');
-  player1Div.style('display', 'flex');
-
-  if (selectedCharacters[0]) {
-    selectedCharacters[0].forEach((char, index) => {
-      const charButton = createButton(char.name);
-      charButton.class('char-button');
-      charButton.mousePressed(() => displayCharacterSelectionPanel(0, index));
-      player1Div.child(charButton);
-    });
-  }
-
-  fill(0);
-  textAlign(LEFT, CENTER);
-  text('Player 2:', 3 * canvasWidth / 4 - 50, canvasHeight / 2 - 150);
-  const player2Div = createDiv();
-  player2Div.position(3 * canvasWidth / 4 - 50, canvasHeight / 2 - 130);
-  player2Div.style('width', '200px');
-  player2Div.style('height', '50px');
-  player2Div.style('overflow-x', 'scroll');
-  player2Div.style('display', 'flex');
-
-  if (selectedCharacters[1]) {
-    selectedCharacters[1].forEach((char, index) => {
-      const charButton = createButton(char.name);
-      charButton.class('char-button');
-      charButton.mousePressed(() => displayCharacterSelectionPanel(1, index));
-      player2Div.child(charButton);
-    });
-  }
-
-  // Hide navigation buttons
-  if (buttonNext) buttonNext.hide();
-  if (buttonPrevious) buttonPrevious.hide();
-
-  if (!buttonSelect) {
-    buttonSelect = createButton('Start Game');
-    buttonSelect.class('game-button');
-    buttonSelect.size(100, 50);
-    buttonSelect.mousePressed(() => {
-      if (selectedCharacters[0] && selectedCharacters[1] && selectedCharacters[0].length > 0 && selectedCharacters[1].length > 0) {
-        startGame();
-      }
-    });
-  }
-
-  if (!buttonAddPlayer1) {
-    buttonAddPlayer1 = createButton('Add Player 1');
-    buttonAddPlayer1.class('game-button');
-    buttonAddPlayer1.size(100, 50);
-    buttonAddPlayer1.position(canvasWidth / 4 - 50, canvasHeight / 2);
-    buttonAddPlayer1.mousePressed(() => displayCharacterSelectionPanel(0, -1));
-  }
-
-  if (!buttonAddPlayer2) {
-    buttonAddPlayer2 = createButton('Add Player 2');
-    buttonAddPlayer2.class('game-button');
-    buttonAddPlayer2.size(100, 50);
-    buttonAddPlayer2.position(3 * canvasWidth / 4 - 50, canvasHeight / 2);
-    buttonAddPlayer2.mousePressed(() => displayCharacterSelectionPanel(1, -1));
-  }
-
-  if (!buttonBack) {
-    buttonBack = createButton('Back');
-    buttonBack.class('game-button');
-    buttonBack.size(100, 50);
-    buttonBack.mousePressed(() => {
-      setGameState('main_menu');
-    });
-  }
-
-  buttonSelect.show();
-  buttonAddPlayer1.show();
-  buttonAddPlayer2.show();
-  buttonBack.show();
-  positionButtons();
-}
-
-function displayCharacterSelectionPanel(playerIndex, charIndex) {
-  const panel = createDiv();
-  panel.position(0, canvasHeight / 2 + 100);
-  panel.style('width', '100%');
-  panel.style('height', '200px');
-  panel.style('overflow-x', 'scroll');
-  panel.style('display', 'flex');
-  panel.style('justify-content', 'space-around');
-  panel.style('background-color', 'rgba(0, 0, 0, 0.5)');
-
-  characters.forEach(char => {
-    const charButton = createButton(char.name);
-    charButton.class('char-button');
-    charButton.mousePressed(() => {
-      if (charIndex === -1) {
-        if (!selectedCharacters[playerIndex]) {
-          selectedCharacters[playerIndex] = [];
-        }
-        selectedCharacters[playerIndex].push({ ...char, isControllable: true });
-      } else {
-        selectedCharacters[playerIndex][charIndex] = { ...char, isControllable: selectedCharacters[playerIndex][charIndex].isControllable };
-      }
-      panel.remove();
-      RenderCharacterSelector(); // Re-render the character selector to update selected character display
-    });
-    panel.child(charButton);
-  });
-
-  if (charIndex !== -1) {
-    const toggleButton = createButton('Toggle Controllable');
-    toggleButton.class('game-button');
-    toggleButton.size(150, 50);
-    toggleButton.mousePressed(() => {
-      selectedCharacters[playerIndex][charIndex].isControllable = !selectedCharacters[playerIndex][charIndex].isControllable;
-      panel.remove();
-      RenderCharacterSelector(); // Re-render the character selector to update controllable status
-    });
-    panel.child(toggleButton);
-  }
 }
 
 function startGame() {
@@ -293,7 +64,7 @@ function setup() {
   }, 1000);
 
 
-  
+  initializeButtons();  
   SetUpClusters();
 }
 
@@ -304,23 +75,7 @@ function resetGame() {
   menus[currentMenu].onselect();
 }
 
-function restartClouds() {
-    //vary the size of the clouds and x and y by a bit
 
-  // bounds to reset if a cloud is off
-  for (let i = 0; i < clouds.length; i++) {
-    if (clouds[i].x > 400) {
-      clouds[i].x = 0;
-    }
-    if (clouds[i].y > 400) {
-      clouds[i].y = 0;
-    }
-  }
-  
-
-
-
-}
 
 
 function checkCollisions() {
@@ -341,6 +96,7 @@ function checkCollisions() {
 
 
 function draw() {
+  UpdateUI();
   if (timer === 0) {
     setGameState('gameOver');
     winner = () => {
@@ -359,18 +115,6 @@ function draw() {
     stroke(10);
     textAlign(CENTER, CENTER);
     text(`Paused!`, canvasWidth / 2, canvasHeight / 2);
-
-    if (!buttonSelect) {
-      buttonSelect = createButton('Back to Main Menu');
-      buttonSelect.class('game-button');
-      buttonSelect.size(100, 50);
-      buttonSelect.mousePressed(() => {
-        setGameState('main_menu');
-        buttonSelect.hide();
-      });
-    }
-
-    buttonSelect.show();
     positionButtons();
     return;
   }
@@ -381,15 +125,7 @@ function draw() {
   } else if (gameState === 'char_select') {
     RenderCharacterSelector();
     return;
-  } else {
-    if (buttonNext) buttonNext.hide();
-    if (buttonPrevious) buttonPrevious.hide();
-    if (buttonPlay) buttonPlay.hide();
-    if (buttonSelect) buttonSelect.hide();
-    if (buttonAddPlayer1) buttonAddPlayer1.hide();
-    if (buttonAddPlayer2) buttonAddPlayer2.hide();
-    if (buttonBack) buttonBack.hide();
-  }
+  } 
 
   if (gameState === 'playing') {
     background(10, 100, 220); // This sets the background color each frame
@@ -466,7 +202,7 @@ function draw() {
     textAlign(CENTER, CENTER);
     text(timer, canvasWidth / 2, 50);
 
-    restartClouds();
+    checkBoundsClouds();
     checkCollisions();
   }
 
@@ -514,7 +250,6 @@ function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
     if (gameState === 'paused') {
       gameState = 'playing';
-      buttonSelect.hide();
     } else if (gameState === 'playing') {
       gameState = 'paused';
     }
@@ -576,4 +311,4 @@ function keyReleased() {
   }
 }
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, startGame };
