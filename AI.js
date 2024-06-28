@@ -30,7 +30,7 @@ class AI extends Playing_Agent {
 
   update() {
     if(this.enemy == null){
-      return
+      this.enemy = (player1 == this) ? player2 : player1;
     }
     super.update();
     this.updatePlayerPosition();
@@ -71,6 +71,8 @@ class AI extends Playing_Agent {
         this.state = AIState.IDLE;
         break;
     }
+
+
   }
 
   updatePlayerPosition() {
