@@ -206,7 +206,8 @@ class charController extends GameObject {
 
   releaseKiAttack() {
     // Calculate direction vector
-    let targetPlayer = this === player1.char ? player2.char : player1;
+    let targetPlayer = (this === player1.char) ? player2.char : player1.char;
+    console.log(targetPlayer);
     let dx = targetPlayer.x - this.x;
     let dy = targetPlayer.y - this.y;
     let magnitude = Math.sqrt(dx * dx + dy * dy);
