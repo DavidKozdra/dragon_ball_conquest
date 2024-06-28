@@ -30,8 +30,12 @@ class AI extends Playing_Agent {
 
   update() {
     if(this.enemy == null){
-      this.enemy = (player1 == this) ? player2 : player1;
+      if(player1 == this){
+        this.enemy = player2;
+      }
+      return
     }
+
     super.update();
     this.updatePlayerPosition();
     const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
@@ -71,8 +75,6 @@ class AI extends Playing_Agent {
         this.state = AIState.IDLE;
         break;
     }
-
-
   }
 
   updatePlayerPosition() {
