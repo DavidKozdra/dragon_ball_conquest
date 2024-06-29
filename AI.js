@@ -30,9 +30,11 @@ class AI extends Playing_Agent {
 
   update() {
     if(this.enemy == null){
-      if(player1 == this){
+      if(player1 == this && player2 != null){
+        console.error("AI: player1 is null, setting player2 as enemy");
         this.enemy = player2;
       }
+      console.error("Enemy NULLL >????: AI.js");
       return
     }
 
@@ -227,13 +229,10 @@ class AI extends Playing_Agent {
   releaseKiAttack() {
     const currentTime = Date.now();
     const timeHeld = currentTime - this.lastAttackTime;
-    console.log("AI key blast time", timeHeld);
   
     // Adjust the size modifier to ensure projectiles are not too large
     let sizeMod = timeHeld / 200; // Divide by a larger number to reduce the effect
-    sizeMod = Math.min(sizeMod, 50); // Cap the size modifier to avoid excessively large projectiles
-    console.log("sizeMod", sizeMod);
-  
+    sizeMod = Math.min(sizeMod, 50);
     // Calculate direction vector
     let targetPlayer = this.char === player1.char ? player2.char : player1.char;
     let dx = targetPlayer.x - this.char.x;

@@ -28,6 +28,32 @@ let player1Div, player2Div;
 var Inputs = [];
 var panels = [];
 
+function getBounds(element) {
+  const rect = element.getBoundingClientRect();
+  return {
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+      height: rect.height
+  };
+}
+
+// Function to map the bounds of one HTML element to another
+function mapBounds(sourceElement, targetElement) {
+  const sourceBounds = getBounds(sourceElement);
+  const targetBounds = getBounds(targetElement);
+
+  // Calculate position difference
+  const offsetX = sourceBounds.left - targetBounds.left;
+  const offsetY = sourceBounds.top - targetBounds.top;
+
+  // Apply position and size adjustments to target element
+  targetElement.style.left = offsetX + 'px';
+  targetElement.style.top = offsetY + 'px';
+  targetElement.style.width = sourceBounds.width + 'px';
+  targetElement.style.height = sourceBounds.height + 'px';
+}
+
 function initializeButtons() {
   buttonNext = createButton('>');
   buttonNext.class('game-button');
@@ -66,12 +92,12 @@ function initializeButtons() {
     setGameState('playing');
   });
 
-  buttonAddPlayer1 = createButton('Add Player 1');
+  buttonAddPlayer1 = createButton('+ Add Player 1');
   buttonAddPlayer1.class('game-button');
   buttonAddPlayer1.size(100, 50);
   buttonAddPlayer1.mousePressed(() => displayCharacterSelectionPanel(0, -1));
 
-  buttonAddPlayer2 = createButton('Add Player 2');
+  buttonAddPlayer2 = createButton('+ Add Player 2');
   buttonAddPlayer2.class('game-button');
   buttonAddPlayer2.size(100, 50);
   buttonAddPlayer2.mousePressed(() => displayCharacterSelectionPanel(1, -1));
@@ -134,8 +160,8 @@ function initializeButtons() {
   Inputs.push({ object: buttonPlay, valid_game_state: 'main_menu', name: 'Play' });
   Inputs.push({ object: startGameButton, valid_game_state: 'char_select', name: 'Start_Game' });
 
-  Inputs.push({ object: buttonAddPlayer1, valid_game_state: 'char_select', name: 'Add Player 1' });
-  Inputs.push({ object: buttonAddPlayer2, valid_game_state: 'char_select', name: 'Add Player 2' });
+  Inputs.push({ object: buttonAddPlayer1, valid_game_state: 'char_select', name: '+ Add Player 1' });
+  Inputs.push({ object: buttonAddPlayer2, valid_game_state: 'char_select', name: '+ Add Player 2' });
   Inputs.push({ object: buttonBack, valid_game_state: 'char_select', name: 'Back' });
   Inputs.push({ object: buttonSelect, valid_game_state: 'paused', name: 'Back to Main Menu' });
   Inputs.push({ object: unpauseButton, valid_game_state: 'paused', name: 'unPause' });
@@ -146,27 +172,29 @@ function initializeButtons() {
     
   // Position buttons initially
   positionButtons();
-}
-
-function positionButtons() {
+}function positionButtons() {
   const canvas = document.getElementById('game-canvas');
   const rect = canvas.getBoundingClientRect();
+  
+  // Example adjustment: Ensuring buttons are positioned within the canvas bounds
+  const canvasLeft = rect.left + window.scrollX;
+  const canvasTop = rect.top + window.scrollY;
 
-  toggleButton.position(-200, 150);
-  toggleButton2.position(100,150);
+  buttonNext.position(canvasLeft + rect.width - 60, canvasTop + rect.height / 2 - 25);
+  buttonPrevious.position(canvasLeft + 10, canvasTop + rect.height / 2 - 25);
+  buttonSelect.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 190);
+  buttonPlay.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 220);
+  buttonAddPlayer1.position(canvasLeft + rect.width / 4 - 50, canvasTop + rect.height - 200);
+  buttonAddPlayer2.position(canvasLeft + (rect.width / 4) * 3 - 50, canvasTop + rect.height - 200);
+  buttonBack.position(canvasLeft + 10, canvasTop + rect.height - 60);
+  unpauseButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
+  startGameButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 150);
+  backToMainButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
 
-  buttonNext.position(rect.right - 60, rect.top + rect.height / 2 - 25);
-  buttonPrevious.position(rect.left + 10, rect.top + rect.height / 2 - 25);
-  buttonSelect.position(rect.left + rect.width / 2 - 50, rect.bottom - 190);
-  buttonPlay.position(rect.left + rect.width / 2 - 50, rect.bottom - 220);
-  buttonAddPlayer1.position(rect.x, rect.bottom / 2 + 200);
-  buttonAddPlayer2.position(rect.x + 300, rect.bottom / 2 + 200);
-  buttonBack.position(rect.left + 10, rect.bottom - 60);
-  unpauseButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 100);
-  startGameButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 150);
-  backToMainButton.position(rect.left + rect.width / 2 - 50, rect.bottom - 100);
-
+  toggleButton.position(canvasLeft + rect.width / 4 - 100, canvasTop + rect.height / 2 + 100);
+  toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 100, canvasTop + rect.height / 2 + 100);
 }
+
 
 function RenderMainMenu() {
   background(200, 200, 220);
@@ -184,54 +212,66 @@ function RenderMainMenu() {
   rect(canvasWidth / 2 - 50, canvasHeight / 2 + 60, 100, 100);
 
   positionButtons();
-}
-function RenderCharacterSelector() {
-  background(200, 200, 220);
-  fill(0);
-  stroke(0);
-  textSize(32);
-  textAlign(CENTER, CENTER);
-  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 100);
-  textSize(16);
-
-  // Create player 1 div
-  const player1Div = createDiv();
-  player1Div.position(rect.x, rect.y);
-
-  if (selectedCharacters[0]) {
-    selectedCharacters[0].forEach((char, index) => {
-      const charButton = createButton(char.name);
-      charButton.class('char-button');
-      charButton.mousePressed(() => displayCharacterSelectionPanel(0, index));
-      charButton.position(rect.width / 4, rect.height / 2);
-      player1Div.child(charButton);
-      Inputs.push({ object: charButton, valid_game_state: 'char_select', name: char.name });
-    });
+}function RenderCharacterSelector() {
+    background(200, 200, 220);
+    fill(0);
+    stroke(0);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 100);
+    textSize(16);
+  
+    // Create player 1 div
+    const player1Div = createDiv();
+    player1Div.position(canvasWidth / 4 - 150, canvasHeight / 2);
+    player1Div.style('display', 'flex');
+    player1Div.style('flex-direction', 'column');
+    player1Div.style('align-items', 'center');
+    player1Div.style('padding', '10px');
+    player1Div.style('background-color', '#ccc');
+    player1Div.style('border-radius', '10px');
+  
+    if (selectedCharacters[0]) {
+      selectedCharacters[0].forEach((char, index) => {
+        const charButton = createButton(char.name);
+        charButton.class('char-button');
+        charButton.mousePressed(() => displayCharacterSelectionPanel(0, index));
+        charButton.style('margin', '5px 0');
+        player1Div.child(charButton);
+        Inputs.push({ object: charButton, valid_game_state: 'char_select', name: char.name });
+      });
+    }
+  
+    // Create player 2 div
+    const player2Div = createDiv();
+    player2Div.position((canvasWidth / 4) * 3 - 150, canvasHeight / 2);
+    player2Div.style('display', 'flex');
+    player2Div.style('flex-direction', 'column');
+    player2Div.style('align-items', 'center');
+    player2Div.style('padding', '10px');
+    player2Div.style('background-color', '#ccc');
+    player2Div.style('border-radius', '10px');
+  
+    if (selectedCharacters[1]) {
+      selectedCharacters[1].forEach((char, index) => {
+        const charButton = createButton(char.name);
+        charButton.class('char-button');
+        charButton.mousePressed(() => displayCharacterSelectionPanel(1, index));
+        charButton.style('margin', '5px 0');
+        player2Div.child(charButton);
+        Inputs.push({ object: charButton, valid_game_state: 'char_select', name: char.name });
+      });
+    }
+  
+    // Position toggle buttons (assuming these are predefined elsewhere)
+    toggleButton.position(canvasWidth / 4 - 100, canvasHeight / 2 + 100);
+    toggleButton2.position((canvasWidth / 4) * 3 - 100, canvasHeight / 2 + 100);
+  
+    // Add toggle buttons to respective divs
+    player1Div.child(toggleButton);
+    player2Div.child(toggleButton2);
   }
-
-  // Create player 2 div
-  const player2Div = createDiv();
-  player2Div.position(rect.width / 4 + 100, rect.height / 2); // Adjusted position to avoid overlap
-
-  if (selectedCharacters[1]) {
-    selectedCharacters[1].forEach((char, index) => {
-      const charButton = createButton(char.name);
-      charButton.class('char-button');
-      charButton.mousePressed(() => displayCharacterSelectionPanel(1, index));
-      player2Div.child(charButton);
-      charButton.position(rect.width / 4 - 100, rect.height / 2);
-      Inputs.push({ object: charButton, valid_game_state: 'char_select', name: char.name });
-    });
-  }
-
-
-
-  player2Div.child(toggleButton);
-
-
-  player2Div.child(toggleButton2);
-  positionButtons();
-}
+  
 
 function displayCharacterSelectionPanel(playerIndex, charIndex) {
   const panel = createDiv();
