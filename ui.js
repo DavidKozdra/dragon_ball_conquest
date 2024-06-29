@@ -186,13 +186,13 @@ function initializeButtons() {
   buttonPlay.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 220);
   buttonAddPlayer1.position(canvasLeft + rect.width / 4 - 50, canvasTop + rect.height - 200);
   buttonAddPlayer2.position(canvasLeft + (rect.width / 4) * 3 - 50, canvasTop + rect.height - 200);
-  buttonBack.position(canvasLeft + 10, canvasTop + rect.height - 60);
+  buttonBack.position((canvasLeft + rect.width / 3) , canvasTop + rect.height - 60);
   unpauseButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
   startGameButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 150);
   backToMainButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
 
-  toggleButton.position(canvasLeft + rect.width / 4 - 100, canvasTop + rect.height / 2 + 100);
-  toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 100, canvasTop + rect.height / 2 + 100);
+  toggleButton.position(canvasLeft + rect.width / 4 - 50, canvasTop + rect.height / 2 );
+  toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 150, canvasTop + rect.height / 2 );
 }
 
 
@@ -263,9 +263,6 @@ function RenderMainMenu() {
       });
     }
   
-    // Position toggle buttons (assuming these are predefined elsewhere)
-    toggleButton.position(canvasWidth / 4 - 100, canvasHeight / 2 + 100);
-    toggleButton2.position((canvasWidth / 4) * 3 - 100, canvasHeight / 2 + 100);
   
     // Add toggle buttons to respective divs
     player1Div.child(toggleButton);
