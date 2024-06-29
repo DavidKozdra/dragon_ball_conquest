@@ -3,6 +3,8 @@ import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, s
 import { Playing_Agent } from './Playing_Agent.js';
 import { Projectile } from './Projectile.js';
 
+import { either } from './utils.js';
+
 const AIState = {
   IDLE: 'idle',
   CHARGING: 'charging',
@@ -29,6 +31,9 @@ class AI extends Playing_Agent {
   }
 
   update() {
+
+
+    super.update();
     if(this.enemy == null){
       if(player1 == this && player2 != null){
         console.error("AI: player1 is null, setting player2 as enemy");
@@ -38,7 +43,7 @@ class AI extends Playing_Agent {
       return
     }
 
-    super.update();
+    console.log("AI")
     this.updatePlayerPosition();
     const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
@@ -48,14 +53,17 @@ class AI extends Playing_Agent {
     this.updateDashTimer();
 
     if (currentTime - this.lastMoveTime > this.inactivityThreshold) {
-      this.state = AIState.CHARGING; // Switch to charging if player is inactive
+        console.log("Just standing")
     }
-
+    console.log(this.state)
+    
     switch (this.state) {
       case AIState.IDLE:
         this.handleIdleState(distanceToPlayer1, distanceToProjectile);
+        
         break;
       case AIState.CHARGING:
+        console.log("charing @@#!!!")
         this.handleChargingState();
         break;
       case AIState.ATTACKING:
@@ -63,6 +71,9 @@ class AI extends Playing_Agent {
         break;
       case AIState.MELEE:
         this.handleMeleeState(distanceToPlayer1);
+        break;
+      case AIState.RETREATING:
+        this.handleRetreatingState();
         break;
       case AIState.FLYING:
         this.handleFlyingState();
@@ -87,6 +98,10 @@ class AI extends Playing_Agent {
     }
   }
 
+  pickRandomItem(){
+
+  }
+
   handleIdleState(distanceToPlayer1, distanceToProjectile) {
     if (distanceToProjectile < 50) {
       this.state = AIState.AVOIDING;
@@ -96,29 +111,34 @@ class AI extends Playing_Agent {
       this.state = AIState.CHARGING;
     } else if (this.char.ki > 300 || this.attackPower > 0) {
       this.state = AIState.ATTACKING;
-    } else if (this.char.health < this.char.maxHealth / 2) {
-      this.state = AIState.AVOIDING;
+    } else if (this.char.health <= this.char.maxHealth / 4) {
+      this.state = AIState.RETREATING;
     } else if (distanceToPlayer1 > 100 && this.dashTimer === 0) {
       this.state = AIState.DASHING;
+    }else {
+      console.error(">>>>S")
     }
+
+    console.log("new state", this.state)
   }
 
   handleChargingState() {
     const currentTime = Date.now();
     const delay = Math.random() * (2000 - 500) + 500; // Generate a random delay between 500 and 2000 milliseconds
-  
     if (this.char.ki >= 150 && currentTime - this.lastMoveTime <= this.inactivityThreshold) {
       this.state = AIState.IDLE;
+      console.log("IDEL")
     } else if (this.char.ki >= 100 && currentTime - this.lastAttackTime > delay) {
       this.char.applyAttacking(); // Charge the attack
+      console.log("ATTACK@@")
       if (this.char.currentAttackPower >= 100) { // Adjust the threshold as needed
         this.releaseKiAttack();
       }
     } else {
-      this.char.applyCharging();
+      //!! random state=
+      this.state = AIState.ATTACKING
     }
   }
-  
 
   handleAttackingState(distanceToPlayer1) {
     if (distanceToPlayer1 < 20) {
@@ -226,6 +246,7 @@ class AI extends Playing_Agent {
   dist(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
   }
+
   releaseKiAttack() {
     const currentTime = Date.now();
     const timeHeld = currentTime - this.lastAttackTime;
@@ -261,7 +282,6 @@ class AI extends Playing_Agent {
     this.state = AIState.IDLE;
     this.lastAttackTime = currentTime; // Set the last attack time here
   }
-  
 }
 
 export { AI };

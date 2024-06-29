@@ -1,7 +1,7 @@
-import { GameObject } from './GameObject.js';
-
+import { GameObject} from './GameObject.js';
+import {player1, player2 } from "./game.js"
 class Projectile extends GameObject {
-  constructor(x, y, size, color, dirX, dirY, speed, damage) {
+  constructor(x, y, size, color, dirX, dirY, speed, damage, following) {
     super('projectile', x, y);
     this.size = size;
     this.radius = size / 2;
@@ -13,6 +13,7 @@ class Projectile extends GameObject {
     this.speedY = dirY * speed;
     this.damage = damage;
     this.alive = true; // Add a flag to track if the projectile is alive
+    this.following = true;
   }
 
   draw() {
@@ -24,9 +25,37 @@ class Projectile extends GameObject {
 
   update() {
     if (this.alive) {
+      if (this.following) {
+        // Find the closest player
+        let target_player = this.findClosestPlayer([player1, player2]);
+        if (target_player) {
+          // Update direction to follow the target player
+          let dir = createVector(target_player.x - this.x, target_player.y - this.y);
+          dir.normalize();
+          this.speedX = dir.x * this.speed;
+          this.speedY = dir.y * this.speed;
+        }
+      }
+
       this.x += this.speedX;
       this.y += this.speedY;
     }
+  }
+
+  findClosestPlayer(players) {
+    let closestPlayer = null;
+    let minDist =  80;
+    for (let player of players) {
+      let d = dist(this.x, this.y, player.x, player.y);
+      if (d < minDist) {
+        minDist = d;
+        closestPlayer = player;
+        
+      }
+    }
+
+
+    return closestPlayer;
   }
 
   onCollision(other) {

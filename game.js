@@ -2,25 +2,22 @@ import { Player } from './Player.js';
 import { collides } from './GameObject.js';
 import { charController } from './Charictar_controller.js';
 import { AI } from './AI.js';
-import { Fist } from './fist.js'; // Assuming Fist is defined in a separate file
+import { Fist } from './fist.js';
 import { characters } from './characters.js';
 import { add } from './utils.js';
-
-import { UpdateUI,RenderMainMenu, RenderCharacterSelector, positionButtons, menus, currentMenu, selectedCharacters, onWindowResize,initializeButtons} from './ui.js';
-
-import { SetUpClusters, drawClouds,checkBoundsClouds } from './clouds.js';
+import { UpdateUI, RenderMainMenu, RenderCharacterSelector, positionButtons, menus, currentMenu, selectedCharacters, onWindowResize, initializeButtons } from './ui.js';
+import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
 
 let delta = 1;
-
 let canvasWidth = 400;
 let canvasHeight = 400;
-
 let timerOValue = 120;
 let timer = timerOValue;
 let gameState = 'main_menu';
 let winner = '';
 
 let player1, player2;
+
 function setGameState(state) {
   gameState = state;
 }
@@ -36,10 +33,8 @@ function setWinner(player) {
 function startGame() {
   gameState = 'playing';
 
-  console.log(selectedCharacters[0], selectedCharacters[1])
+  console.log(selectedCharacters[0], selectedCharacters[1]);
 
-
-  console.log("player1 ")
   let team1 = selectedCharacters[0].map(charData => {
     let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
     char.fists = [new Fist(char, 5, 5)];
@@ -56,14 +51,13 @@ function startGame() {
     ? new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, team1[0], team1) 
     : new AI(selectedCharacters[0][0], team1);
 
-    console.log("player1 ", player1)
-
-
   player2 = team2.some(char => char.isControllable) 
     ? new Player(78, 66, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, team2[0], team2) 
     : new AI(team2[0], team2);
-}
 
+  console.log("Player1:", player1);
+  console.log("Player2:", player2);
+}
 
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
@@ -73,7 +67,6 @@ function setup() {
   setInterval(() => {
     if (timer > 0 && gameState === 'playing') timer--;
   }, 1000);
-
 
   initializeButtons();  
   SetUpClusters();
@@ -85,9 +78,6 @@ function resetGame() {
   timer = timerOValue;
   menus[currentMenu].onselect();
 }
-
-
-
 
 function checkCollisions() {
   let allObjects = [...player1.char.projectiles, ...player2.char.projectiles, ...player1.char.fists, ...player2.char.fists, player1.char, player2.char];
@@ -101,10 +91,6 @@ function checkCollisions() {
     }
   }
 }
-
-
-
-
 
 function draw() {
   UpdateUI();
@@ -141,11 +127,9 @@ function draw() {
   if (gameState === 'playing') {
     background(10, 100, 220); // This sets the background color each frame
 
-
-    drawClouds()
+    drawClouds();
     player1.update();
     if (player1.char) {
-      console.log("player1.char" , player1.char)
       player1.char.update();
       player1.char.draw();
     } else {
@@ -174,18 +158,18 @@ function draw() {
 
     // UI
     fill(0);
-    rect(0,0,100,40)
+    rect(0, 0, 100, 40);
     textSize(16);
     fill(255);
     noStroke();
     textAlign(LEFT, CENTER);
-    text('Player 1', 0, 10);
+    text('Player 1', 20, 20);
 
-    fill(0)
-    rect(canvasWidth - 100,0,100,40)
+    fill(0);
+    rect(canvasWidth - 100, 0, 100, 40);
     textAlign(RIGHT, CENTER);
-    fill(255)
-    text('Player 2', canvasWidth, 10);
+    fill(255);
+    text('Player 2', canvasWidth - 20, 20);
 
     // Player1 health
     fill(10, 10, 10);
@@ -208,7 +192,7 @@ function draw() {
     // Player2 ki
     fill(10, 10, 10);
     rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
-    fill(10, 0, 200);
+    fill(10, 0, 255);
     rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
 
     // Timer
@@ -328,4 +312,4 @@ function keyReleased() {
   }
 }
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState,getGameState, setWinner, startGame };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, getGameState, setWinner, startGame };
