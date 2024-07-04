@@ -2,6 +2,7 @@ import { either } from './utils.js';
 
 let clouds = [];
 let clusters = [];
+const lightSource = { x: 0, y: 100 }; // Define the light source position
 
 function SetUpClusters() {
     let initialCloudNum = random(1, 50);
@@ -39,16 +40,22 @@ function drawClouds() {
             let depthFactor = map(cloud.y, 0, 400, 1, 0.5); // Adjust size based on depth
             let adjustedWidth = cloud.w * depthFactor;
             let adjustedHeight = cloud.h * depthFactor;
-            let colorFactor = map(cloud.y, 0, 400, 255, 150); // Adjust color based on depth
+
+            // Calculate shading based on distance and angle to the light source
+            let dx = lightSource.x - cloud.x;
+            let dy = lightSource.y - cloud.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            let angle = Math.atan2(dy, dx);
+            let colorFactor = map(distance, 0, 400, 255, 150); // Adjust color based on distance from the light source
 
             fill(colorFactor);
 
             cloud.x += random(0, 0.1); // Adjusting cloud speed
 
-            if(cloud.shape === 'round') {
-                drawRoundPolygon(cloud.x, cloud.y, adjustedWidth, adjustedHeight, 8)
-            }else {
-              drawRoundPolygon(cloud.x, cloud.y, adjustedWidth, adjustedHeight, 15)
+            if (cloud.shape === 'round') {
+                drawRoundPolygon(cloud.x, cloud.y, adjustedWidth, adjustedHeight, 8);
+            } else {
+                drawRoundPolygon(cloud.x, cloud.y, adjustedWidth, adjustedHeight, 15);
             }
         }
     }
@@ -71,7 +78,7 @@ function map(value, start1, stop1, start2, stop2) {
 
 function drawRoundPolygon(x, y, w, h, sides) {
     beginShape();
-    for (let i = 0; i < TWO_PI*2; i += TWO_PI / sides ) {
+    for (let i = 0; i < TWO_PI * 2; i += TWO_PI / sides) {
         let sx = x + cos(i) * w / 2;
         let sy = y + sin(i) * h / 2;
         vertex(sx, sy);
