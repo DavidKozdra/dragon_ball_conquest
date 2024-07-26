@@ -52,9 +52,8 @@ let menus = [
       let char3 = new charController(300, 200, true,[100,0,2]);
 
       let team = [char1, char2];
-
-      player1 = new Player(88,67 , { left: 65, right: 68, up: 87, down: 83 }, 90, char1, team=[char1]);
-      player2 = new Player(78,66 , { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 77, char2, team=[char2,char3]);
+      player1 = new Player(88,67 ,{left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW} , 90, char1, team=[char1]);
+      player2 = new Player(78,66 , { left: 65, right: 68, up: 87, down: 83 }, 77, char2, team=[char2,char3]);
     }
   },
   {
@@ -71,7 +70,7 @@ let menus = [
 
       let char4 = new charController(300, 200, false, [10,100,100]);
 
-      player1 = new Player(88, 67, { left: 65, right: 68, up: 87, down: 83 }, 90, char1,[char1]);
+      player1 = new Player(88, 67, {left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW}, 90, char1,[char1]);
       player2 = new AI( char2, [char2,char3, char4]);
 
       console.log("?????????//")
