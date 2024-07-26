@@ -167,10 +167,6 @@ class charController extends GameObject {
   
 
   applyCharging() {
-    if (this.currentAttackPower > 0){
-      return
-    }
-
       if (this.ki < this.maxKi) {
         this.ki += this.kiRate;
     }
