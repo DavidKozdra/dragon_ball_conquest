@@ -288,7 +288,8 @@ function keyPressed() {
 function keyReleased() {
   if (gameState === 'paused') return; // Skip updates if game is paused
 
-  if (gameState === 'main_menu') return;
+  if (gameState === 'main_menu' || gameState === "char_select") return;
+
 
   if (player1.char.isControllable) {
     if (keyCode === player1.moveKeys.up) {
