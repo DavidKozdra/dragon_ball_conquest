@@ -191,8 +191,8 @@ function initializeButtons() {
   startGameButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 150);
   backToMainButton.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
 
-  toggleButton.position(canvasLeft + rect.width / 4 - 50, canvasTop + rect.height / 2 );
-  toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 150, canvasTop + rect.height / 2 );
+  toggleButton.position(canvasLeft + rect.width / 4 - 50, canvasTop + rect.height / 4 );
+  toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 150, canvasTop + rect.height / 4 );
 }
 
 
