@@ -5,3 +5,55 @@ html, body {
 canvas {
   display: block;
 }
+
+.char-button {
+  margin: 1px;
+  padding: 1px;
+  background-color: #ccc;
+  border: 1px solid #999;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.game-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #ccc;
+  border: 1px solid #999;
+  cursor: pointer;
+  position: absolute;
+}
+
+.charSelectDiv {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  display: flex;
+  justify-content: space-around;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-x: scroll;
+  z-index: 10; /* Ensure it appears on top */
+}
+
+.player-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background-color: #ccc;
+  border-radius: 10px;
+  position: absolute;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  background-color: black;
+}

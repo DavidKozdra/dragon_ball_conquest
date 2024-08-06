@@ -1,0 +1,15 @@
+{
+  "name": "dragon_ball_conquest",
+  "version": "1.0.0",
+  "description": "dragon ball 2d fighting game",
+  "main": "AI.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "p5": "^1.9.4",
+    "p5ts": "^0.0.15"
+  }
+}

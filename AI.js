@@ -3,6 +3,8 @@ import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, s
 import { Playing_Agent } from './Playing_Agent.js';
 import { Projectile } from './Projectile.js';
 
+import { either } from './utils.js';
+
 const AIState = {
   IDLE: 'idle',
   CHARGING: 'charging',
@@ -16,21 +18,32 @@ const AIState = {
 
 class AI extends Playing_Agent {
   constructor(characterController, team) {
-    super(characterController, team);
-    this.char = characterController;
+    super(team[0], team);
+    this.char = team[0];
     this.state = AIState.IDLE;
     this.dashTimer = 0;
     this.attackPower = 0;
     this.inactivityThreshold = 2000; // 2 seconds
-    this.lastPlayerPosition = { x: player1.char.x, y: player1.char.y };
+    this.enemy = (player1 == this) ? player2 : player1;
+    this.lastPlayerPosition = { x: 0, y: 0 };
     this.lastMoveTime = Date.now();
     this.lastAttackTime = 0; // Initialize lastAttackTime
   }
 
   update() {
+
+
     super.update();
+    if(this.enemy == null){
+      if(player1 == this && player2 != null){
+        console.error("AI: player1 is null, setting player2 as enemy");
+        this.enemy = player2;
+      }
+      console.error("Enemy NULLL >????: AI.js");
+      return
+    }
     this.updatePlayerPosition();
-    const distanceToPlayer1 = this.dist(this.char.x, this.char.y, player1.char.x, player1.char.y);
+    const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
     const distanceToProjectile = nearestProjectile ? this.dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) : Infinity;
     const currentTime = Date.now();
@@ -38,14 +51,16 @@ class AI extends Playing_Agent {
     this.updateDashTimer();
 
     if (currentTime - this.lastMoveTime > this.inactivityThreshold) {
-      this.state = AIState.CHARGING; // Switch to charging if player is inactive
+       // console.log("Just standing")
     }
-
+    
     switch (this.state) {
       case AIState.IDLE:
         this.handleIdleState(distanceToPlayer1, distanceToProjectile);
+        
         break;
       case AIState.CHARGING:
+        //console.log("charing @@#!!!")
         this.handleChargingState();
         break;
       case AIState.ATTACKING:
@@ -53,6 +68,9 @@ class AI extends Playing_Agent {
         break;
       case AIState.MELEE:
         this.handleMeleeState(distanceToPlayer1);
+        break;
+      case AIState.RETREATING:
+        this.handleRetreatingState();
         break;
       case AIState.FLYING:
         this.handleFlyingState();
@@ -71,10 +89,14 @@ class AI extends Playing_Agent {
 
   updatePlayerPosition() {
     const currentTime = Date.now();
-    if (player1.char.x !== this.lastPlayerPosition.x || player1.char.y !== this.lastPlayerPosition.y) {
-      this.lastPlayerPosition = { x: player1.char.x, y: player1.char.y };
+    if (this.enemy.char.x !== this.lastPlayerPosition.x || this.enemy.char.y !== this.lastPlayerPosition.y) {
+      this.lastPlayerPosition = { x: this.enemy.char.x, y: this.enemy.char.y };
       this.lastMoveTime = currentTime;
     }
+  }
+
+  pickRandomItem(){
+
   }
 
   handleIdleState(distanceToPlayer1, distanceToProjectile) {
@@ -86,29 +108,33 @@ class AI extends Playing_Agent {
       this.state = AIState.CHARGING;
     } else if (this.char.ki > 300 || this.attackPower > 0) {
       this.state = AIState.ATTACKING;
-    } else if (this.char.health < this.char.maxHealth / 2) {
-      this.state = AIState.AVOIDING;
+    } else if (this.char.health <= this.char.maxHealth / 4) {
+      this.state = AIState.RETREATING;
     } else if (distanceToPlayer1 > 100 && this.dashTimer === 0) {
       this.state = AIState.DASHING;
+    }else {
+      console.error(">>>>S")
     }
+
+    //console.log("new state", this.state)
   }
 
   handleChargingState() {
     const currentTime = Date.now();
     const delay = Math.random() * (2000 - 500) + 500; // Generate a random delay between 500 and 2000 milliseconds
-  
     if (this.char.ki >= 150 && currentTime - this.lastMoveTime <= this.inactivityThreshold) {
       this.state = AIState.IDLE;
+
     } else if (this.char.ki >= 100 && currentTime - this.lastAttackTime > delay) {
       this.char.applyAttacking(); // Charge the attack
       if (this.char.currentAttackPower >= 100) { // Adjust the threshold as needed
         this.releaseKiAttack();
       }
     } else {
-      this.char.applyCharging();
+      //!! random state=
+      this.state = AIState.ATTACKING
     }
   }
-  
 
   handleAttackingState(distanceToPlayer1) {
     if (distanceToPlayer1 < 20) {
@@ -136,11 +162,11 @@ class AI extends Playing_Agent {
       this.state = AIState.IDLE;
     } else {
       // Move dynamically away from the player based on player's velocity
-      const dx = this.char.x - player1.char.x;
-      const dy = this.char.y - player1.char.y;
+      const dx = this.char.x - this.enemy.char.x;
+      const dy = this.char.y - this.enemy.char.y;
       const angle = Math.atan2(dy, dx);
-      const playerVelocityX = player1.char.velocityX;
-      const playerVelocityY = player1.char.velocityY;
+      const playerVelocityX = this.enemy.char.velocityX;
+      const playerVelocityY = this.enemy.char.velocityY;
       const moveX = Math.cos(angle) + (playerVelocityX > 0 ? 1 : -1);
       const moveY = Math.sin(angle) + (playerVelocityY > 0 ? 1 : -1);
       const speed = 5;
@@ -167,7 +193,7 @@ class AI extends Playing_Agent {
   }
 
   handleDashingState() {
-    const direction = this.char.x < player1.char.x ? 'right' : 'left';
+    const direction = this.char.x < this.enemy.char.x ? 'right' : 'left';
     this.char.dash(direction);
     this.dashTimer = 100; // Set a cooldown for dashing to prevent constant dashing
     this.state = AIState.IDLE;
@@ -183,7 +209,7 @@ class AI extends Playing_Agent {
     let nearestProjectile = null;
     let minDistance = Infinity;
 
-    for (const projectile of player1.char.projectiles) {
+    for (const projectile of this.enemy.char.projectiles) {
       const distance = this.dist(this.char.x, this.char.y, projectile.x, projectile.y);
       if (distance < minDistance) {
         minDistance = distance;
@@ -216,16 +242,14 @@ class AI extends Playing_Agent {
   dist(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
   }
+
   releaseKiAttack() {
     const currentTime = Date.now();
     const timeHeld = currentTime - this.lastAttackTime;
-    console.log("AI key blast time", timeHeld);
   
     // Adjust the size modifier to ensure projectiles are not too large
     let sizeMod = timeHeld / 200; // Divide by a larger number to reduce the effect
-    sizeMod = Math.min(sizeMod, 50); // Cap the size modifier to avoid excessively large projectiles
-    console.log("sizeMod", sizeMod);
-  
+    sizeMod = Math.min(sizeMod, 50);
     // Calculate direction vector
     let targetPlayer = this.char === player1.char ? player2.char : player1.char;
     let dx = targetPlayer.x - this.char.x;
@@ -254,7 +278,6 @@ class AI extends Playing_Agent {
     this.state = AIState.IDLE;
     this.lastAttackTime = currentTime; // Set the last attack time here
   }
-  
 }
 
 export { AI };

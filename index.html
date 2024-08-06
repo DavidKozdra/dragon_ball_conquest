@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game</title>
+  <style src="style.css"></style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+
   <script type="module">
     import { setup, draw, keyPressed, keyReleased } from './game.js';
 
@@ -30,16 +32,68 @@
       margin-top: 20px;
       font-family: Arial, sans-serif;
     }
+    html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+
+
+.char-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #ccc;
+  border: 1px solid #999;
+  cursor: pointer;
+}
+
+
+.hidden {
+  display: none;
+}
+
+.game-button {
+  margin: 5px;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #999;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.charSelectDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 100;
+}
   </style>
 </head>
 <body>
   <div id="game-container">
-    <p>Player 1 Controls: Arrow keys (Move), Z (Punch), Double-tap A/D (Dash), Double-tap up (Toggle Flying)</p>
+    <div id="instructions">
+      <h2>Game Instructions</h2>
+      <p>Player 1 Controls: Arrow keys (Move), Z (Punch), Double-tap A/D (Dash), Double-tap up (Toggle Flying)</p>
 
-    <p>Charge Ki with C and charge ki attacks with x </p>
+      <p>Charge Ki with C and charge ki attacks with x </p>
 
-    <p>Enter to select a menu</p>
-    <p>Player 2 Controls: A (Left), D (Right), W (Jump/Up), S (Down), Z (Punch), Double-tap A/D (Dash), M (Punch), Double-tap Arrow Keys (Dash), Double-tap W (Toggle Flying)</p>
+      <p>Enter to select a menu</p>
+      <p>Player 2 Controls: A (Left), D (Right), W (Jump/Up), S (Down), Z (Punch), Double-tap A/D (Dash), M (Punch), Double-tap Arrow Keys (Dash), Double-tap W (Toggle Flying)</p>
+      <p>Press Space to Pause/Resume the game.</p>
+    </div>
   </div>
+
+
+  <div> 
+
+    check out my other work :
+    <a href="https://davidkozdra.com/"> website</a>
+    or the   <a href="https://github.com/DavidKozdra/dragon_ball_conquest"> source code<a> for this game :
+  
+  </div>
+
 </body>
 </html>
