@@ -8,7 +8,6 @@ let menus = [
     name: 'Play',
     image: 'char_select.png',
     onselect: () => {
-      console.log('Character Selection');
       setGameState('char_select');
     }
   },
@@ -16,7 +15,6 @@ let menus = [
     name: 'Settings',
     image: 'char_select.png',
     onselect: () => {
-      console.log('Settings');
       setGameState('settings');
     }
   }
@@ -146,6 +144,7 @@ function initializeButtons() {
 
   toggleButton2.mousePressed(() => {
     if (selectedCharacters[1].length === 0) {
+      alert("empty team can not toggle controllable till there are chars selected")
       return;
     }
     selectedCharacters[1].forEach(char => {

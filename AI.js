@@ -42,8 +42,6 @@ class AI extends Playing_Agent {
       console.error("Enemy NULLL >????: AI.js");
       return
     }
-
-    console.log("AI")
     this.updatePlayerPosition();
     const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
@@ -53,9 +51,8 @@ class AI extends Playing_Agent {
     this.updateDashTimer();
 
     if (currentTime - this.lastMoveTime > this.inactivityThreshold) {
-        console.log("Just standing")
+       // console.log("Just standing")
     }
-    console.log(this.state)
     
     switch (this.state) {
       case AIState.IDLE:
@@ -63,7 +60,7 @@ class AI extends Playing_Agent {
         
         break;
       case AIState.CHARGING:
-        console.log("charing @@#!!!")
+        //console.log("charing @@#!!!")
         this.handleChargingState();
         break;
       case AIState.ATTACKING:
@@ -119,7 +116,7 @@ class AI extends Playing_Agent {
       console.error(">>>>S")
     }
 
-    console.log("new state", this.state)
+    //console.log("new state", this.state)
   }
 
   handleChargingState() {
@@ -127,10 +124,9 @@ class AI extends Playing_Agent {
     const delay = Math.random() * (2000 - 500) + 500; // Generate a random delay between 500 and 2000 milliseconds
     if (this.char.ki >= 150 && currentTime - this.lastMoveTime <= this.inactivityThreshold) {
       this.state = AIState.IDLE;
-      console.log("IDEL")
+
     } else if (this.char.ki >= 100 && currentTime - this.lastAttackTime > delay) {
       this.char.applyAttacking(); // Charge the attack
-      console.log("ATTACK@@")
       if (this.char.currentAttackPower >= 100) { // Adjust the threshold as needed
         this.releaseKiAttack();
       }

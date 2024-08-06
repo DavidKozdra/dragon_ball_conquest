@@ -49,18 +49,11 @@ canvas {
   border-radius: 10px;
   position: absolute;
 }
+
 .teamGrid {
   display: grid;
-  align-items: center;
-  padding: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
+  gap: 10px;
+  padding: 10px;
   background-color: black;
 }
-
-/*
-  player1Div.style('display', 'flex');
-  player1Div.style('flex-direction', 'column');
-  player1Div.style('align-items', 'center');
-  player1Div.style('padding', '10px');
-  player1Div.style('background-color', '#ccc');
-  player1Div.style('border-radius', '10px');
-*/

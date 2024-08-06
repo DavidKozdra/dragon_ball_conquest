@@ -15,7 +15,6 @@ class Playing_Agent {
 
   update() {
     if (!this.team[this.currentChar].alive && millis() - this.removedTimer > 100) {
-      console.log("ded", this.team.length);
       this.removeChar(this.currentChar);
       this.removedTimer = millis();
     }
@@ -28,7 +27,6 @@ class Playing_Agent {
   }
 
   nextChar() {
-    console.log('current char', this.currentChar, this.team);
     this.currentChar = (this.currentChar + 1) % this.team.length;
     this.char = this.team[this.currentChar];
     console.log("new char ", this.team[this.currentChar]);

@@ -211,7 +211,7 @@ class charController extends GameObject {
   releaseKiAttack() {
     // Calculate direction vector
     let targetPlayer = (this === player1.char) ? player2.char : player1.char;
-    console.log(targetPlayer);
+    //console.log(targetPlayer);
     let dx = targetPlayer.x - this.x;
     let dy = targetPlayer.y - this.y;
     let magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -288,12 +288,12 @@ class charController extends GameObject {
     if (this.ki < this.costOfFlying * 50) {
       return; // Not enough ki for dashing
     }
-    console.log("dash");
+    ///console.log("dash");
     let dashSpeed = this.dashSpeed;
   
     switch (direction) {
       case 'left':
-        console.log("dash left")
+        //console.log("dash left")
         this.x -= dashSpeed;
         this.accelerationX = 0;
         break;

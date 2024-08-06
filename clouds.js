@@ -5,7 +5,6 @@ let clusters = [];
 
 function SetUpClusters() {
     let initialCloudNum = int(random(1, 20));
-    console.log(initialCloudNum)
     for (let i = 0; i < initialCloudNum; i++) {
         clouds.push({ x: random(-100, 300), y: random(0, 150), w: either(90, 80), h: either(30, 40), shape: either('round', 'ellipse')});
     }
