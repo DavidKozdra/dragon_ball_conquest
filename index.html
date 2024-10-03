@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game</title>
-  <style src="style.css"></style>
+  <!-- Link to external stylesheet if you have one -->
+  <!-- <link rel="stylesheet" href="style.css"> -->
+  <!-- Include p5.js library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-
   <script type="module">
     import { setup, draw, keyPressed, keyReleased } from './game.js';
 
@@ -17,83 +18,94 @@
   </script>
   <style>
     body {
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
+      padding: 0;
       background-color: #f0f0f0;
+      font-family: 'Arial', sans-serif;
     }
     #game-container {
       text-align: center;
+      margin: 0 auto;
     }
     #instructions {
-      margin-top: 20px;
-      font-family: Arial, sans-serif;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 800px;
     }
-    html, body {
-  margin: 0;
-  padding: 0;
-}
-canvas {
-  display: block;
-}
-
-
-.char-button {
-  margin: 5px;
-  padding: 10px;
-  background-color: #ccc;
-  border: 1px solid #999;
-  cursor: pointer;
-}
-
-
-.hidden {
-  display: none;
-}
-
-.game-button {
-  margin: 5px;
-  padding: 10px;
-  background-color: white;
-  border: 1px solid #999;
-  cursor: pointer;
-  border-radius: 20px;
-}
-
-.charSelectDiv {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 100;
-}
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+    .key {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 0 3px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      background-color: #eee;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    details {
+      width: 100%;
+    }
+    summary {
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    details[open] summary::after {
+      content: "▲";
+      float: right;
+    }
+    summary::after {
+      content: "▼";
+      float: right;
+    }
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    /* Additional styling for a professional look */
+    h3 {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+    p {
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
   <div id="game-container">
-   
+    <!-- The game canvas will be inserted here -->
   </div>
 
+  <div id="instructions">
+    <details>
+      <summary>Game Instructions</summary>
+      <h3>Player 1 Controls</h3>
+      <p>Move: <span class="key">←</span> <span class="key">→</span> <span class="key">↑</span> <span class="key">↓</span></p>
+      <p>Punch: <span class="key">Z</span></p>
+      <p>Dash: Double-tap <span class="key">←</span> or <span class="key">→</span></p>
+      <p>Toggle Flying: Double-tap <span class="key">↑</span></p>
+      <p>Charge Ki: <span class="key">C</span></p>
+      <p>Charge Ki Attacks: <span class="key">X</span></p>
+      <p>Select Menu: <span class="key">Enter</span></p>
 
-  <div> 
-    <div id="instructions">
-      <h2>Game Instructions</h2>
-      <p>Player 1 Controls: Arrow keys (Move), Z (Punch), Double-tap A/D (Dash), Double-tap up (Toggle Flying)</p>
+      <h3>Player 2 Controls</h3>
+      <p>Move: <span class="key">A</span> (Left), <span class="key">D</span> (Right), <span class="key">W</span> (Up/Jump), <span class="key">S</span> (Down)</p>
+      <p>Punch: <span class="key">Z</span> and <span class="key">M</span></p>
+      <p>Dash: Double-tap <span class="key">A</span> or <span class="key">D</span></p>
+      <p>Toggle Flying: Double-tap <span class="key">W</span></p>
 
-      <p>Charge Ki with C and charge ki attacks with x </p>
+      <p>Pause/Resume Game: <span class="key">Space</span></p>
+    </details>
 
-      <p>Enter to select a menu</p>
-      <p>Player 2 Controls: A (Left), D (Right), W (Jump/Up), S (Down), Z (Punch), Double-tap A/D (Dash), M (Punch), Double-tap Arrow Keys (Dash), Double-tap W (Toggle Flying)</p>
-      <p>Press Space to Pause/Resume the game.</p>
-    </div>
-    check out my other work :
-    <a href="https://davidkozdra.com/"> website</a>
-    or the   <a href="https://github.com/DavidKozdra/dragon_ball_conquest"> source code<a> for this game :
-  
+    <p>Check out my other work: <a href="https://davidkozdra.com/">Website</a> or the <a href="https://github.com/DavidKozdra/dragon_ball_conquest">source code</a> for this game.</p>
   </div>
-
 </body>
 </html>
