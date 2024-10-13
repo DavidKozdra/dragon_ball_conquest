@@ -28,11 +28,12 @@ canvas {
 }
 
 .charSelectDiv {
+  
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 200px;
+  height: 20px;
   display: flex;
   justify-content: space-around;
   background-color: rgba(0, 0, 0, 0.5);
@@ -57,3 +58,5 @@ canvas {
   padding: 10px;
   background-color: black;
 }
+
+

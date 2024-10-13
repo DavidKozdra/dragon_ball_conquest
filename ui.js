@@ -99,7 +99,7 @@ function initializeButtons() {
   buttonAddPlayer2 = createButton('+ Add Player 2');
   buttonAddPlayer2.class('game-button');
   buttonAddPlayer2.size(100, 50);
-  buttonAddPlayer2.mousePressed(() => displayCharacterSelectionPanel(1, -1));
+  buttonAddPlayer2.mousePressed(() => displayCharacterSelectionPanel(1, 1));
 
   buttonBack = createButton('Back');
   buttonBack.class('game-button');
@@ -200,6 +200,8 @@ function positionButtons() {
   toggleButton2.position(canvasLeft + (rect.width / 4) * 3 - 50, canvasTop + rect.height / 4);
 }
 
+
+var CharSelectPanel;
 function initializePlayerDivs() {
   const canvas = document.getElementById('game-canvas');
   const rect = canvas.getBoundingClientRect();
@@ -210,11 +212,19 @@ function initializePlayerDivs() {
   player1Div.addClass("teamGrid")
   player1Div.hide();
 
-  // Create player 2 div
   player2Div = createDiv();
   player2Div.position(rect.left + window.scrollX + (rect.width / 4) * 3 - 50, rect.top + window.scrollY + rect.height / 4 + 50);
   player2Div.addClass("teamGrid")
   player2Div.hide();
+
+  CharSelectPanel = createDiv();
+  CharSelectPanel.position(0, rect.height * 1.5);
+  CharSelectPanel.style('width', '100%');
+  CharSelectPanel.style('height', '100px');
+  CharSelectPanel.style('overflow-x', 'scroll');
+  CharSelectPanel.style('display', 'flex');
+  CharSelectPanel.style('justify-content', 'space-around');
+  CharSelectPanel.addClass('charSelectDiv');
 }
 
 function RenderMainMenu() {
@@ -241,7 +251,7 @@ function RenderCharacterSelector() {
   stroke(0);
   textSize(32);
   textAlign(CENTER, CENTER);
-  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 100);
+  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 -150);
   textSize(16);
 
   player1Div.show();
@@ -275,49 +285,75 @@ function updatePlayerDivs() {
     });
   }
 }
-
+let isPanelVisible = false; // Variable to track panel visibility
 function displayCharacterSelectionPanel(playerIndex, charIndex) {
-  const canvas = document.getElementById('game-canvas');
-  const rect = canvas.getBoundingClientRect();
+  if (CharSelectPanel) {
+    console.log("Hiding the panel");
+    CharSelectPanel.remove();
+    CharSelectPanel = null;
+    isPanelVisible = false;
+    return;
+  }
+  
 
-  const panel = createDiv();
-  panel.position(0, rect.height * 1.5);
-  panel.style('width', '100%');
-  panel.style('height', '200px');
-  panel.style('overflow-x', 'scroll');
-  panel.style('display', 'flex');
-  panel.style('justify-content', 'space-around');
-  panel.style('background-color', 'rgba(0, 0, 0, 0.5)');
+  console.log("Showing the panel");
+  CharSelectPanel = createDiv();
+  CharSelectPanel.addClass('charSelectDiv');
+  CharSelectPanel.parent('game-container'); // Append to the main container
+  isPanelVisible = true;
+  
+ 
+  // Position the panel
+  positionCharSelectPanel(charIndex);
 
-  panel.addClass('charSelectDiv');
-
+  // Add character buttons
   characters.forEach(char => {
     const charButton = createButton(char.name);
-    charButton.class('char-button');
+    charButton.addClass('char-button');
+    charButton.parent(CharSelectPanel);
     charButton.mousePressed(() => {
       if (charIndex === -1) {
         selectedCharacters[playerIndex].push({ ...char });
       } else {
         selectedCharacters[playerIndex][charIndex] = { ...char };
       }
-      panel.remove();
-      updatePlayerDivs(); // Update the player divs to reflect changes
+      CharSelectPanel.remove();
+      CharSelectPanel = null;
+      isPanelVisible = false;
+      updatePlayerDivs();
     });
-    panel.child(charButton);
   });
 
+  // Option to remove character
   if (charIndex !== -1) {
     const removeButton = createButton('Remove Character');
-    removeButton.class('game-button');
+    removeButton.addClass('game-button');
     removeButton.size(150, 50);
+    removeButton.parent(CharSelectPanel);
     removeButton.mousePressed(() => {
       selectedCharacters[playerIndex].splice(charIndex, 1);
-      panel.remove();
-      updatePlayerDivs(); // Update the player divs to reflect changes
+      CharSelectPanel.remove();
+      CharSelectPanel = null;
+      isPanelVisible = false;
+      updatePlayerDivs();
     });
-    panel.child(removeButton);
   }
+
+  // Reposition the panel on window resize
+  window.addEventListener('resize', positionCharSelectPanel);
 }
+
+function positionCharSelectPanel(chari) {
+  const canvasRect = canvas.getBoundingClientRect();
+
+  console.log(chari)
+  CharSelectPanel.position(
+    chari == -1 ? canvasRect.left : canvasRect.right ,
+    canvasRect.top + height - CharSelectPanel.size().height
+  );
+}
+
+
 
 function findInputByName(name) {
   return Inputs.find(input => input.name === name)?.object;
