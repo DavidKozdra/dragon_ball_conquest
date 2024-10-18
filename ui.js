@@ -245,12 +245,9 @@ function RenderCharacterSelector() {
 }
 
 function RenderPausedUI() {
-  background(0, 0, 0, 150);
-  fill(255);
+
   textSize(32);
   textAlign(CENTER, CENTER);
-  text('Game Paused', canvasWidth / 2, canvasHeight / 2 - 50);
-
   unpauseButton.show();
   backToMainButton.show();
 
