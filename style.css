@@ -14,10 +14,6 @@ canvas {
   cursor: pointer;
 }
 
-.hidden {
-  display: none;
-}
-
 .game-button {
   margin: 5px;
   padding: 10px;
@@ -28,17 +24,18 @@ canvas {
 }
 
 .charSelectDiv {
-  position: absolute;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  position: fixed; /* Changed to fixed to stay at the bottom */
   bottom: 0;
   left: 0;
-  right: 0;
+  width: 100%;
   height: 200px;
-  display: flex;
-  justify-content: space-around;
   background-color: rgba(0, 0, 0, 0.5);
-  overflow-x: scroll;
-  z-index: 10; /* Ensure it appears on top */
+  z-index: 1000; /* Ensure it appears on top */
 }
+
 
 .player-div {
   display: flex;
