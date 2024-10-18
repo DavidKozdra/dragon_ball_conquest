@@ -241,7 +241,7 @@ function RenderCharacterSelector() {
   stroke(0);
   textSize(32);
   textAlign(CENTER, CENTER);
-  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 100);
+  text('Select Your Characters', canvasWidth / 2, canvasHeight / 2 - 150);
   textSize(16);
 
   player1Div.show();
