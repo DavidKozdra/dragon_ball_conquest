@@ -34,6 +34,7 @@ function startGame() {
   gameState = 'playing';
   SetUpClusters()
 
+  timer = timerOValue;
   console.log(selectedCharacters[0], selectedCharacters[1]);
 
   let team1 = selectedCharacters[0].map(charData => {
