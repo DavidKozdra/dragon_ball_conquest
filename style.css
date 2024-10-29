@@ -93,3 +93,8 @@ h3 {
   color: #fff;
   font-size: .8em;
 }
+
+#instructions h3 {
+  color: #007BFF;
+  font-size: .8em;
+}
