@@ -17,10 +17,13 @@
     window.keyReleased = keyReleased;
 
     window.addEventListener('keydown', function(e) {
-  if (e.code === 'Space') {
+  const keysToPrevent = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
+  if (keysToPrevent.includes(e.code)) {
     e.preventDefault();
   }
 });
+
 
   </script>
   <style>
