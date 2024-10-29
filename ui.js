@@ -88,6 +88,8 @@ function initializeButtons() {
     setGameState('main_menu');
   });
 
+ 
+
   toggleButton = createButton('Human');
   toggleButton.class('game-button');
   toggleButton.size(70, 50);
@@ -143,6 +145,7 @@ function initializePlayerDivs() {
   availableCharsDiv.addClass('availableCharsGrid');
   availableCharsDiv.hide();
 }
+
 
 function hideAllUIElements() {
   buttonNext.hide();
@@ -383,7 +386,7 @@ function positionButtons() {
   const canvasLeft = rect.left + window.scrollX;
   const canvasTop = rect.top + window.scrollY;
 
-  buttonNext.position(canvasLeft + rect.width - 60, canvasTop + rect.height / 2 - 25);
+  buttonNext.position(canvasLeft + rect.width - 120, canvasTop + rect.height / 2 - 25);
   buttonPrevious.position(canvasLeft + 10, canvasTop + rect.height / 2 - 25);
   buttonPlay.position(canvasLeft + rect.width / 2 - 50, canvasTop + rect.height - 100);
   buttonBack.position(canvasLeft + 20, canvasTop + 400);
@@ -395,7 +398,7 @@ function positionButtons() {
   toggleButton2.position(canvasLeft + rect.width - 120, canvasTop + rect.height - 100);
 
   // Position player divs
-  player1Div.position(canvasLeft + 50, canvasTop + 120);
+  player1Div.position(canvasLeft + 10, canvasTop + 120);
   player2Div.position(canvasLeft + rect.width - 150, canvasTop + 120);
   availableCharsDiv.position(canvasLeft + rect.width / 2 - 200, canvasTop + 100);
 }

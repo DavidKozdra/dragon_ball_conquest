@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game</title>
+  <title>Dragon ball conquest </title>
   <!-- Link to external stylesheet if you have one -->
   <!-- <link rel="stylesheet" href="style.css"> -->
   <!-- Include p5.js library -->
@@ -15,6 +15,13 @@
     window.draw = draw;
     window.keyPressed = keyPressed;
     window.keyReleased = keyReleased;
+
+    window.addEventListener('keydown', function(e) {
+  if (e.code === 'Space') {
+    e.preventDefault();
+  }
+});
+
   </script>
   <style>
     body {
@@ -30,7 +37,7 @@
       margin: 0 auto;
     }
     #instructions {
-      margin: 20px auto;
+      margin: 100px auto;
       width: 80%;
       max-width: 800px;
     }
@@ -80,6 +87,8 @@
       line-height: 1.6;
     }
   </style>
+  
+  <link rel="stylesheet" href="style.css" >
 </head>
 <body>
   <div id="game-container">
