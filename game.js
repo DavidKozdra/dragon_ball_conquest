@@ -165,13 +165,13 @@ function draw() {
     fill(255);
     noStroke();
     textAlign(LEFT, CENTER);
-    text('Player 1', 20, 20);
+    text(player1.char.name, 20, 20);
 
     fill(0);
     rect(canvasWidth - 100, 0, 100, 40);
     textAlign(RIGHT, CENTER);
     fill(255);
-    text('Player 2', canvasWidth - 20, 20);
+    text(player2.char.name, canvasWidth - 20, 20);
 
     // Player1 health
     fill(10, 10, 10);
