@@ -43,7 +43,7 @@ class charController extends GameObject {
 
     this.name = name;
 
-    this.attackType=1;
+    this.attackType="lazer";
   }
 
   get health() {
@@ -227,19 +227,20 @@ class charController extends GameObject {
     let offsetX = dx * offset;
     let offsetY = dy * offset;
   
-    let p = new Projectile(
+
+    this.projectiles.push(new Projectile(
       this.x + offsetX,
       this.y + offsetY,
       this.currentAttackPower, // Size of the projectile based on attack power
       this.spirit,
       dx,
       dy,
-      5, // Speed of the projectile
-      this.currentAttackPower, // Damage of the projectile based on attack power,
-      
-      {startX:this.x,startY:this.y}
-    )
-    this.projectiles.push(p);
+      5, 
+      this.currentAttackPower,
+      {startX:this.x + offsetX,startY:this.y+offsetY},
+      true,
+      this.attackType
+    ));
 
   
     this.currentAttackPower = 0;

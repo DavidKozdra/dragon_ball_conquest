@@ -1,7 +1,7 @@
 import { GameObject} from './GameObject.js';
 import {player1, player2 } from "./game.js"
 class Projectile extends GameObject {
-  constructor(x, y, size, color, dirX, dirY, speed, damage, line,following) {
+  constructor(x, y, size, color, dirX, dirY, speed, damage, line,following,type) {
     super('projectile', x, y);
     this.size = size;
     this.radius = size / 2;
@@ -15,13 +15,26 @@ class Projectile extends GameObject {
     this.alive = true; // Add a flag to track if the projectile is alive
     this.following = following;
     this.line = line
+    this.attackType = type;
   }
 
   draw() {
     if (this.alive) {
+
+      if(this.attackType=="lazer" && this.line) {
+        push()
+
+        fill(this.color)
+
+        strokeWeight(this.size * .8);
+
+        line(this.line.startX,this.line.startY,this.x, this.y)
+        pop()
+
+      }
+
       fill(this.color);
       ellipse(this.x, this.y, this.size, this.size);
-      line(this.line.startX,this.line.startY,this.x, this.y)
     }
   }
 
