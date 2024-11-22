@@ -4,7 +4,7 @@ class Projectile extends GameObject {
   constructor(x, y, size, color, dirX, dirY, speed, damage, line,following,type) {
     super('projectile', x, y);
     this.size = size;
-    this.radius = size / 2;
+    this.radius = type=="blast" ? size / 2 : size/3;
     this.color = color;
     this.dirX = dirX;
     this.dirY = dirY;

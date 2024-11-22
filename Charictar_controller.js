@@ -44,6 +44,7 @@ class charController extends GameObject {
     this.name = name;
 
     this.attackType="lazer";
+    this.charging = true;
   }
 
   get health() {
@@ -136,7 +137,10 @@ class charController extends GameObject {
     // Reset acceleration
     this.accelerationX = 0;
     this.accelerationY = 0;
-  
+    console.log(this.projectiles.some(p => p.alive && p.type === 'lazer'))
+    if (this.currentAttackPower > 0 || this.projectiles.some(p => p.alive && p.type === 'lazer' || this.charging)) {
+      return; // Stop movement if charging/releasing attack or if a live laser exists
+    }
     // Apply acceleration based on direction
     switch (direction) {
       case 'left':
@@ -176,12 +180,19 @@ class charController extends GameObject {
     }
 
       if (this.ki < this.maxKi) {
+        this.charging = true
         this.ki += this.kiRate;
-    }
+      }else {
+        this.charging = false;
+      }
   }
 
   applyAttacking() {
-    if (this.ki <= 0) {
+    if( this.projectiles.some(p => p.alive && p.type === 'lazer' || this.charging)){
+      return
+    }
+
+    if (this.ki <= 0 ) {
       if (this.currentAttackPower > 0) {
         this.releaseKiAttack();
       }
