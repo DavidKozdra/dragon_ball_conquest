@@ -42,6 +42,8 @@ class charController extends GameObject {
     this.dashSpeed = 200;
 
     this.name = name;
+
+    this.attackType=1;
   }
 
   get health() {
@@ -209,6 +211,8 @@ class charController extends GameObject {
   }
 
   releaseKiAttack() {
+
+  
     // Calculate direction vector
     let targetPlayer = (this === player1.char) ? player2.char : player1.char;
     //console.log(targetPlayer);
@@ -223,7 +227,7 @@ class charController extends GameObject {
     let offsetX = dx * offset;
     let offsetY = dy * offset;
   
-    this.projectiles.push(new Projectile(
+    let p = new Projectile(
       this.x + offsetX,
       this.y + offsetY,
       this.currentAttackPower, // Size of the projectile based on attack power
@@ -231,8 +235,12 @@ class charController extends GameObject {
       dx,
       dy,
       5, // Speed of the projectile
-      this.currentAttackPower // Damage of the projectile based on attack power
-    ));
+      this.currentAttackPower, // Damage of the projectile based on attack power,
+      
+      {startX:this.x,startY:this.y}
+    )
+    this.projectiles.push(p);
+
   
     this.currentAttackPower = 0;
   }

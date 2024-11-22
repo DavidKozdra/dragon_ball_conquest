@@ -98,16 +98,13 @@ class AI extends Playing_Agent {
     }
   }
 
-  pickRandomItem(){
-
-  }
 
   handleIdleState(distanceToPlayer1, distanceToProjectile) {
     if (distanceToProjectile < 50) {
       this.state = AIState.AVOIDING;
     } else if (distanceToPlayer1 < 20) {
       this.state = AIState.MELEE;
-    } else if (this.char.ki < 150) {
+    } else if (this.char.ki < 150 && this.char.ki != this.char.maxKi) {
       this.state = AIState.CHARGING;
     } else if (this.char.ki > 300 || this.attackPower > 0) {
       this.state = AIState.ATTACKING;
@@ -116,7 +113,8 @@ class AI extends Playing_Agent {
     } else if (distanceToPlayer1 > 100 && this.dashTimer === 0) {
       this.state = AIState.DASHING;
     }else {
-      console.error(">>>>S")
+
+      this.handleRetreatingState();
     }
 
     console.log("new state", this.state)
