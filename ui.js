@@ -6,37 +6,42 @@ import {startGame} from "./game.js"
 
 function initUI(uiManager,gameStateManager, GameStates){
 
-
-// ==================== MAIN MENU ====================
 uiManager.registerScreen("mainMenu", {
   validStates: [GameStates.MAIN_MENU],
 
   create: () => {
-    const parent = createDiv().id("mainMenu").class("screen");
+    const parent = createDiv().id("mainMenu").class("screen fixed inset-0 flex flex-col items-center justify-center min-h-screen space-y-6");
 
     createImg("./images/logo.png", "Game Logo")
-      .style("margin-bottom", "20px")
+      .addClass("w-64 h-32 object-contain mb-4")
       .parent(parent);
 
-    createElement("h1", "Dragon Ball Conquest").parent(parent).addClass("main-title");
+    createElement("h1", "Dragon Ball Conquest")
+      .parent(parent)
+      .addClass("main-title text-6xl font-bold text-yellow-400 mb-8 text-center");
+
+    // Button container for proper spacing
+    const buttonContainer = createDiv()
+      .addClass("flex flex-col space-y-4 items-center w-full max-w-xs")
+      .parent(parent);
 
     createButton("Start Game")
-      .parent(parent)
-      .addClass("menu-btn")
+      .parent(buttonContainer)
+      .addClass("menu-btn w-full py-3 px-6 text-xl font-semibold bg-orange-600 hover:bg-orange-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         gameStateManager.setState(GameStates.CHAR_SELECT);
       });
 
     createButton("Settings")
-      .parent(parent)
-      .addClass("menu-btn")
+      .parent(buttonContainer)
+      .addClass("menu-btn w-full py-3 px-6 text-xl font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         gameStateManager.setState(GameStates.SETTINGS);
       });
 
     createButton("Quit Game")
-      .parent(parent)
-      .addClass("menu-btn")
+      .parent(buttonContainer)
+      .addClass("menu-btn w-full py-3 px-6 text-xl font-semibold bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         window.close(); // Or a custom quit handler
       });
@@ -47,8 +52,7 @@ uiManager.registerScreen("mainMenu", {
   show: () => {
     const m = select("#mainMenu");
     if (m) m.show().style("opacity", "1");
-
-    console.log("main menu ?!?!")
+    console.log("main menu loaded");
   },
 
   hide: () => {
@@ -60,33 +64,46 @@ uiManager.registerScreen("mainMenu", {
   }
 });
 
-
 // ==================== PAUSE MENU ====================
 uiManager.registerScreen("pauseMenu", {
   validStates: [GameStates.PAUSED],
 
   create: () => {
-    const wrapper = createDiv().id("pauseMenu").class("screen");
+    const wrapper = createDiv()
+      .id("pauseMenu")
+      .class("screen fixed inset-0 flex flex-col items-center justify-center min-h-screen space-y-8 bg-black bg-opacity-75");
 
-    createElement("h2", "Game Paused").parent(wrapper);
+    // Semi-transparent overlay background
+    const menuCard = createDiv()
+      .addClass("bg-gray-800 rounded-xl p-8 shadow-2xl border border-gray-600 max-w-md w-full mx-4")
+      .parent(wrapper);
+
+    createElement("h2", "Game Paused")
+      .parent(menuCard)
+      .addClass("text-4xl font-bold text-white text-center mb-8");
+
+    // Button container for proper spacing
+    const buttonContainer = createDiv()
+      .addClass("flex flex-col space-y-4 w-full")
+      .parent(menuCard);
 
     createButton("Resume")
-      .parent(wrapper)
-      .addClass("pause-btn")
+      .parent(buttonContainer)
+      .addClass("pause-btn w-full py-3 px-6 text-lg font-semibold bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         gameStateManager.setState(GameStates.PLAYING);
       });
 
     createButton("Settings")
-      .parent(wrapper)
-      .addClass("pause-btn")
+      .parent(buttonContainer)
+      .addClass("pause-btn w-full py-3 px-6 text-lg font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         gameStateManager.setState(GameStates.SETTINGS);
       });
 
     createButton("Quit to Main Menu")
-      .parent(wrapper)
-      .addClass("pause-btn")
+      .parent(buttonContainer)
+      .addClass("pause-btn w-full py-3 px-6 text-lg font-semibold bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors duration-200")
       .mousePressed(() => {
         gameStateManager.setState(GameStates.MAIN_MENU);
       });
@@ -107,8 +124,6 @@ uiManager.registerScreen("pauseMenu", {
     }
   }
 });
-
-
 // ==================== SETTINGS MENU ====================
 uiManager.registerScreen("settingsMenu", {
   validStates: [GameStates.SETTINGS],

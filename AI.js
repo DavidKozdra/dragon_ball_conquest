@@ -1,4 +1,3 @@
-
 import {  player1, player2 } from './game.js';
 import { Playing_Agent } from './Playing_Agent.js';
 import { Projectile } from './Projectile.js';
@@ -12,6 +11,8 @@ const AIState = {
   FLYING: 'flying',
   AVOIDING: 'avoiding',
   DASHING: 'dashing',
+  CIRCLING: 'circling',
+  AGGRESSIVE: 'aggressive',
 };
 
 class AI extends Playing_Agent {
@@ -21,52 +22,184 @@ class AI extends Playing_Agent {
     this.state = AIState.IDLE;
     this.dashTimer = 0;
     this.attackPower = 0;
-    this.inactivityThreshold = 2000; // 2 seconds
+    this.inactivityThreshold = 800; // Reduced from 2000 to 800ms for faster reactions
     this.enemy = (player1 == this) ? player2 : player1;
     this.lastPlayerPosition = { x: 0, y: 0 };
     this.lastMoveTime = Date.now();
-    this.lastAttackTime = 0; // Initialize lastAttackTime
+    this.lastAttackTime = 0;
+    this.lastStateChange = Date.now();
+    this.stateChangeDelay = this.randomBetween(200, 600); // Random delay between state changes
+    this.aggressiveness = Math.random(); // 0-1, affects behavior choices
+    this.currentStrategy = this.pickRandomStrategy();
+    this.strategyTimer = 0;
+    this.circlingDirection = Math.random() > 0.5 ? 1 : -1;
+    this.chargeBuildup = 0;
+    this.feintChance = 0.15; // 15% chance to feint attacks
   }
 
   update() {
-
-
     super.update();
     if(this.enemy == null){
       if(player1 == this && player2 != null){
-        console.error("AI: player1 is null, setting player2 as enemy");
         this.enemy = player2;
       }
-      console.error("Enemy NULLL >????: AI.js");
-      return
+      return;
     }
 
     this.updatePlayerPosition();
-    const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
+    this.updateTimers();
+    
+    const distanceToPlayer = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
     const distanceToProjectile = nearestProjectile ? this.dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) : Infinity;
     const currentTime = Date.now();
 
-    this.updateDashTimer();
+    // Add some randomization to decision making
+    const shouldMakeDecision = currentTime - this.lastStateChange > this.stateChangeDelay || 
+                               this.isInDanger(distanceToProjectile, distanceToPlayer);
 
-    if (currentTime - this.lastMoveTime > this.inactivityThreshold) {
-        console.log("Just standing")
+    if (!shouldMakeDecision && this.state !== AIState.AVOIDING) {
+      this.executeCurrentState(distanceToPlayer, distanceToProjectile, nearestProjectile);
+      return;
     }
-    //console.log(this.state)
+
+    // Make decisions faster with more randomization
+    this.makeStrategicDecision(distanceToPlayer, distanceToProjectile, nearestProjectile);
+    this.executeCurrentState(distanceToPlayer, distanceToProjectile, nearestProjectile);
+  }
+
+  updateTimers() {
+    this.updateDashTimer();
+    this.strategyTimer--;
     
+    // Change strategy periodically for unpredictability
+    if (this.strategyTimer <= 0) {
+      this.currentStrategy = this.pickRandomStrategy();
+      this.strategyTimer = this.randomBetween(300, 800);
+    }
+  }
+
+  isInDanger(distanceToProjectile, distanceToPlayer) {
+    return distanceToProjectile < 60 || 
+           (distanceToPlayer < 15 && this.enemy.char.isAttacking) ||
+           this.char.health < this.char.maxHealth * 0.2;
+  }
+
+  makeStrategicDecision(distanceToPlayer, distanceToProjectile, nearestProjectile) {
+    const currentTime = Date.now();
+    const healthRatio = this.char.health / this.char.maxHealth;
+    const kiRatio = this.char.ki / this.char.maxKi;
+    
+    // Emergency responses (highest priority)
+    if (distanceToProjectile < 50) {
+      this.changeState(AIState.AVOIDING);
+      return;
+    }
+    
+    if (healthRatio < 0.25 && Math.random() > 0.3) {
+      this.changeState(AIState.RETREATING);
+      return;
+    }
+
+    // Strategic decisions based on current strategy and randomization
+    switch (this.currentStrategy) {
+      case 'aggressive':
+        this.handleAggressiveStrategy(distanceToPlayer, kiRatio);
+        break;
+      case 'defensive':
+        this.handleDefensiveStrategy(distanceToPlayer, healthRatio, kiRatio);
+        break;
+      case 'balanced':
+        this.handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio);
+        break;
+      case 'unpredictable':
+        this.handleUnpredictableStrategy(distanceToPlayer);
+        break;
+    }
+  }
+
+  handleAggressiveStrategy(distanceToPlayer, kiRatio) {
+    const rand = Math.random();
+    
+    if (distanceToPlayer < 25) {
+      if (rand < 0.7) {
+        this.changeState(AIState.MELEE);
+      } else {
+        this.changeState(AIState.DASHING);
+      }
+    } else if (kiRatio > 0.4 && rand < 0.6) {
+      this.changeState(AIState.ATTACKING);
+    } else if (distanceToPlayer > 80 && this.dashTimer === 0 && rand < 0.5) {
+      this.changeState(AIState.DASHING);
+    } else if (rand < 0.3) {
+      this.changeState(AIState.CIRCLING);
+    } else {
+      this.changeState(AIState.CHARGING);
+    }
+  }
+
+  handleDefensiveStrategy(distanceToPlayer, healthRatio, kiRatio) {
+    const rand = Math.random();
+    
+    if (healthRatio < 0.5 && rand < 0.4) {
+      this.changeState(AIState.RETREATING);
+    } else if (kiRatio < 0.3) {
+      this.changeState(AIState.CHARGING);
+    } else if (distanceToPlayer > 60 && kiRatio > 0.5 && rand < 0.6) {
+      this.changeState(AIState.ATTACKING);
+    } else if (distanceToPlayer < 30 && rand < 0.3) {
+      this.changeState(AIState.MELEE);
+    } else {
+      this.changeState(AIState.CIRCLING);
+    }
+  }
+
+  handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio) {
+    const rand = Math.random();
+    
+    if (distanceToPlayer < 20 && rand < 0.5) {
+      this.changeState(AIState.MELEE);
+    } else if (kiRatio < 0.2) {
+      this.changeState(AIState.CHARGING);
+    } else if (kiRatio > 0.6 && distanceToPlayer > 40 && rand < 0.5) {
+      this.changeState(AIState.ATTACKING);
+    } else if (distanceToPlayer > 100 && this.dashTimer === 0 && rand < 0.3) {
+      this.changeState(AIState.DASHING);
+    } else if (rand < 0.4) {
+      this.changeState(AIState.CIRCLING);
+    } else {
+      this.changeState(AIState.IDLE);
+    }
+  }
+
+  handleUnpredictableStrategy(distanceToPlayer) {
+    const rand = Math.random();
+    const states = [AIState.ATTACKING, AIState.MELEE, AIState.CIRCLING, AIState.DASHING, AIState.CHARGING];
+    
+    if (rand < 0.8) {
+      const randomState = states[Math.floor(Math.random() * states.length)];
+      this.changeState(randomState);
+    } else {
+      // Feint - start charging then immediately switch
+      if (this.state === AIState.CHARGING && rand < this.feintChance) {
+        this.changeState(distanceToPlayer < 30 ? AIState.MELEE : AIState.DASHING);
+      }
+    }
+  }
+
+  executeCurrentState(distanceToPlayer, distanceToProjectile, nearestProjectile) {
     switch (this.state) {
       case AIState.IDLE:
-        this.handleIdleState(distanceToPlayer1, distanceToProjectile);
-        
+        this.handleIdleState();
         break;
       case AIState.CHARGING:
         this.handleChargingState();
         break;
       case AIState.ATTACKING:
-        this.handleAttackingState(distanceToPlayer1);
+        this.handleAttackingState(distanceToPlayer);
         break;
       case AIState.MELEE:
-        this.handleMeleeState(distanceToPlayer1);
+        this.handleMeleeState(distanceToPlayer);
         break;
       case AIState.RETREATING:
         this.handleRetreatingState();
@@ -80,10 +213,171 @@ class AI extends Playing_Agent {
       case AIState.DASHING:
         this.handleDashingState();
         break;
+      case AIState.CIRCLING:
+        this.handleCirclingState(distanceToPlayer);
+        break;
       default:
-        this.state = AIState.IDLE;
+        this.changeState(AIState.IDLE);
         break;
     }
+  }
+
+  changeState(newState) {
+    if (this.state !== newState) {
+      this.state = newState;
+      this.lastStateChange = Date.now();
+      this.stateChangeDelay = this.randomBetween(150, 500); // Faster state changes
+    }
+  }
+
+  handleIdleState() {
+    // Add small random movements to look more natural
+    if (Math.random() < 0.1) {
+      const direction = Math.random() > 0.5 ? 'right' : 'left';
+      this.char.applyMovement(direction, 1);
+    }
+  }
+
+  handleChargingState() {
+    const currentTime = Date.now();
+    const chargeTime = this.randomBetween(300, 1200); // Variable charge time
+    
+    this.chargeBuildup++;
+    
+    if (this.char.ki >= 150 || this.chargeBuildup > chargeTime / 10) {
+      // Randomly decide to attack or keep charging
+      if (Math.random() < 0.7) {
+        this.changeState(AIState.ATTACKING);
+      }
+    } else {
+      this.char.ki += this.randomBetween(1, 3); // Variable ki gain
+    }
+  }
+
+  handleAttackingState(distanceToPlayer) {
+    const rand = Math.random();
+    
+    // Add movement while attacking for dynamic combat
+    if (rand < 0.3) {
+      const direction = this.char.x < this.enemy.char.x ? 'right' : 'left';
+      this.char.applyMovement(direction, 2);
+    }
+    
+    if (distanceToPlayer < 25 && rand < 0.4) {
+      this.changeState(AIState.MELEE);
+    } else if (this.char.ki > 50 && rand < 0.6) {
+      this.char.applyAttacking();
+      this.attackPower += this.randomBetween(1, 3);
+      
+      // Randomly release attack early or late
+      if (this.attackPower > this.randomBetween(20, 80)) {
+        this.releaseKiAttack();
+      }
+    } else {
+      this.changeState(AIState.IDLE);
+    }
+  }
+
+  handleMeleeState(distanceToPlayer) {
+    if (distanceToPlayer >= 30) {
+      this.changeState(AIState.DASHING);
+    } else {
+      this.char.applyMelee();
+      
+      // Add random dodging during melee
+      if (Math.random() < 0.2) {
+        const direction = Math.random() > 0.5 ? 'right' : 'left';
+        this.char.applyMovement(direction, 3);
+      }
+    }
+  }
+
+  handleCirclingState(distanceToPlayer) {
+    const optimalDistance = this.randomBetween(40, 70);
+    
+    // Circle around the enemy
+    const angle = Math.atan2(this.enemy.char.y - this.char.y, this.enemy.char.x - this.char.x);
+    const circleAngle = angle + (this.circlingDirection * 0.5);
+    
+    const moveX = Math.cos(circleAngle) * 3;
+    const moveY = Math.sin(circleAngle) * 3;
+    
+    this.char.applyMovement('left', moveX);
+    this.char.applyMovement('up', moveY);
+    
+    // Randomly change circling direction
+    if (Math.random() < 0.05) {
+      this.circlingDirection *= -1;
+    }
+    
+    // Attack while circling sometimes
+    if (Math.random() < 0.1 && this.char.ki > 100) {
+      this.changeState(AIState.ATTACKING);
+    }
+  }
+
+  handleRetreatingState() {
+    if (this.char.health >= this.char.maxHealth * 0.4) {
+      this.changeState(AIState.CIRCLING);
+    } else {
+      // Enhanced retreat logic with prediction
+      const dx = this.char.x - this.enemy.char.x;
+      const dy = this.char.y - this.enemy.char.y;
+      const angle = Math.atan2(dy, dx);
+      
+      // Predict enemy movement
+      const playerVelocityX = this.enemy.char.velocityX || 0;
+      const playerVelocityY = this.enemy.char.velocityY || 0;
+      
+      const moveX = Math.cos(angle) + (playerVelocityX > 0 ? 1 : -1) * 0.5;
+      const moveY = Math.sin(angle) + (playerVelocityY > 0 ? 1 : -1) * 0.5;
+      const speed = this.randomBetween(4, 7);
+
+      this.char.applyMovement('left', moveX * speed);
+      this.char.applyMovement('up', moveY * speed);
+      
+      // Jump or fly randomly while retreating
+      if (Math.random() < 0.3) {
+        if (this.char.isOnGround) {
+          this.char.startJump();
+        } else if (Math.random() < 0.5) {
+          this.char.toggleFlying();
+        }
+      }
+    }
+  }
+
+  handleFlyingState() {
+    if (this.char.health >= this.char.maxHealth * 0.4) {
+      this.changeState(AIState.CIRCLING);
+    } else {
+      this.char.applyMovement('up', this.randomBetween(3, 6));
+    }
+  }
+
+  handleAvoidingState(nearestProjectile) {
+    if (!nearestProjectile || this.dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) >= 80) {
+      this.changeState(AIState.CIRCLING);
+    } else {
+      this.moveAwayFromProjectile(nearestProjectile);
+    }
+  }
+
+  handleDashingState() {
+    const rand = Math.random();
+    let direction;
+    
+    // More intelligent dashing
+    if (rand < 0.7) {
+      direction = this.char.x < this.enemy.char.x ? 'right' : 'left';
+    } else {
+      // Sometimes dash in unexpected direction
+      direction = Math.random() > 0.5 ? 'right' : 'left';
+    }
+    
+    this.char.dash(direction);
+    this.dashTimer = this.randomBetween(60, 120);
+    this.changeState(AIState.IDLE);
   }
 
   updatePlayerPosition() {
@@ -92,110 +386,6 @@ class AI extends Playing_Agent {
       this.lastPlayerPosition = { x: this.enemy.char.x, y: this.enemy.char.y };
       this.lastMoveTime = currentTime;
     }
-  }
-
-  pickRandomItem(){
-
-  }
-
-  handleIdleState(distanceToPlayer1, distanceToProjectile) {
-    if (distanceToProjectile < 50) {
-      this.state = AIState.AVOIDING;
-    } else if (distanceToPlayer1 < 20) {
-      this.state = AIState.MELEE;
-    } else if (this.char.ki < 150) {
-      this.state = AIState.CHARGING;
-    } else if (this.char.ki > 300 || this.attackPower > 0) {
-      this.state = AIState.ATTACKING;
-    } else if (this.char.health <= this.char.maxHealth / 4) {
-      this.state = AIState.RETREATING;
-    } else if (distanceToPlayer1 > 100 && this.dashTimer === 0) {
-      this.state = AIState.DASHING;
-    }else {
-      console.error(">>>>S")
-      this.state= AIState.IDLE
-    }
-
-  }
-
-  handleChargingState() {
-    const currentTime = Date.now();
-    const delay = Math.random() * (2000 - 500) + 500; // Generate a random delay between 500 and 2000 milliseconds
-    if (this.char.ki >= 150 && currentTime - this.lastMoveTime <= this.inactivityThreshold) {
-      this.state = AIState.IDLE;
-
-    } else if (this.char.ki >= 100 && currentTime - this.lastAttackTime > delay) {
-      this.char.applyAttacking(); // Charge the attack
-
-      if (this.char.currentAttackPower >= 100) { // Adjust the threshold as needed
-        this.releaseKiAttack();
-      }
-    } else {
-      this.char.ki ++;
-    }
-  }
-
-  handleAttackingState(distanceToPlayer1) {
-    if (distanceToPlayer1 < 20) {
-      this.state = AIState.MELEE;
-    } else if (this.char.ki <= 0 && this.attackPower > 20) {
-      this.releaseKiAttack();
-    } else if (this.char.ki > 0 && distanceToPlayer1 > 150) {
-      this.char.applyAttacking();
-      this.attackPower += 1;
-    } else {
-      this.state = AIState.IDLE;
-    }
-  }
-
-  handleMeleeState(distanceToPlayer1) {
-    if (distanceToPlayer1 >= 20) {
-      this.state = AIState.IDLE;
-    } else {
-      this.char.applyMelee();
-    }
-  }
-
-  handleRetreatingState() {
-    if (this.char.health >= this.char.maxHealth / 2) {
-      this.state = AIState.IDLE;
-    } else {
-      // Move dynamically away from the player based on player's velocity
-      const dx = this.char.x - this.enemy.char.x;
-      const dy = this.char.y - this.enemy.char.y;
-      const angle = Math.atan2(dy, dx);
-      const playerVelocityX = this.enemy.char.velocityX;
-      const playerVelocityY = this.enemy.char.velocityY;
-      const moveX = Math.cos(angle) + (playerVelocityX > 0 ? 1 : -1);
-      const moveY = Math.sin(angle) + (playerVelocityY > 0 ? 1 : -1);
-      const speed = 5;
-  
-      this.char.applyMovement('left', moveX * speed);
-      this.char.applyMovement('up', moveY * speed);
-    }
-  }
-
-  handleFlyingState() {
-    if (this.char.health >= this.char.maxHealth / 2) {
-      this.state = AIState.IDLE;
-    } else {
-      this.char.applyMovement('up');
-    }
-  }
-
-  handleAvoidingState(nearestProjectile) {
-    if (!nearestProjectile || this.dist(this.char.x, this.char.y, nearestProjectile.x, nearestProjectile.y) >= 100) {
-      this.state = AIState.IDLE;
-    } else {
-      this.moveAwayFromProjectile(nearestProjectile);
-    }
-  }
-
-  handleDashingState() {
-    const direction = this.char.x < this.enemy.char.x ? 'right' : 'left';
-    this.char.dash(direction);
-    this.dashTimer = 100; // Set a cooldown for dashing to prevent constant dashing
-    this.state = AIState.IDLE;
   }
 
   updateDashTimer() {
@@ -223,19 +413,34 @@ class AI extends Playing_Agent {
     const dx = this.char.x - projectile.x;
     const dy = this.char.y - projectile.y;
     const angle = Math.atan2(dy, dx);
-    const moveX = Math.cos(angle);
-    const moveY = Math.sin(angle);
+    
+    // Add randomness to avoidance
+    const randomOffset = (Math.random() - 0.5) * 0.5;
+    const moveX = Math.cos(angle + randomOffset);
+    const moveY = Math.sin(angle + randomOffset);
 
-    const speed = 5;
+    const speed = this.randomBetween(6, 9);
 
     this.char.applyMovement('left', moveX * speed);
     this.char.applyMovement('up', moveY * speed);
 
-    if (this.char.isOnGround) {
-      this.char.startJump();
-    } else {
-      this.char.toggleFlying();
+    // More varied evasion techniques
+    if (Math.random() < 0.4) {
+      if (this.char.isOnGround) {
+        this.char.startJump();
+      } else if (Math.random() < 0.6) {
+        this.char.toggleFlying();
+      }
     }
+  }
+
+  pickRandomStrategy() {
+    const strategies = ['aggressive', 'defensive', 'balanced', 'unpredictable'];
+    return strategies[Math.floor(Math.random() * strategies.length)];
+  }
+
+  randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   dist(x1, y1, x2, y2) {
@@ -244,38 +449,50 @@ class AI extends Playing_Agent {
 
   releaseKiAttack() {
     const currentTime = Date.now();
-    const timeHeld = currentTime - this.lastAttackTime;
+    const timeHeld = Math.max(currentTime - this.lastAttackTime, 200);
   
-    // Adjust the size modifier to ensure projectiles are not too large
-    let sizeMod = timeHeld / 200; // Divide by a larger number to reduce the effect
-    sizeMod = Math.min(sizeMod, 50);
-    // Calculate direction vector
+    let sizeMod = timeHeld / 300;
+    sizeMod = Math.min(sizeMod, 40);
+    
+    // Add accuracy variation
     let targetPlayer = this.char === player1.char ? player2.char : player1.char;
     let dx = targetPlayer.x - this.char.x;
     let dy = targetPlayer.y - this.char.y;
     let magnitude = Math.sqrt(dx * dx + dy * dy);
+    
+    // Predict target movement for better accuracy
+    const predictionFactor = 0.1;
+    dx += (targetPlayer.velocityX || 0) * predictionFactor;
+    dy += (targetPlayer.velocityY || 0) * predictionFactor;
+    
+    magnitude = Math.sqrt(dx * dx + dy * dy);
     dx /= magnitude;
     dy /= magnitude;
+    
+    // Add slight inaccuracy for realism
+    const inaccuracy = (Math.random() - 0.5) * 0.2;
+    dx += inaccuracy;
+    dy += inaccuracy;
   
-    // Increase offset distance to ensure the projectile does not spawn near the AI
-    let offset = (this.char.width / 2) + (this.attackPower / 2) + 20; // Increase the buffer distance
+    let offset = (this.char.width / 2) + (this.attackPower / 2) + 25;
     let offsetX = dx * offset;
     let offsetY = dy * offset;
   
     this.char.projectiles.push(new Projectile(
       this.char.x + offsetX,
       this.char.y + offsetY,
-      this.attackPower + sizeMod, // Size of the projectile based on attack power and time held
+      this.attackPower + sizeMod,
       this.char.spirit,
       dx,
       dy,
-      5, // Speed of the projectile
-      this.attackPower + sizeMod // Damage of the projectile based on attack power and time held
+      this.randomBetween(4, 7), // Variable projectile speed
+      this.attackPower + sizeMod
     ));
   
     this.attackPower = 0;
-    this.state = AIState.IDLE;
-    this.lastAttackTime = currentTime; // Set the last attack time here
+    this.chargeBuildup = 0;
+    this.changeState(AIState.IDLE);
+    this.lastAttackTime = currentTime;
   }
 }
 
