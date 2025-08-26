@@ -1,100 +1,190 @@
-/* Include the pixel font */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* Import a modern, clean font like 'Inter' */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+/* Basic setup for a modern, full-screen look */
 html, body {
-  margin-top: 40px;
+  margin: 0;
   padding: 0;
-  font-family: 'Press Start 2P', sans-serif !important; /* Set the pixel font */
-} 
-
-canvas {
-  display: block;
-  margin: 0 auto; /* Center the canvas */
-}
-
-.char-button {
-  margin: 10px;
-  padding: 5px 10px;
-  background-color: #444;
-  border: 2px solid #888;
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.char-button:hover {
-  background-color: #555;
-}
-
-.game-button {
-  margin: 5px;
-  padding: 10px 20px;
-  background-color: #444;
-  border: 2px solid #888;
-  color: #fff;
-  cursor: pointer;
-  position: absolute;
-  font-size: 14px;
-  text-transform: uppercase;
-}
-
-.game-button:hover {
-  background-color: #555;
-}
-
-.charSelectDiv {
+  background-color: #1a1a2e; /* Deep purple/blue background */
+  color: #e0e0e0; /* Light gray text for contrast */
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 150px;
-  background-color: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  padding: 10px;
-  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Prevent scrolling */
 }
 
-.player-div {
+/* Style for the main container that holds both the canvas and UI */
+.game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px;
-  background-color: #222;
-  border: 2px solid #555;
-  border-radius: 10px;
-  position: absolute;
-  color: #fff;
+  gap: 20px; /* Space between the canvas and buttons */
 }
 
-.teamGrid {
+/* Style the canvas with modern aesthetics */
+canvas {
+  display: block;
+  background-color: #2c2b3e; /* A slightly lighter background for the game area */
+  border-radius: 16px; /* Rounded corners for the canvas */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* Soft shadow for depth */
+}
+
+/* Global styles for all screen containers */
+.screen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none; /* Hidden by default */
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(44, 43, 62, 0.9);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s ease-in-out;
+  z-index: 10;
+}
+
+/* Titles and headings */
+.main-title {
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #bac8e0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+h2 {
+  font-size: 2em;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #e0e0e0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* General button styles with gradients and subtle effects */
+.menu-btn, .pause-btn, .settings-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-image: linear-gradient(135deg, #6a85b6 0%, #bac8e0 100%);
+  box-shadow: 0 4px 15px rgba(106, 133, 182, 0.4);
+  transition: all 0.3s ease;
+  margin: 10px;
+}
+
+.menu-btn:hover, .pause-btn:hover, .settings-btn:hover {
+  background-image: linear-gradient(135deg, #bac8e0 0%, #6a85b6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(106, 133, 182, 0.6);
+}
+
+.menu-btn:active, .pause-btn:active, .settings-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(106, 133, 182, 0.3);
+}
+
+/* Specific button styles */
+.danger-btn {
+  background-color: #e74c3c;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+.danger-btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(192, 57, 43, 0.6);
+}
+
+/* Sliders and form elements */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 200px;
+  height: 8px;
+  background: #4a4964;
+  border-radius: 5px;
+  outline: none;
+  transition: opacity .2s;
+  margin: 10px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #bac8e0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Character Selection Screen layout */
+#charSelectMenu {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  font-size: .5em;
-  background-color: #111;
-  min-width: 8dvw;
+  grid-template-areas:
+    "title title"
+    "p1-team p2-team"
+    "p1-toggle p2-toggle"
+    "available available"
+    "nav-btns nav-btns";
+  gap: 20px;
+  padding: 30px;
+  background-color: rgba(44, 43, 62, 0.9);
+  width: 90%;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+#charSelectMenu h2 { grid-area: title; }
+#player1Team { grid-area: p1-team; }
+#player2Team { grid-area: p2-team; }
+#p1Toggle { grid-area: p1-toggle; }
+#p2Toggle { grid-area: p2-toggle; }
+#availableChars { grid-area: available; }
+#charSelectMenu .menu-btn:last-of-type { grid-area: nav-btns; }
+
+/* Team grid and character display */
+.teamGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #2c2b3e;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .char-display {
   padding: 10px;
+  background-color: #3e3d54;
+  border-radius: 8px;
   color: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-
-button {
-  border-radius: 50%;
-  min-width: 100px;
-}
-
-h3 {
-  color: #fff;
-  font-size: .8em;
-}
-
-#instructions h3 {
-  color: #007BFF;
-  font-size: .8em;
+.char-display:hover {
+  background-color: #52516a;
+  transform: translateY(-2px);
 }

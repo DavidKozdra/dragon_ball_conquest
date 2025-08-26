@@ -5,8 +5,29 @@ import { AI } from './AI.js';
 import { Fist } from './fist.js';
 import { characters } from './characters.js';
 import { add } from './utils.js';
-import { UpdateUI, RenderMainMenu, RenderCharacterSelector, positionButtons, menus, currentMenu, selectedCharacters, onWindowResize, initializeButtons } from './ui.js';
 import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
+
+import {GameStateManager} from "./gameState.js"
+
+import {UIManager} from "./UI_Manager.js"
+import {initUI} from "./ui.js"
+
+const GameStates = {
+  MAIN_MENU: "mainMenu",
+  PLAYING: "playing",
+  INVENTORY: "inventory",
+  VIEW_EDIT: "viewEdit",
+  PAUSED: "paused",
+  SETTINGS: "settings",
+  GAMELOSE : "lose",
+  GAMEWON:"won",
+  CHAR_SELECT:"char_select"
+};
+
+let gameStateManager = new GameStateManager();
+let uiManager = new UIManager();
+
+var notificationManager;
 
 let delta = 1;
 let canvasWidth = 400;
@@ -17,6 +38,36 @@ let gameState = 'main_menu';
 let winner = '';
 
 let player1, player2;
+
+
+function setup() {
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  canvas.id('game-canvas');
+
+
+  gameStateManager.addState(GameStates.MAIN_MENU, {});
+  gameStateManager.addState(GameStates.SETTINGS, {});
+  gameStateManager.addState(GameStates.PLAYING, {});
+  gameStateManager.addState(GameStates.INVENTORY, {});
+  gameStateManager.addState(GameStates.PAUSED, {});
+  gameStateManager.addState(GameStates.VIEW_EDIT, {});
+
+  gameStateManager.addState(GameStates.GAMELOSE, {});
+
+  gameStateManager.addState(GameStates.GAMEWON, {});
+
+  gameStateManager.addState(GameStates.CHAR_SELECT, {});
+  initUI(uiManager, gameStateManager,GameStates)
+  gameStateManager.onChange((from, to) => uiManager.onGameStateChange(to));
+  gameStateManager.setState(GameStates.MAIN_MENU);
+
+  setInterval(() => {
+    if (timer > 0 && gameStateManager.is(GameStates.PLAYING)) timer--;
+  }, 1000);
+
+  SetUpClusters();
+}
+
 
 function setGameState(state) {
   gameState = state;
@@ -31,7 +82,7 @@ function setWinner(player) {
 }
 
 function startGame() {
-  gameState = 'playing';
+
   SetUpClusters()
 
   timer = timerOValue;
@@ -60,19 +111,9 @@ function startGame() {
 
   console.log("Player1:", player1);
   console.log("Player2:", player2);
-}
 
-function setup() {
-  const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.id('game-canvas');
-  window.addEventListener('resize', onWindowResize);
+    gameStateManager.setState(GameStates.PLAYING);
 
-  setInterval(() => {
-    if (timer > 0 && gameState === 'playing') timer--;
-  }, 1000);
-
-  initializeButtons();  
-  SetUpClusters();
 }
 
 function resetGame() {
@@ -96,7 +137,9 @@ function checkCollisions() {
 }
 
 function draw() {
-  UpdateUI();
+
+
+  uiManager.updateAll();
   if (timer === 0) {
     setGameState('gameOver');
     winner = () => {
@@ -109,25 +152,7 @@ function draw() {
     setWinner(winner() ? 'Player 1' : 'Player 2');
   }
 
-  if (gameState === 'paused') {
-    fill(255);
-    textSize(32);
-    stroke(10);
-    textAlign(CENTER, CENTER);
-    text(`Paused!`, canvasWidth / 2, canvasHeight / 2);
-    positionButtons();
-    return;
-  }
-
-  if (gameState === 'main_menu') {
-    RenderMainMenu();
-    return;
-  } else if (gameState === 'char_select') {
-    RenderCharacterSelector();
-    return;
-  } 
-
-  if (gameState === 'playing') {
+  if (gameStateManager.is(GameStates.PLAYING)) {
     background(10, 100, 220); // This sets the background color each frame
 
     drawClouds();
@@ -210,7 +235,7 @@ function draw() {
     checkCollisions();
   }
 
-  if (gameState === 'gameOver') {
+  if (gameStateManager.is(GameStates.GAMELOSE)) {
     fill(255);
     textSize(32);
     textAlign(CENTER, CENTER);
@@ -227,7 +252,7 @@ function draw() {
   }
 
   // Handle continuous movement
-  if (gameState === 'playing') {
+  if (gameStateManager.is(GameStates.PLAYING)) {
     if (player1.char.isControllable) {
       if (keyIsDown(player1.moveKeys.left)) player1.char.applyMovement('left');
       if (keyIsDown(player1.moveKeys.right)) player1.char.applyMovement('right');
@@ -252,15 +277,15 @@ function draw() {
 
 function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
-    if (gameState === 'paused') {
-      gameState = 'playing';
-    } else if (gameState === 'playing') {
-      gameState = 'paused';
+    if (gameStateManager.is(GameStates.PAUSED)) {
+  gameStateManager.setState(GameStates.PLAYING)
+    } else if (gameStateManager.is(GameStates.PLAYING)) {
+  gameStateManager.setState(GameStates.PAUSED)
     }
   }
-  if (gameState === 'paused') return; // Skip updates if game is paused
+  if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
 
-  if (gameState === 'main_menu') {
+  if (gameStateManager.is(GameStates.MAIN_MENU)) {
     if (keyCode === RIGHT_ARROW) {
       currentMenu = (currentMenu + 1) % menus.length;
       RenderMainMenu();
@@ -271,9 +296,9 @@ function keyPressed() {
       menus[currentMenu].onselect();
     }
     return;
-  } else if (gameState === 'char_select') {
+  } else if (gameStateManager.is(GameStates.CHAR_SELECT)) {
     return;
-  } else if (gameState === 'playing') {
+  } else if (gameStateManager.is(GameStates.PLAYING)) {
     if (player1.char.isControllable) {
       player1.handleKeyDown(keyCode);
       player1.handleKeyPress(keyCode);
@@ -287,9 +312,9 @@ function keyPressed() {
 }
 
 function keyReleased() {
-  if (gameState === 'paused') return; // Skip updates if game is paused
+  if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
 
-  if (gameState === 'main_menu' || gameState === "char_select") return;
+  if (gameStateManager.is(GameStates.MAIN_MENU) || gameStateManager.is(GameStates.CHAR_SELECT)) return;
 
 
   if (player1.char.isControllable) {
@@ -304,7 +329,7 @@ function keyReleased() {
     }
   }
 
-  if (gameState === 'playing') {
+  if (gameStateManager.is(GameStates.PLAYING)) {
     if (player1.char.isControllable) {
       player1.handleKeyUp(keyCode);
     }
@@ -316,4 +341,8 @@ function keyReleased() {
   }
 }
 
+
 export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, getGameState, setWinner, startGame };
+
+
+
