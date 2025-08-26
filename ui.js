@@ -11,10 +11,14 @@ uiManager.registerScreen("mainMenu", {
 
   create: () => {
     const parent = createDiv().id("mainMenu").class("screen fixed inset-0 flex flex-col items-center justify-center min-h-screen space-y-6");
-
     createImg("./images/logo.png", "Game Logo")
-      .addClass("w-64 h-32 object-contain mb-4")
+      .style("width", "400px")
+      .style("height", "200px")
+      .style("object-fit", "contain")
+      .style("margin", "0 auto 30px auto")
+      .style("display", "block")
       .parent(parent);
+
 
     createElement("h1", "Dragon Ball Conquest")
       .parent(parent)
