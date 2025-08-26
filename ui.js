@@ -167,6 +167,7 @@ uiManager.registerScreen("settingsMenu", {
     }
   }
 });
+
 uiManager.registerScreen("charSelect", {
   validStates: [GameStates.CHAR_SELECT],
   
@@ -422,6 +423,221 @@ function saveSettings() {
   }
 }
 
+
+// Game Win Screen
+uiManager.registerScreen("gameWon", {
+  validStates: [GameStates.GAMEWON],
+  
+  create: () => {
+    const wrapper = createDiv().id("gameWonMenu").class("screen");
+    
+    // Victory header with styling
+    const victoryHeader = createElement("h1", "🎉 VICTORY! 🎉")
+      .addClass("victory-title text-center text-6xl font-bold text-yellow-400 mb-8 animate-bounce");
+    victoryHeader.parent(wrapper);
+    
+    // Victory message container
+    const messageContainer = createDiv().addClass("victory-message text-center mb-8");
+    createElement("h2", "Congratulations!")
+      .addClass("text-3xl font-semibold text-green-400 mb-4")
+      .parent(messageContainer);
+    
+    createElement("p", "You have emerged victorious in battle!")
+      .addClass("text-xl text-gray-300 mb-4")
+      .parent(messageContainer);
+    
+    // Stats container (can be populated with game data)
+    const statsContainer = createDiv().addClass("stats-container bg-gray-800 rounded-lg p-6 mb-8 max-w-md mx-auto");
+    createElement("h3", "Battle Statistics")
+      .addClass("text-xl font-semibold text-blue-400 mb-4 text-center")
+      .parent(statsContainer);
+    
+    // Placeholder for battle stats - you can populate these with actual game data
+    const statsList = createDiv().addClass("stats-list space-y-2");
+    createElement("div", "• Characters Remaining: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    createElement("div", "• Battle Duration: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    createElement("div", "• Moves Used: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    
+    statsList.parent(statsContainer);
+    messageContainer.parent(wrapper);
+    statsContainer.parent(wrapper);
+    
+    // Navigation buttons
+    const navWrapper = createDiv().addClass("flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mt-8");
+    
+    createButton("Play Again")
+      .parent(navWrapper)
+      .addClass("menu-btn bg-green-600 hover:bg-green-500 px-8 py-3 text-lg font-semibold")
+      .mousePressed(() => {
+        // Reset game state and go to character selection
+        if (window.selectedCharacters) {
+          window.selectedCharacters = [[], []];
+        }
+        gameStateManager.setState(GameStates.CHAR_SELECT);
+      });
+      
+    createButton("Main Menu")
+      .parent(navWrapper)
+      .addClass("menu-btn bg-blue-600 hover:bg-blue-500 px-8 py-3 text-lg font-semibold")
+      .mousePressed(() => {
+        // Reset game state and return to main menu
+        if (window.selectedCharacters) {
+          window.selectedCharacters = [[], []];
+        }
+        gameStateManager.setState(GameStates.MAIN_MENU);
+      });
+      
+    navWrapper.parent(wrapper);
+    
+    return wrapper;
+  },
+  
+  show: () => {
+    const wrapper = select("#gameWonMenu");
+    if (!wrapper) return;
+    wrapper.show().style("opacity", "1");
+    
+    // Optional: Update stats with actual game data
+    // You can add code here to populate the stats with real data from your game
+    // Example:
+    // select(".stats-list").html(`
+    //   <div class="text-gray-300">• Characters Remaining: ${actualRemainingChars}</div>
+    //   <div class="text-gray-300">• Battle Duration: ${actualDuration}</div>
+    //   <div class="text-gray-300">• Moves Used: ${actualMoves}</div>
+    // `);
+  },
+  
+  hide: () => {
+    const wrapper = select("#gameWonMenu");
+    if (!wrapper) return;
+    wrapper.style("opacity", "0");
+    setTimeout(() => wrapper.hide(), 200);
+  }
+});
+
+// Game Lose Screen
+uiManager.registerScreen("gameLose", {
+  validStates: [GameStates.GAMELOSE],
+  
+  create: () => {
+    const wrapper = createDiv().id("gameLoseMenu").class("screen");
+    
+    // Defeat header with styling
+    const defeatHeader = createElement("h1", "💀 DEFEAT 💀")
+      .addClass("defeat-title text-center text-6xl font-bold text-red-400 mb-8");
+    defeatHeader.parent(wrapper);
+    
+    // Defeat message container
+    const messageContainer = createDiv().addClass("defeat-message text-center mb-8");
+    createElement("h2", "Game Over")
+      .addClass("text-3xl font-semibold text-red-400 mb-4")
+      .parent(messageContainer);
+    
+    createElement("p", "Your team has been defeated in battle.")
+      .addClass("text-xl text-gray-300 mb-4")
+      .parent(messageContainer);
+    
+    createElement("p", "Learn from this experience and try again!")
+      .addClass("text-lg text-gray-400 italic")
+      .parent(messageContainer);
+    
+    // Stats container (can be populated with game data)
+    const statsContainer = createDiv().addClass("stats-container bg-gray-800 rounded-lg p-6 mb-8 max-w-md mx-auto");
+    createElement("h3", "Battle Statistics")
+      .addClass("text-xl font-semibold text-blue-400 mb-4 text-center")
+      .parent(statsContainer);
+    
+    // Placeholder for battle stats
+    const statsList = createDiv().addClass("stats-list space-y-2");
+    createElement("div", "• Damage Dealt: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    createElement("div", "• Battle Duration: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    createElement("div", "• Moves Used: -")
+      .addClass("text-gray-300")
+      .parent(statsList);
+    
+    statsList.parent(statsContainer);
+    messageContainer.parent(wrapper);
+    statsContainer.parent(wrapper);
+    
+    // Motivational tip section
+    const tipContainer = createDiv().addClass("tip-container bg-gray-700 rounded-lg p-4 mb-8 max-w-lg mx-auto");
+    createElement("h4", "💡 Battle Tip")
+      .addClass("text-lg font-semibold text-yellow-400 mb-2 text-center")
+      .parent(tipContainer);
+    
+    createElement("p", "Try different character combinations or adjust your strategy!")
+      .addClass("text-gray-300 text-center text-sm")
+      .parent(tipContainer);
+    
+    tipContainer.parent(wrapper);
+    
+    // Navigation buttons
+    const navWrapper = createDiv().addClass("flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mt-8");
+    
+    createButton("Try Again")
+      .parent(navWrapper)
+      .addClass("menu-btn bg-red-600 hover:bg-red-500 px-8 py-3 text-lg font-semibold")
+      .mousePressed(() => {
+        // Keep current team setup and restart the game
+        gameStateManager.setState(GameStates.PLAYING);
+      });
+    
+    createButton("Change Team")
+      .parent(navWrapper)
+      .addClass("menu-btn bg-orange-600 hover:bg-orange-500 px-8 py-3 text-lg font-semibold")
+      .mousePressed(() => {
+        // Go back to character selection to modify team
+        gameStateManager.setState(GameStates.CHAR_SELECT);
+      });
+      
+    createButton("Main Menu")
+      .parent(navWrapper)
+      .addClass("menu-btn bg-blue-600 hover:bg-blue-500 px-8 py-3 text-lg font-semibold")
+      .mousePressed(() => {
+        // Reset game state and return to main menu
+        if (window.selectedCharacters) {
+          window.selectedCharacters = [[], []];
+        }
+        gameStateManager.setState(GameStates.MAIN_MENU);
+      });
+      
+    navWrapper.parent(wrapper);
+    
+    return wrapper;
+  },
+  
+  show: () => {
+    const wrapper = select("#gameLoseMenu");
+    if (!wrapper) return;
+    wrapper.show().style("opacity", "1");
+    
+    // Optional: Update stats with actual game data
+    // You can add code here to populate the stats with real data from your game
+    // Example:
+    // select(".stats-list").html(`
+    //   <div class="text-gray-300">• Damage Dealt: ${actualDamage}</div>
+    //   <div class="text-gray-300">• Battle Duration: ${actualDuration}</div>
+    //   <div class="text-gray-300">• Moves Used: ${actualMoves}</div>
+    // `);
+  },
+  
+  hide: () => {
+    const wrapper = select("#gameLoseMenu");
+    if (!wrapper) return;
+    wrapper.style("opacity", "0");
+    setTimeout(() => wrapper.hide(), 200);
+  }
+});
 }
 
 export {initUI}

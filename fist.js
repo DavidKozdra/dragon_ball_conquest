@@ -1,5 +1,4 @@
 import { GameObject } from './GameObject.js';
-import { player1, player2 } from './game.js';
 
 class Fist extends GameObject {
   constructor(player, offsetX, offsetY) {

@@ -1,9 +1,7 @@
-import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, resetGame } from './game.js';
+
+import {  player1, player2 } from './game.js';
 import { Playing_Agent } from './Playing_Agent.js';
 import { Projectile } from './Projectile.js';
-
-import { either } from './utils.js';
 
 const AIState = {
   IDLE: 'idle',
@@ -43,7 +41,6 @@ class AI extends Playing_Agent {
       return
     }
 
-    console.log("AI")
     this.updatePlayerPosition();
     const distanceToPlayer1 = this.dist(this.char.x, this.char.y, this.enemy.char.x, this.enemy.char.y);
     const nearestProjectile = this.findNearestProjectile();
@@ -55,7 +52,7 @@ class AI extends Playing_Agent {
     if (currentTime - this.lastMoveTime > this.inactivityThreshold) {
         console.log("Just standing")
     }
-    console.log(this.state)
+    //console.log(this.state)
     
     switch (this.state) {
       case AIState.IDLE:
@@ -63,7 +60,6 @@ class AI extends Playing_Agent {
         
         break;
       case AIState.CHARGING:
-        console.log("charing @@#!!!")
         this.handleChargingState();
         break;
       case AIState.ATTACKING:
@@ -117,9 +113,9 @@ class AI extends Playing_Agent {
       this.state = AIState.DASHING;
     }else {
       console.error(">>>>S")
+      this.state= AIState.IDLE
     }
 
-    console.log("new state", this.state)
   }
 
   handleChargingState() {
@@ -127,10 +123,10 @@ class AI extends Playing_Agent {
     const delay = Math.random() * (2000 - 500) + 500; // Generate a random delay between 500 and 2000 milliseconds
     if (this.char.ki >= 150 && currentTime - this.lastMoveTime <= this.inactivityThreshold) {
       this.state = AIState.IDLE;
-      console.log("IDEL")
+
     } else if (this.char.ki >= 100 && currentTime - this.lastAttackTime > delay) {
       this.char.applyAttacking(); // Charge the attack
-      console.log("ATTACK@@")
+
       if (this.char.currentAttackPower >= 100) { // Adjust the threshold as needed
         this.releaseKiAttack();
       }

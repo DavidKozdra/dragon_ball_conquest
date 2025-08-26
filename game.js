@@ -44,7 +44,7 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');
 
-   frameRate(10000000);
+  frameRate(10000000);
   gameStateManager.addState(GameStates.MAIN_MENU, {});
   gameStateManager.addState(GameStates.SETTINGS, {});
   gameStateManager.addState(GameStates.PLAYING, {});
@@ -141,7 +141,6 @@ function draw() {
 
   uiManager.updateAll();
   if (timer === 0) {
-    setGameState('gameOver');
     winner = () => {
       let player1Health = player1.team.reduce(add, 0);
       let player2Health = player2.team.reduce(add, 0);
@@ -149,7 +148,7 @@ function draw() {
       return player1Health > player2Health;
     };
 
-    setWinner(winner() ? 'Player 1' : 'Player 2');
+    setWinner(winner() ? gameStateManager.setState(GameStates.GameStates.GAMEWON) : gameStateManager.setState(GameStates.GameStates.GAMELOSE));
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -342,7 +341,7 @@ function keyReleased() {
 }
 
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, setGameState, getGameState, setWinner, startGame };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager,GameStates, setWinner, startGame };
 
 
 
