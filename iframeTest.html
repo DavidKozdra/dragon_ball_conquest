@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Grid</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap; /* Allows iframes to wrap to the next row */
+            gap: 20px; /* Space between each iframe */
+            background-color: #222;
+        }
+
+        .game-container {
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 600px;
+            height: 400px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const url = './index.html?aiOnly=true';
+        const numGames = 50;
+
+        // Function to create and append iframes
+        function createGameGrid() {
+            const body = document.querySelector('body');
+            for (let i = 0; i < numGames; i++) {
+                const container = document.createElement('div');
+                container.className = 'game-container';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+
+                container.appendChild(iframe);
+
+                console.log(iframe)
+                body.appendChild(container);
+            }
+        }
+
+        window.onload = createGameGrid;
+    </script>
+</body>
+</html>
