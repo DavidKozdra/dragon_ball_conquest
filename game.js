@@ -12,7 +12,9 @@ import {GameStateManager} from "./gameState.js"
 import {UIManager} from "./UI_Manager.js"
 import {initUI} from "./ui.js"
 
-let headless = true
+import { runGeneticAlgorithm, createRandomGenome } from './ga.js';
+
+let headless = false
 
 const GameStates = {
   MAIN_MENU: "mainMenu",
@@ -34,14 +36,24 @@ var notificationManager;
 let delta = 1;
 let canvasWidth = 400;
 let canvasHeight = 400;
-let timerOValue = 80;
+let timerOValue = 5;
 let timer = timerOValue;
 let winner = '';
 
+let params = {}
+
 let player1, player2;
+let currentGenome = []
+//createRandomGenome(params)
 
 
-function setup() {
+function setup() {  
+  
+  window.addEventListener('newGenome', (event) => {
+    currentGenome = createRandomGenome(event.params)
+  }, false);
+
+
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');
   gameStateManager.addState(GameStates.MAIN_MENU, {});
@@ -94,16 +106,16 @@ function startGame() {
   //{ left: 65, right: 68, up: 87, down: 83 },
   player1 = team1.some(char => char.isControllable) 
     ? new Player(88, 67,  { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW },90, team1[0], team1) 
-    : new AI(selectedCharacters[0][0], team1);
+    : new AI(selectedCharacters[0][0], team1, currentGenome);
 
   player2 = team2.some(char => char.isControllable) 
     ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 } , 77, team2[0], team2) 
-    : new AI(team2[0], team2);
+    : new AI(team2[0], team2,currentGenome);
 
-  console.log("Player1:", player1);
-  console.log("Player2:", player2);
+  ///console.log("Player1:", player1);
+  //console.log("Player2:", player2);
 
-    gameStateManager.setState(GameStates.PLAYING);
+  gameStateManager.setState(GameStates.PLAYING);
 
 }
 
@@ -119,7 +131,7 @@ function checkCollisions() {
   for (let i = 0; i < allObjects.length; i++) {
     for (let j = i + 1; j < allObjects.length; j++) {
       if (collides(allObjects[i], allObjects[j])) {
-        console.log('collision');
+       
         allObjects[i].onCollision(allObjects[j]);
         allObjects[j].onCollision(allObjects[i]);
       }
@@ -135,11 +147,15 @@ function draw() {
     winner = () => {
       let player1Health = player1.team.reduce(add, 0);
       let player2Health = player2.team.reduce(add, 0);
-      console.log(player1Health, player2Health);
       return player1Health > player2Health;
     };
 
     setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
+
+        window.parent.postMessage({
+        type: 'gameFinished',
+        data: { population: 100, mutationRate: 0.1 }
+      }, '*');
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -239,7 +255,7 @@ function draw() {
     text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
 
     if (keyIsPressed && keyCode === 13) {
-      console.log("reset");
+
       resetGame();
     }
   }

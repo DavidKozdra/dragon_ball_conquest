@@ -1,32 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <script>
-/**
- * Genetic Algorithm (GA) — Readable Version
- * 
- * This GA can optimize over any number of parameters:
- *   - Continuous (float in range [min, max])
- *   - Integer   (int in range [min, max])
- *   - Categorical (choice from list)
- * 
- * Workflow:
- *   1. Initialize population randomly
- *   2. Evaluate fitness of each individual
- *   3. Copy best individuals (elitism)
- *   4. Fill rest of population with children (selection → crossover → mutation)
- *   5. Repeat for given generations
- *   6. Return best solution
- */
-
-// --------------------------------------------------
-// Helpers
-// --------------------------------------------------
 
 function randomFloat(min, max) {
   return Math.random() * (max - min) + min;
@@ -231,6 +202,7 @@ function fitness({ x, y }) {
   return -(x*x + y*y); // maximize (best is at x=0, y=0)
 }
 
+/*
 const result = runGeneticAlgorithm({
   paramDefs: params,
   fitnessFunction: fitness,
@@ -240,10 +212,6 @@ const result = runGeneticAlgorithm({
 });
 
 console.log("Best solution:", result.bestGenome, "Fitness:", result.bestFitness);
+*/
 
-
-
-
-</script>
-</body>
-</html>
+export {runGeneticAlgorithm,createRandomGenome}

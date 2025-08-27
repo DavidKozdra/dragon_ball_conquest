@@ -11,7 +11,7 @@ export class GameStateManager {
     }
 
     setState(newState) {
-        console.log(newState, "NEW STATE")
+        //console.log(newState, "NEW STATE")
         if (!this.states[newState]) {
             console.warn(`State "${newState}" not defined`);
             return;

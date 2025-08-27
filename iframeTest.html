@@ -12,6 +12,9 @@
             flex-wrap: wrap; /* Allows iframes to wrap to the next row */
             gap: 20px; /* Space between each iframe */
             background-color: #222;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
         }
 
         .game-container {
@@ -30,12 +33,12 @@
 </head>
 <body>
     <script>
-        const url = './index.html?aiOnly=true';
-        const numGames = 40;
-
         // Function to create and append iframes
         function createGameGrid() {
+            const url = './index.html?aiOnly=true';
+            const numGames = 5;
             const body = document.querySelector('body');
+            
             for (let i = 0; i < numGames; i++) {
                 const container = document.createElement('div');
                 container.className = 'game-container';
@@ -44,13 +47,21 @@
                 iframe.src = url;
 
                 container.appendChild(iframe);
-
-                console.log(iframe)
+                console.log(iframe);
                 body.appendChild(container);
             }
         }
 
-        window.onload = createGameGrid;
+            // Listen for messages from iframes
+            window.addEventListener('message', (event) => {
+            if (event.data.type === 'gameFinished') {
+                console.log('Game finished!', event.data.data);
+                // Handle the game finished event
+            }
+            });
+
+        // Wait for DOM to load before creating the grid
+        document.addEventListener('DOMContentLoaded', createGameGrid);
     </script>
 </body>
 </html>
