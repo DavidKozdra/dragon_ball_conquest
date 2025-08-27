@@ -35,6 +35,7 @@ class AI extends Playing_Agent {
     this.circlingDirection = Math.random() > 0.5 ? 1 : -1;
     this.chargeBuildup = 0;
     this.feintChance = 0.15; // 15% chance to feint attacks
+    this.weights = [1, 2, 3, 4, 5, 6] // index 0 is bias variable
   }
 
   update() {
@@ -100,22 +101,22 @@ class AI extends Playing_Agent {
       this.changeState(AIState.RETREATING);
       return;
     }
-
-    // Strategic decisions based on current strategy and randomization
-    switch (this.currentStrategy) {
-      case 'aggressive':
-        this.handleAggressiveStrategy(distanceToPlayer, kiRatio);
-        break;
-      case 'defensive':
-        this.handleDefensiveStrategy(distanceToPlayer, healthRatio, kiRatio);
-        break;
-      case 'balanced':
-        this.handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio);
-        break;
-      case 'unpredictable':
-        this.handleUnpredictableStrategy(distanceToPlayer);
-        break;
-    }
+    this.handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio, distanceToProjectile);
+    // // Strategic decisions based on current strategy and randomization
+    // switch (this.currentStrategy) {
+    //   case 'aggressive':
+    //     this.handleAggressiveStrategy(distanceToPlayer, kiRatio);
+    //     break;
+    //   case 'defensive':
+    //     this.handleDefensiveStrategy(distanceToPlayer, healthRatio, kiRatio);
+    //     break;
+    //   case 'balanced':
+    //     this.handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio, distanceToProjectile);
+    //     break;
+    //   case 'unpredictable':
+    //     this.handleUnpredictableStrategy(distanceToPlayer);
+    //     break;
+    // }
   }
 
   handleAggressiveStrategy(distanceToPlayer, kiRatio) {
@@ -154,22 +155,38 @@ class AI extends Playing_Agent {
     }
   }
 
-  handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio) {
-    const rand = Math.random();
+  handleBalancedStrategy(distanceToPlayer, healthRatio, kiRatio, distanceToProjectile) { 
+    // const rand = Math.random();
     
-    if (distanceToPlayer < 20 && rand < 0.5) {
-      this.changeState(AIState.MELEE);
-    } else if (kiRatio < 0.2) {
-      this.changeState(AIState.CHARGING);
-    } else if (kiRatio > 0.6 && distanceToPlayer > 40 && rand < 0.5) {
-      this.changeState(AIState.ATTACKING);
-    } else if (distanceToPlayer > 100 && this.dashTimer === 0 && rand < 0.3) {
-      this.changeState(AIState.DASHING);
-    } else if (rand < 0.4) {
-      this.changeState(AIState.CIRCLING);
-    } else {
-      this.changeState(AIState.IDLE);
+    // if (distanceToPlayer < 20 && rand < 0.5) {
+    //   this.changeState(AIState.MELEE);
+    // } else if (kiRatio < 0.2) {
+    //   this.changeState(AIState.CHARGING);
+    // } else if (kiRatio > 0.6 && distanceToPlayer > 40 && rand < 0.5) {
+    //   this.changeState(AIState.ATTACKING);
+    // } else if (distanceToPlayer > 100 && this.dashTimer === 0 && rand < 0.3) {
+    //   this.changeState(AIState.DASHING);
+    // } else if (rand < 0.4) {
+    //   this.changeState(AIState.CIRCLING);
+    // } else {
+    //   this.changeState(AIState.IDLE);
+    // }
+    let states = [AIState.MELEE, AIState.CHARGING, AIState.ATTACKING, AIState.DASHING, AIState.CIRCLING, AIState.IDLE]
+    function f(distanceToPlayer, healthRatio, kiRatio, distanceToProjectile, dashTimer, weights) {
+      let x = [distanceToPlayer, healthRatio, kiRatio, distanceToProjectile, dashTimer]
+      let sum = [];
+      for (let i=0; i < x.length; i++){
+        sum.push([]);
+        sum[i].push(weights[0]); // Bias added
+        for (let j=1; j < x[i].length; j++){
+          sum += weights[i,j] * x[i,j];
+        }
+      }
+
+      return sum;
     }
+    let arr = f(distanceToPlayer, healthRatio, kiRatio, distanceToProjectile, this.dashTimer, this.weights);
+    this.changeState(states[arr.indexOf(Math.max(...arr))]);
   }
 
   handleUnpredictableStrategy(distanceToPlayer) {
