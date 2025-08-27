@@ -32,7 +32,7 @@ var notificationManager;
 let delta = 1;
 let canvasWidth = 400;
 let canvasHeight = 400;
-let timerOValue = 120;
+let timerOValue = 1;
 let timer = timerOValue;
 let winner = '';
 
@@ -137,7 +137,7 @@ function draw() {
       return player1Health > player2Health;
     };
 
-    setWinner(winner() ? gameStateManager.setState(GameStates.GameStates.GAMEWON) : gameStateManager.setState(GameStates.GameStates.GAMELOSE));
+    setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
