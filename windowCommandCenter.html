@@ -44,7 +44,7 @@
 <body>
 
     <h1>Click to Open Windows</h1>
-    <p>This will attempt to open 10 new windows, which your browser will likely block.</p>
+    <p>This will attempt to open N new windows, which your browser will likely block.</p>
     <p>Use the buttons below to open and close them.</p>
     
     <button onclick="openWindows()">Start</button>
@@ -55,7 +55,7 @@
         let openedWindows = [];
 
         function openWindows() {
-            const url = 'http://127.0.0.1:5500/index.html?aiOnly=true';
+            const url = 'http://127.0.0.1:5500/iframeTest.html';
             const numWindows = 10;
             const delay = 100; // Delay in milliseconds
 
@@ -64,8 +64,8 @@
             const numRows = Math.ceil(numWindows / numCols);
 
             // Define window dimensions (browser will respect this)
-            const windowWidth = 600;
-            const windowHeight = 400;
+            const windowWidth = 1000;
+            const windowHeight = 600;
 
             for (let i = 0; i < numWindows; i++) {
                 // Calculate position for the theoretical grid
