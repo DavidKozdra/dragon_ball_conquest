@@ -285,16 +285,7 @@ function keyPressed() {
   if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
 
   if (gameStateManager.is(GameStates.MAIN_MENU)) {
-    if (keyCode === RIGHT_ARROW) {
-      currentMenu = (currentMenu + 1) % menus.length;
-      RenderMainMenu();
-    } else if (keyCode === LEFT_ARROW) {
-      currentMenu = (currentMenu - 1 + menus.length) % menus.length;
-      RenderMainMenu();
-    } else if (keyCode === ENTER) {
-      menus[currentMenu].onselect();
-    }
-    return;
+
   } else if (gameStateManager.is(GameStates.CHAR_SELECT)) {
     return;
   } else if (gameStateManager.is(GameStates.PLAYING)) {

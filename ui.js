@@ -451,7 +451,7 @@ uiManager.registerScreen("gameWon", {
     const wrapper = createDiv().id("gameWonMenu").class("screen");
     
     // Victory header with styling
-    const victoryHeader = createElement("h1", "🎉 VICTORY! 🎉")
+    const victoryHeader = createElement("h1", " VICTORY! ")
       .addClass("victory-title text-center text-6xl font-bold text-yellow-400 mb-8 animate-bounce");
     victoryHeader.parent(wrapper);
     
@@ -465,27 +465,8 @@ uiManager.registerScreen("gameWon", {
       .addClass("text-xl text-gray-300 mb-4")
       .parent(messageContainer);
     
-    // Stats container (can be populated with game data)
-    const statsContainer = createDiv().addClass("stats-container bg-gray-800 rounded-lg p-6 mb-8 max-w-md mx-auto");
-    createElement("h3", "Battle Statistics")
-      .addClass("text-xl font-semibold text-blue-400 mb-4 text-center")
-      .parent(statsContainer);
-    
-    // Placeholder for battle stats - you can populate these with actual game data
-    const statsList = createDiv().addClass("stats-list space-y-2");
-    createElement("div", "• Characters Remaining: -")
-      .addClass("text-gray-300")
-      .parent(statsList);
-    createElement("div", "• Battle Duration: -")
-      .addClass("text-gray-300")
-      .parent(statsList);
-    createElement("div", "• Moves Used: -")
-      .addClass("text-gray-300")
-      .parent(statsList);
-    
-    statsList.parent(statsContainer);
+
     messageContainer.parent(wrapper);
-    statsContainer.parent(wrapper);
     
     // Navigation buttons
     const navWrapper = createDiv().addClass("flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mt-8");
