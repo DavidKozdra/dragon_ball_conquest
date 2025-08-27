@@ -23,7 +23,7 @@ function clamp(value, min, max) {
  * Generate a random genome (solution vector)
  */
 function createRandomGenome(paramDefs) {
-  return paramDefs.map(param => {
+  let params = paramDefs.map(param => {
     switch (param.type) {
       case "continuous": return randomFloat(param.min, param.max);
       case "integer":    return randomInt(param.min, param.max);
@@ -31,6 +31,9 @@ function createRandomGenome(paramDefs) {
       default: throw new Error("Unknown parameter type: " + param.type);
     }
   });
+
+  
+  return params
 }
 
 /**
