@@ -1,7 +1,6 @@
-import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager, setWinner, GameStates } from './game.js';
-import { Projectile } from './Projectile.js';
-import { Fist } from './fist.js';
+
+import { player1, gameStateManager, setWinner, GameStates } from './game.js';
+
 
 class Playing_Agent {
   constructor(charictarController, team) {

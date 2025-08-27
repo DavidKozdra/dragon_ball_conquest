@@ -5,7 +5,6 @@ let selectedCharacters = [[], []]; // Selected characters for player1 and player
 import {startGame} from "./game.js"
 
 function initUI(uiManager,gameStateManager, GameStates){
-
 uiManager.registerScreen("mainMenu", {
   validStates: [GameStates.MAIN_MENU],
 
@@ -18,7 +17,6 @@ uiManager.registerScreen("mainMenu", {
       .style("margin", "0 auto 30px auto")
       .style("display", "block")
       .parent(parent);
-
 
     createElement("h1", "Dragon Ball Conquest")
       .parent(parent)
@@ -56,7 +54,29 @@ uiManager.registerScreen("mainMenu", {
   show: () => {
     const m = select("#mainMenu");
     if (m) m.show().style("opacity", "1");
-    console.log("main menu loaded");
+
+    // ⭐ Check for URL parameter to start AI-only game
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAIOnly = urlParams.get('aiOnly') === 'true';
+
+    if (isAIOnly) {
+      console.log("AI Only mode detected. Starting game automatically.");
+      
+      // Select two random characters for the AI teams
+      // Make sure 'characters' array is globally available
+      window.selectedCharacters = [
+        [{ ...characters[0], isControllable: false }],
+        [{ ...characters[1], isControllable: false }]
+      ];
+      
+      // Transition directly to the game screen without showing the menu
+      startGame();
+      
+      // Hide the menu immediately
+      m.hide();
+    } else {
+      console.log("main menu loaded");
+    }
   },
 
   hide: () => {

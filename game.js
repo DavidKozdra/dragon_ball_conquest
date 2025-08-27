@@ -34,7 +34,6 @@ let canvasWidth = 400;
 let canvasHeight = 400;
 let timerOValue = 120;
 let timer = timerOValue;
-let gameState = 'main_menu';
 let winner = '';
 
 let player1, player2;
@@ -66,14 +65,6 @@ function setup() {
   SetUpClusters();
 }
 
-
-function setGameState(state) {
-  gameState = state;
-}
-
-function getGameState() {
-  return gameState;
-}
 
 function setWinner(player) {
   winner = player;
@@ -330,7 +321,7 @@ function keyReleased() {
 }
 
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager,GameStates, setWinner, startGame };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameStateManager,GameStates, setWinner, startGame };
 
 
 
