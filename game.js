@@ -43,8 +43,6 @@ let player1, player2;
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');
-
-  frameRate(10000000);
   gameStateManager.addState(GameStates.MAIN_MENU, {});
   gameStateManager.addState(GameStates.SETTINGS, {});
   gameStateManager.addState(GameStates.PLAYING, {});
