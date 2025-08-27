@@ -32,7 +32,7 @@ var notificationManager;
 let delta = 1;
 let canvasWidth = 400;
 let canvasHeight = 400;
-let timerOValue = 1;
+let timerOValue = 120;
 let timer = timerOValue;
 let winner = '';
 
