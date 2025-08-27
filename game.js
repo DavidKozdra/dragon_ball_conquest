@@ -43,8 +43,44 @@ let winner = '';
 let params = {}
 
 let player1, player2;
-let currentGenome = []
-//createRandomGenome(params)
+const AICombos = [
+  { name: "MELEE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "MELEE_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "MELEE_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "MELEE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "MELEE_dashTimer", type: "continuous", min: -5, max: 5 },
+
+  { name: "CHARGING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "CHARGING_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "CHARGING_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "CHARGING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "CHARGING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+  { name: "ATTACKING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "ATTACKING_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "ATTACKING_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "ATTACKING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "ATTACKING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+  { name: "DASHING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "DASHING_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "DASHING_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "DASHING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "DASHING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+  { name: "CIRCLING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "CIRCLING_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "CIRCLING_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "CIRCLING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "CIRCLING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+  { name: "IDLE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+  { name: "IDLE_healthRatio", type: "continuous", min: -5, max: 5 },
+  { name: "IDLE_kiRatio", type: "continuous", min: -5, max: 5 },
+  { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+  { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
+];
+let currentGenome = createRandomGenome(AICombos)
 
 
 function setup() {  
@@ -78,6 +114,8 @@ function setup() {
 
   SetUpClusters();
 }
+
+
 
 
 function setWinner(player) {

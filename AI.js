@@ -36,6 +36,8 @@ class AI extends Playing_Agent {
     this.chargeBuildup = 0;
     this.feintChance = 0.15; // 15% chance to feint attacks
     this.weights = currentGenome // index 0 is bias variable
+
+    console.log(this.weights, "wheights")
   }
 
   update() {
@@ -153,9 +155,12 @@ class AI extends Playing_Agent {
         sum.push([]);
         sum[i].push(weights[0]); // Bias added
         for (let j=1; j < x[i].length; j++){
+          console.log(weights[i][j], "I J !")
           sum += weights[i,j] * x[i,j];
         }
       }
+
+      console.log(sum, "sum ")
 
       return sum;
     }
