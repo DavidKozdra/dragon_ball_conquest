@@ -1,5 +1,5 @@
 import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, resetGame } from './game.js';
+import { canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager, setWinner, GameStates } from './game.js';
 import { Projectile } from './Projectile.js';
 import { Fist } from './fist.js';
 
@@ -15,12 +15,14 @@ class Playing_Agent {
 
   update() {
     if (!this.team[this.currentChar].alive && millis() - this.removedTimer > 100) {
+      console.log("remove", this)
       this.removeChar(this.currentChar);
       this.removedTimer = millis();
     }
 
     if (this.team.length <= 0) {
-      setGameState('gameOver');
+     
+      gameStateManager.setState(this === player1 ?  gameStateManager.setState(GameStates.GAMEWON): gameStateManager.setState(GameStates.GAMELOSE))
       setWinner(this === player1 ? 'Player 2' : 'Player 1');
     }
     
@@ -36,8 +38,7 @@ class Playing_Agent {
   removeChar(indexToRemove) {
     console.log("remove");
     if (this.team.length === 1) {
-      setGameState('gameOver');
-      setWinner(this === player1 ? 'Player 2' : 'Player 1');
+      gameStateManager.setState(this === player1 ?  gameStateManager.setState(GameStates.GAMELOSE): gameStateManager.setState(GameStates.GAMEWON))
     } else {
       console.log(this.team.length);
       this.team.splice(indexToRemove, 1); // Use splice to remove the correct character

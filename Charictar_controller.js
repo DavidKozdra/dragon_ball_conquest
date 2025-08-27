@@ -1,5 +1,5 @@
 import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, setGameState, setWinner, resetGame } from './game.js';
+import { canvasWidth, canvasHeight, player1, player2, gameStateManager,GameStates } from './game.js';
 import { Projectile } from './Projectile.js';
 import { Fist } from './fist.js';
 
@@ -50,7 +50,7 @@ class charController extends GameObject {
 
   set health(value) {
     this._health = constrain(value, 0, this.maxHealth);
-    if (this._health <= 0 && gameState === 'playing') {
+    if (this._health <= 0 &&  gameStateManager.is(GameStates.PLAYING)) {
       this.alive = false;
     }
   }
@@ -79,7 +79,7 @@ class charController extends GameObject {
 
   update() {
     if (!this.alive) return; // Skip updates if player is dead
-    if (gameState === 'paused') return; // Skip updates if game is paused
+    if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
     this.applyGravity();
     this.applyMovement();
     this.checkGrounded();
