@@ -12,6 +12,8 @@ import {GameStateManager} from "./gameState.js"
 import {UIManager} from "./UI_Manager.js"
 import {initUI} from "./ui.js"
 
+let headless = true
+
 const GameStates = {
   MAIN_MENU: "mainMenu",
   PLAYING: "playing",
@@ -71,7 +73,7 @@ function setWinner(player) {
 }
 
 function startGame() {
-
+  frameRate(1000)
   SetUpClusters()
 
   timer = timerOValue;
@@ -106,7 +108,7 @@ function startGame() {
 }
 
 function resetGame() {
-  SetUpClusters();
+  //SetUpClusters();
   winner = '';
   timer = timerOValue;
   menus[currentMenu].onselect();
@@ -143,11 +145,12 @@ function draw() {
   if (gameStateManager.is(GameStates.PLAYING)) {
     background(10, 100, 220); // This sets the background color each frame
 
-    drawClouds();
+    //drawClouds();
     player1.update();
     if (player1.char) {
       player1.char.update();
-      player1.char.draw();
+    
+      if(!headless)player1.char.draw();
     } else {
       return;
     }
@@ -155,11 +158,12 @@ function draw() {
     player2.update();
     if (player2.char) {
       player2.char.update();
-      player2.char.draw();
+      if(!headless)player2.char.draw();
     } else {
       return;
     }
 
+    if(!headless){
     for (let i = 0; i < player1.char.projectiles.length; i++) {
       player1.char.projectiles[i].draw();
     }
@@ -219,9 +223,11 @@ function draw() {
     textAlign(CENTER, CENTER);
     text(timer, canvasWidth / 2, 50);
 
-    checkBoundsClouds();
+    //checkBoundsClouds();
     checkCollisions();
   }
+  }
+
 
   if (gameStateManager.is(GameStates.GAMELOSE)) {
     fill(255);
@@ -236,7 +242,6 @@ function draw() {
       console.log("reset");
       resetGame();
     }
-    console.log(gameState);
   }
 
   // Handle continuous movement
