@@ -8,7 +8,6 @@ import { add } from './utils.js';
 import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
 
 import {GameStateManager} from "./gameState.js"
-
 import {UIManager} from "./UI_Manager.js"
 import {initUI} from "./ui.js"
 
@@ -27,18 +26,189 @@ const GameStates = {
 let gameStateManager = new GameStateManager();
 let uiManager = new UIManager();
 
-var notificationManager;
+const FIGHTS_COUNT = 100;
+const GRID_COLS = 10;
+const GRID_ROWS = 10;
+const FIGHT_WIDTH = 80;
+const FIGHT_HEIGHT = 80;
 
 let delta = 1;
-let canvasWidth = 400;
-let canvasHeight = 400;
+let canvasWidth = GRID_COLS * FIGHT_WIDTH;
+let canvasHeight = GRID_ROWS * FIGHT_HEIGHT;
 let timerOValue = 120;
 let timer = timerOValue;
 let gameState = 'main_menu';
 let winner = '';
 
-let player1, player2;
+// Array to hold all fight instances
+let fights = [];
+let completedFights = 0;
+let results = { team1Wins: 0, team2Wins: 0, draws: 0 };
 
+// Fight class to encapsulate each individual fight
+// Updated Fight class to work with the fixed Playing_Agent
+
+class Fight {
+  constructor(id, x, y, width, height) {
+    this.id = id;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.timer = timerOValue;
+    this.player1 = null;
+    this.player2 = null;
+    this.isComplete = false;
+    this.winner = null;
+    this.scale = 0.2;
+  }
+
+  initialize(team1Template, team2Template) {
+    // Create scaled-down teams for this fight
+    let team1 = team1Template.map(charData => {
+      let char = new charController(
+        this.x + 10 * this.scale, 
+        this.y + (this.height - 20) * this.scale, 
+        charData.isControllable, 
+        charData.spirit, 
+        charData.name
+      );
+      char.fists = [new Fist(char, 5 * this.scale, 5 * this.scale)];
+      char.scale = this.scale;
+      char.speed *= this.scale;
+      return char;
+    });
+
+    let team2 = team2Template.map(charData => {
+      let char = new charController(
+        this.x + (this.width - 20) * this.scale, 
+        this.y + (this.height - 20) * this.scale, 
+        charData.isControllable, 
+        charData.spirit, 
+        charData.name
+      );
+      char.fists = [new Fist(char, 5 * this.scale, 5 * this.scale)];
+      char.scale = this.scale;
+      char.speed *= this.scale;
+      return char;
+    });
+
+    // Create players with game context
+    this.player1 = new AI(team1[0], team1);
+    this.player2 = new AI(team2[0], team2);
+
+    // If using Playing_Agent instead of AI:
+    // this.player1 = new Playing_Agent(team1[0], team1, this);
+    // this.player2 = new Playing_Agent(team2[0], team2, this);
+    
+    // Set opponents
+    if (this.player1.setOpponent) this.player1.setOpponent(this.player2);
+    if (this.player2.setOpponent) this.player2.setOpponent(this.player1);
+  }
+
+  // Called when a player is defeated
+  onPlayerDefeat(player) {
+    if (player === this.player1) {
+      this.winner = 'team2';
+    } else if (player === this.player2) {
+      this.winner = 'team1';
+    }
+    this.endFight();
+  }
+
+  update() {
+    if (this.isComplete) return;
+
+    // Update timer
+    if (this.timer > 0) {
+      this.timer -= 0.016;
+    }
+
+    // Check for timer end
+    if (this.timer <= 0 && !this.isComplete) {
+      this.endFight();
+      return;
+    }
+
+    // Update players
+    if (this.player1 && this.player1.char) {
+      this.player1.update();
+      this.player1.char.update();
+      
+      // Update projectile targets for player1
+      if (this.player1.char.projectiles) {
+        for (let projectile of this.player1.char.projectiles) {
+          if (projectile.setTargets) {
+            projectile.setTargets([this.player2]);
+          }
+        }
+      }
+      
+      // Constrain to fight bounds
+      this.player1.char.x = constrain(this.player1.char.x, this.x, this.x + this.width - 10);
+      this.player1.char.y = constrain(this.player1.char.y, this.y, this.y + this.height - 10);
+
+      // Check if player1 is defeated
+      if (this.player1.isDefeated) {
+        this.winner = 'team2';
+        this.endFight();
+        return;
+      }
+    }
+
+    if (this.player2 && this.player2.char) {
+      this.player2.update();
+      this.player2.char.update();
+      
+      // Update projectile targets for player2
+      if (this.player2.char.projectiles) {
+        for (let projectile of this.player2.char.projectiles) {
+          if (projectile.setTargets) {
+            projectile.setTargets([this.player1]);
+          }
+        }
+      }
+      
+      // Constrain to fight bounds
+      this.player2.char.x = constrain(this.player2.char.x, this.x, this.x + this.width - 10);
+      this.player2.char.y = constrain(this.player2.char.y, this.y, this.y + this.height - 10);
+
+      // Check if player2 is defeated
+      if (this.player2.isDefeated) {
+        this.winner = 'team1';
+        this.endFight();
+        return;
+      }
+    }
+
+    // Check collisions within this fight
+    this.checkCollisions();
+
+    // Alternative defeat check by health
+    if (this.player1.char && this.player1.char.health <= 0 && !this.player1.isDefeated) {
+      this.winner = 'team2';
+      this.endFight();
+    } else if (this.player2.char && this.player2.char.health <= 0 && !this.player2.isDefeated) {
+      this.winner = 'team1';
+      this.endFight();
+    }
+  }
+
+  // ... rest of the Fight class methods remain the same ...
+}
+
+// For the main game system, create a game context:
+const mainGameContext = {
+  gameStateManager: gameStateManager,
+  GameStates: GameStates,
+  setWinner: setWinner,
+  isPlayer1: (player) => player === player1,
+  onPlayerDefeat: null // Not needed for main game
+};
+
+// When creating players in the main game:
+// player1 = new Playing_Agent(team1[0], team1, mainGameContext);
+// player2 = new Playing_Agent(team2[0], team2, mainGameContext);
 
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
@@ -49,23 +219,16 @@ function setup() {
   gameStateManager.addState(GameStates.INVENTORY, {});
   gameStateManager.addState(GameStates.PAUSED, {});
   gameStateManager.addState(GameStates.VIEW_EDIT, {});
-
   gameStateManager.addState(GameStates.GAMELOSE, {});
-
   gameStateManager.addState(GameStates.GAMEWON, {});
-
   gameStateManager.addState(GameStates.CHAR_SELECT, {});
-  initUI(uiManager, gameStateManager,GameStates)
+  
+  initUI(uiManager, gameStateManager, GameStates);
   gameStateManager.onChange((from, to) => uiManager.onGameStateChange(to));
   gameStateManager.setState(GameStates.MAIN_MENU);
 
-  setInterval(() => {
-    if (timer > 0 && gameStateManager.is(GameStates.PLAYING)) timer--;
-  }, 1000);
-
   SetUpClusters();
 }
-
 
 function setGameState(state) {
   gameState = state;
@@ -79,164 +242,109 @@ function setWinner(player) {
   winner = player;
 }
 
-function startGame() {
-
-  SetUpClusters()
-
+function startMassSimulation(team1Template, team2Template) {
+  // Reset everything
+  fights = [];
+  completedFights = 0;
+  results = { team1Wins: 0, team2Wins: 0, draws: 0 };
   timer = timerOValue;
-  console.log(selectedCharacters[0], selectedCharacters[1]);
 
-  let team1 = selectedCharacters[0].map(charData => {
-    let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
-    char.fists = [new Fist(char, 5, 5)];
-    return char;
-  });
+  // Create fight grid
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS; col++) {
+      let fightId = row * GRID_COLS + col;
+      if (fightId >= FIGHTS_COUNT) break;
+      
+      let x = col * FIGHT_WIDTH;
+      let y = row * FIGHT_HEIGHT;
+      
+      let fight = new Fight(fightId, x, y, FIGHT_WIDTH, FIGHT_HEIGHT);
+      fight.initialize(team1Template, team2Template);
+      fights.push(fight);
+    }
+  }
 
-  let team2 = selectedCharacters[1].map(charData => {
-    let char = new charController(300, 200, charData.isControllable, charData.spirit, charData.name);
-    char.fists = [new Fist(char, 5, 5)];
-    return char;
-  });
+  gameStateManager.setState(GameStates.PLAYING);
+  console.log(`Started ${fights.length} simultaneous fights!`);
+}
 
-  //{ left: 65, right: 68, up: 87, down: 83 },
-  player1 = team1.some(char => char.isControllable) 
-    ? new Player(88, 67,  { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW },90, team1[0], team1) 
-    : new AI(selectedCharacters[0][0], team1);
-
-  player2 = team2.some(char => char.isControllable) 
-    ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 } , 77, team2[0], team2) 
-    : new AI(team2[0], team2);
-
-  console.log("Player1:", player1);
-  console.log("Player2:", player2);
-
-    gameStateManager.setState(GameStates.PLAYING);
-
+function startGame() {
+  // Use the existing selectedCharacters for mass simulation
+  startMassSimulation(selectedCharacters[0], selectedCharacters[1]);
 }
 
 function resetGame() {
   SetUpClusters();
   winner = '';
   timer = timerOValue;
-  menus[currentMenu].onselect();
-}
-
-function checkCollisions() {
-  let allObjects = [...player1.char.projectiles, ...player2.char.projectiles, ...player1.char.fists, ...player2.char.fists, player1.char, player2.char];
-  for (let i = 0; i < allObjects.length; i++) {
-    for (let j = i + 1; j < allObjects.length; j++) {
-      if (collides(allObjects[i], allObjects[j])) {
-        console.log('collision');
-        allObjects[i].onCollision(allObjects[j]);
-        allObjects[j].onCollision(allObjects[i]);
-      }
-    }
-  }
+  fights = [];
+  completedFights = 0;
+  results = { team1Wins: 0, team2Wins: 0, draws: 0 };
 }
 
 function draw() {
-
-
   uiManager.updateAll();
-  if (timer === 0) {
-    winner = () => {
-      let player1Health = player1.team.reduce(add, 0);
-      let player2Health = player2.team.reduce(add, 0);
-      console.log(player1Health, player2Health);
-      return player1Health > player2Health;
-    };
-
-    setWinner(winner() ? gameStateManager.setState(GameStates.GameStates.GAMEWON) : gameStateManager.setState(GameStates.GameStates.GAMELOSE));
-  }
-
+  
   if (gameStateManager.is(GameStates.PLAYING)) {
-    background(10, 100, 220); // This sets the background color each frame
+    background(50, 150, 255);
 
-    drawClouds();
-    player1.update();
-    if (player1.char) {
-      player1.char.update();
-      player1.char.draw();
-    } else {
-      return;
+    // Update all fights
+    for (let fight of fights) {
+      fight.update();
     }
 
-    player2.update();
-    if (player2.char) {
-      player2.char.update();
-      player2.char.draw();
-    } else {
-      return;
+    // Draw all fights
+    for (let fight of fights) {
+      fight.draw();
     }
 
-    for (let i = 0; i < player1.char.projectiles.length; i++) {
-      player1.char.projectiles[i].draw();
-    }
-
-    for (let i = 0; i < player2.char.projectiles.length; i++) {
-      player2.char.projectiles[i].draw();
-    }
-
-    // Ground
-    fill(0, 100, 0);
-    rect(0, 350, canvasWidth, 50);
-
-    // UI
+    // Draw overall statistics
     fill(0);
-    rect(0, 0, 100, 40);
-    textSize(16);
+    rect(0, canvasHeight - 60, canvasWidth, 60);
+    
     fill(255);
-    noStroke();
     textAlign(LEFT, CENTER);
-    text(player1.char.name, 20, 20);
+    textSize(16);
+    text(`Completed: ${completedFights}/${fights.length}`, 10, canvasHeight - 45);
+    text(`Team 1 Wins: ${results.team1Wins}`, 10, canvasHeight - 25);
+    text(`Team 2 Wins: ${results.team2Wins}`, 150, canvasHeight - 25);
+    text(`Draws: ${results.draws}`, 290, canvasHeight - 25);
 
-    fill(0);
-    rect(canvasWidth - 100, 0, 100, 40);
-    textAlign(RIGHT, CENTER);
-    fill(255);
-    text(player2.char.name, canvasWidth - 20, 20);
+    // Calculate win percentage
+    if (completedFights > 0) {
+      let team1Percentage = ((results.team1Wins / completedFights) * 100).toFixed(1);
+      let team2Percentage = ((results.team2Wins / completedFights) * 100).toFixed(1);
+      
+      textAlign(RIGHT, CENTER);
+      text(`Team 1: ${team1Percentage}%`, canvasWidth - 150, canvasHeight - 45);
+      text(`Team 2: ${team2Percentage}%`, canvasWidth - 10, canvasHeight - 45);
+    }
 
-    // Player1 health
-    fill(10, 10, 10);
-    rect(0, 30, player1.char.maxHealth, 10);
-    fill(200, 0, 0);
-    rect(0, 30, player1.char.health, 10);
-
-    // Player1 ki
-    fill(10, 10, 10);
-    rect(0, 50, player1.char.maxKi, 10);
-    fill(10, 0, 200);
-    rect(0, 50, player1.char.ki, 10);
-
-    // Player2 health
-    fill(10, 10, 10);
-    rect(canvasWidth - player2.char.maxHealth, 30, player2.char.maxHealth, 10);
-    fill(200, 0, 0);
-    rect(canvasWidth - player2.char.health, 30, player2.char.health, 10);
-
-    // Player2 ki
-    fill(10, 10, 10);
-    rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
-    fill(10, 0, 255);
-    rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
-
-    // Timer
-    fill(255);
-    stroke(0);
-    strokeWeight(2);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text(timer, canvasWidth / 2, 50);
-
-    checkBoundsClouds();
-    checkCollisions();
+    // Check if all fights are complete
+    if (completedFights >= fights.length) {
+      fill(255, 255, 0);
+      textAlign(CENTER, CENTER);
+      textSize(24);
+      text("ALL FIGHTS COMPLETE!", canvasWidth / 2, canvasHeight / 2);
+      
+      textSize(16);
+      if (results.team1Wins > results.team2Wins) {
+        text("TEAM 1 WINS OVERALL!", canvasWidth / 2, canvasHeight / 2 + 30);
+      } else if (results.team2Wins > results.team1Wins) {
+        text("TEAM 2 WINS OVERALL!", canvasWidth / 2, canvasHeight / 2 + 30);
+      } else {
+        text("OVERALL TIE!", canvasWidth / 2, canvasHeight / 2 + 30);
+      }
+      
+      text('Press R to restart', canvasWidth / 2, canvasHeight / 2 + 50);
+    }
   }
 
-  if (gameStateManager.is(GameStates.GAMELOSE)) {
+  if (gameStateManager.is(GameStates.GAMELOSE) || gameStateManager.is(GameStates.GAMEWON)) {
     fill(255);
     textSize(32);
     textAlign(CENTER, CENTER);
-    text(`${winner} Wins!`, canvasWidth / 2, canvasHeight / 2);
+    text('Mass Simulation Complete!', canvasWidth / 2, canvasHeight / 2);
 
     textSize(16);
     text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
@@ -244,30 +352,7 @@ function draw() {
     if (keyIsPressed && keyCode === 13) {
       console.log("reset");
       resetGame();
-    }
-    console.log(gameState);
-  }
-
-  // Handle continuous movement
-  if (gameStateManager.is(GameStates.PLAYING)) {
-    if (player1.char.isControllable) {
-      if (keyIsDown(player1.moveKeys.left)) player1.char.applyMovement('left');
-      if (keyIsDown(player1.moveKeys.right)) player1.char.applyMovement('right');
-      if (keyIsDown(player1.moveKeys.up)) player1.char.applyMovement('up');
-      if (keyIsDown(player1.moveKeys.down)) player1.char.applyMovement('down');
-      if (keyIsDown(player1.attackKey)) player1.char.applyAttacking();
-      if (keyIsDown(player1.chargeKey)) player1.char.applyCharging();
-      if (keyIsDown(player1.meleeKey)) player1.char.applyMelee();
-    }
-
-    if (player2.char.isControllable) {
-      if (keyIsDown(player2.moveKeys.left)) player2.char.applyMovement('left');
-      if (keyIsDown(player2.moveKeys.right)) player2.char.applyMovement('right');
-      if (keyIsDown(player2.moveKeys.up)) player2.char.applyMovement('up');
-      if (keyIsDown(player2.moveKeys.down)) player2.char.applyMovement('down');
-      if (keyIsDown(player2.attackKey)) player2.char.applyAttacking();
-      if (keyIsDown(player2.chargeKey)) player2.char.applyCharging();
-      if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
+      gameStateManager.setState(GameStates.MAIN_MENU);
     }
   }
 }
@@ -275,62 +360,39 @@ function draw() {
 function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
     if (gameStateManager.is(GameStates.PAUSED)) {
-  gameStateManager.setState(GameStates.PLAYING)
+      gameStateManager.setState(GameStates.PLAYING);
     } else if (gameStateManager.is(GameStates.PLAYING)) {
-  gameStateManager.setState(GameStates.PAUSED)
+      gameStateManager.setState(GameStates.PAUSED);
     }
   }
-  if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
 
-  if (gameStateManager.is(GameStates.MAIN_MENU)) {
-
-  } else if (gameStateManager.is(GameStates.CHAR_SELECT)) {
-    return;
-  } else if (gameStateManager.is(GameStates.PLAYING)) {
-    if (player1.char.isControllable) {
-      player1.handleKeyDown(keyCode);
-      player1.handleKeyPress(keyCode);
-    }
-
-    if (player2.char.isControllable) {
-      player2.handleKeyDown(keyCode);
-      player2.handleKeyPress(keyCode);
-    }
+  // R key to restart simulation
+  if (keyCode === 82 && completedFights >= fights.length) { // R key
+    resetGame();
+    gameStateManager.setState(GameStates.MAIN_MENU);
   }
+
+  if (gameStateManager.is(GameStates.PAUSED)) return;
 }
 
 function keyReleased() {
-  if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
-
-  if (gameStateManager.is(GameStates.MAIN_MENU) || gameStateManager.is(GameStates.CHAR_SELECT)) return;
-
-
-  if (player1.char.isControllable) {
-    if (keyCode === player1.moveKeys.up) {
-      player1.char.stopJump();
-    }
-  }
-
-  if (player2.char.isControllable) {
-    if (keyCode === player2.moveKeys.up) {
-      player2.char.stopJump();
-    }
-  }
-
-  if (gameStateManager.is(GameStates.PLAYING)) {
-    if (player1.char.isControllable) {
-      player1.handleKeyUp(keyCode);
-    }
-
-    if (player2.char.isControllable) {
-      console.log("key released");
-      player2.handleKeyUp(keyCode);
-    }
-  }
+  // No continuous input needed for mass simulation
 }
 
-
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager,GameStates, setWinner, startGame };
-
-
-
+export { 
+  setup, 
+  draw, 
+  keyPressed, 
+  keyReleased, 
+  resetGame, 
+  canvasWidth, 
+  canvasHeight, 
+  gameState, 
+  gameStateManager, 
+  GameStates, 
+  setWinner, 
+  startGame, 
+  startMassSimulation,
+  fights,
+  results,
+};

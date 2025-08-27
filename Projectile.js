@@ -1,7 +1,7 @@
 import { GameObject} from './GameObject.js';
-import {player1, player2 } from "./game.js"
+
 class Projectile extends GameObject {
-  constructor(x, y, size, color, dirX, dirY, speed, damage, following) {
+  constructor(x, y, size, color, dirX, dirY, speed, damage, following, owner = null) {
     super('projectile', x, y);
     this.size = size;
     this.radius = size / 2;
@@ -12,8 +12,15 @@ class Projectile extends GameObject {
     this.speedX = dirX * speed;
     this.speedY = dirY * speed;
     this.damage = damage;
-    this.alive = true; // Add a flag to track if the projectile is alive
-    this.following = true;
+    this.alive = true;
+    this.following = following;
+    this.owner = owner; // Reference to the character/player that created this projectile
+    this.targetPlayers = []; // Will be set by the fight or game system
+  }
+
+  // Method to set target players for this projectile
+  setTargets(players) {
+    this.targetPlayers = players.filter(player => player !== this.owner);
   }
 
   draw() {
@@ -25,12 +32,13 @@ class Projectile extends GameObject {
 
   update() {
     if (this.alive) {
-      if (this.following) {
-        // Find the closest player
-        let target_player = this.findClosestPlayer([player1, player2]);
+      if (this.following && this.targetPlayers.length > 0) {
+        // Find the closest target player
+        let target_player = this.findClosestPlayer(this.targetPlayers);
         if (target_player) {
           // Update direction to follow the target player
-          let dir = createVector(target_player.x - this.x, target_player.y - this.y);
+          let dir = createVector(target_player.char ? target_player.char.x - this.x : target_player.x - this.x, 
+                                target_player.char ? target_player.char.y - this.y : target_player.y - this.y);
           dir.normalize();
           this.speedX = dir.x * this.speed;
           this.speedY = dir.y * this.speed;
@@ -39,39 +47,57 @@ class Projectile extends GameObject {
 
       this.x += this.speedX;
       this.y += this.speedY;
+
+      // Remove projectile if it goes too far off screen or lives too long
+      if (this.x < -100 || this.x > width + 100 || this.y < -100 || this.y > height + 100) {
+        this.alive = false;
+      }
     }
   }
 
   findClosestPlayer(players) {
     let closestPlayer = null;
-    let minDist =  80;
+    let minDist = 80;
+    
     for (let player of players) {
-      let d = dist(this.x, this.y, player.x, player.y);
+      if (!player) continue;
+      
+      // Handle both direct player objects and player wrapper objects
+      let playerX = player.char ? player.char.x : player.x;
+      let playerY = player.char ? player.char.y : player.y;
+      
+      if (playerX === undefined || playerY === undefined) continue;
+      
+      let d = dist(this.x, this.y, playerX, playerY);
       if (d < minDist) {
         minDist = d;
         closestPlayer = player;
-        
       }
     }
-
 
     return closestPlayer;
   }
 
   onCollision(other) {
-    if (other.type === 'player') {
+    if (other.type === 'player' || other.type === 'character') {
+      // Don't hit the owner
+      if (other === this.owner) return;
+      
       other.health -= this.damage;
-      this.alive = false; // Remove projectile after hitting player
+      this.alive = false;
 
       // Apply knockback
       let dx = this.dirX;
       let dy = this.dirY;
-      other.applyKnockback(dx, dy, this.damage);
-
-      // destroy projectile
+      if (other.applyKnockback) {
+        other.applyKnockback(dx, dy, this.damage);
+      }
     }
 
     if (other.type === 'projectile') {
+      // Don't collide with projectiles from the same owner
+      if (other.owner === this.owner) return;
+      
       // Compare size and remove smaller one
       if (other.size > this.size) {
         other.size -= this.size;
@@ -84,6 +110,18 @@ class Projectile extends GameObject {
         other.alive = false;
       }
     }
+
+    // Collision with boundaries or other objects
+    if (other.type === 'boundary' || other.type === 'wall') {
+      this.alive = false;
+    }
+  }
+
+  // Static method to create a projectile with proper targeting
+  static createTargeted(x, y, size, color, dirX, dirY, speed, damage, following, owner, targets) {
+    let projectile = new Projectile(x, y, size, color, dirX, dirY, speed, damage, following, owner);
+    projectile.setTargets(targets);
+    return projectile;
   }
 }
 

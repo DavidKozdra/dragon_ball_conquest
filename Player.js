@@ -1,7 +1,4 @@
-import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, setWinner, resetGame } from './game.js';
-import { Projectile } from './Projectile.js';
-import { Fist } from './fist.js';
+
 import { Playing_Agent } from './Playing_Agent.js';
 
 class Player extends Playing_Agent{
