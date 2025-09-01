@@ -80,11 +80,11 @@
         }
 
         console.log(list_genomes);
-        function postNewGenome(id, player1Genome, player2Genome){
-            console.log("Hello?");
-            window.parent.postMessage({
-                type: 'newGenome'+id,
-                data: { player1Genome: player1Genome, player2Genome: player2Genome }
+            function postNewGenome(id, player1Genome, player2Genome) {
+            window.frames[`iframe-${id}`].contentWindow.postMessage({
+                type: 'newGenome',
+                game_id: id,
+                data: { player1Genome, player2Genome }
             }, '*');
         }
 
@@ -118,10 +118,11 @@
                 });
             }
             
-            for (let i = 0; i < ids.length; i++){
-                
-                postNewGenome(ids[i], list_genomes[i], list_genomes[i+1]);
-            }
+            setTimeout(() => {
+        for (let i = 0; i < ids.length; i++) {
+            postNewGenome(ids[i], list_genomes[i], list_genomes[i + 1]);
+        }
+    }, 1000);
         }
 
 

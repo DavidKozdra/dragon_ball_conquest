@@ -85,11 +85,13 @@ const params = new URLSearchParams(window.location.search);
 const game_id = params.get('game_id');
 
 
-window.addEventListener('newGenome'+game_id, (event) => {
-  startGame(event.data.player1Genome,event.data.player2Genome );
-  console.log("Running new Genome: ", event.data.player1Genome, event.data.player2Genome);
-}, false);
-console.log("my id ", game_id)
+window.addEventListener('message', (event) => {
+    if (event.data.type === 'newGenome' && event.data.game_id === game_id) {
+        const { player1Genome, player2Genome } = event.data.data;
+        console.log("Running new Genome for", game_id, player1Genome, player2Genome);
+        startGame(player1Genome, player2Genome);
+    }
+});
 function setup() {
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
