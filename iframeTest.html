@@ -80,37 +80,54 @@
         }
 
         console.log(list_genomes);
-
-        // Function to create and append iframes
-      function createGameGrid() {
-        const url = './index.html?aiOnly=true';
-        const numGames = 5;
-        const body = document.querySelector('body');
-        
-        for (let i = 0; i < numGames; i++) {
-            const game_id = generateUUID(); // unique ID for this instance
-
-            // Create container with ID
-            const container = document.createElement('div');
-            container.className = 'game-container';
-            container.id = `container-${game_id}`;
-
-            // Create iframe with ID
-            const iframe = document.createElement('iframe');
-            iframe.src = `${url}&game_id=${game_id}`; // optional: pass id to game
-            iframe.id = `iframe-${game_id}`;
-
-            container.appendChild(iframe);
-            body.appendChild(container);
-
-            console.log(`Created game:`, {
-                containerId: container.id,
-                iframeId: iframe.id
-            });
+        function postNewGenome(id, player1Genome, player2Genome){
+            console.log("Hello?");
+            window.parent.postMessage({
+                type: 'newGenome'+id,
+                data: { player1Genome: player1Genome, player2Genome: player2Genome }
+            }, '*');
         }
-}
 
+        let ids = [];
+            // Function to create and append iframes
+        function createGameGrid() {
+            const url = './index.html?aiOnly=true';
+            const numGames = 5;
+            const body = document.querySelector('body');
             
+            for (let i = 0; i < numGames; i++) {
+                const game_id = generateUUID(); // unique ID for this instance
+                ids.push(game_id);
+
+                // Create container with ID
+                const container = document.createElement('div');
+                container.className = 'game-container';
+                container.id = `container-${game_id}`;
+
+                // Create iframe with ID
+                const iframe = document.createElement('iframe');
+                iframe.src = `${url}&game_id=${game_id}`; // optional: pass id to game
+                iframe.id = `iframe-${game_id}`;
+
+                container.appendChild(iframe);
+                body.appendChild(container);
+
+                console.log(`Created game:`, {
+                    containerId: container.id,
+                    iframeId: iframe.id
+                });
+            }
+            
+            for (let i = 0; i < ids.length; i++){
+                
+                postNewGenome(ids[i], list_genomes[i], list_genomes[i+1]);
+            }
+        }
+
+
+
+
+        
 
         // Wait for DOM to load before creating the grid
 
