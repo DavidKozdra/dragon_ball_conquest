@@ -4,7 +4,7 @@ import { charController } from './Charictar_controller.js';
 import { AI } from './AI.js';
 import { Fist } from './fist.js';
 import { characters } from './characters.js';
-import { add } from './utils.js';
+import { add, generateUUID } from './utils.js';
 import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
 
 import { GameStateManager } from "./gameState.js"
@@ -80,13 +80,14 @@ const AICombos = [
   { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
   { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
 ];
-let currentGenome = createRandomGenome(AICombos)
-
+let currentGenome = createRandomGenome(AICombos);
+let game_id = generateUUID()
 
 function setup() {
 
   window.addEventListener('newGenome', (event) => {
-    currentGenome = createRandomGenome(event.params)
+    // currentGenome = createRandomGenome(event.params)
+    currentGenome = event.data.params
   }, false);
 
 
@@ -152,6 +153,7 @@ function startGame() {
 
   ///console.log("Player1:", player1);
   //console.log("Player2:", player2);
+  console.log("START GAME");
 
   gameStateManager.setState(GameStates.PLAYING);
 
@@ -182,18 +184,18 @@ function draw() {
 
   uiManager.updateAll();
   if (timer === 0) {
-    winner = () => {
       let player1Health = player1.team.reduce(add, 0);
       let player2Health = player2.team.reduce(add, 0);
+    winner = () => {
       return player1Health > player2Health;
     };
 
     setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
 
-    window.parent.postMessage({
-      type: 'gameFinished',
-      data: { population: 100, mutationRate: 0.1 }
-    }, '*');
+      window.parent.postMessage({
+        type: 'gameFinished',
+        data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
+      }, '*');
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {

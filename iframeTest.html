@@ -32,7 +32,53 @@
     </style>
 </head>
 <body>
-    <script>
+    <script type="module">
+        import { runGeneticAlgorithm, createRandomGenome } from './ga.js';
+        const AICombos = [
+            { name: "MELEE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "CHARGING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "ATTACKING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "DASHING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "CIRCLING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "IDLE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
+        ];
+
+        let list_genomes = [];
+        for (let i = 0; i < 100; i++){
+            list_genomes.push(createRandomGenome(AICombos));
+        }
+
+        console.log(list_genomes);
+
         // Function to create and append iframes
         function createGameGrid() {
             const url = './index.html?aiOnly=true';
@@ -52,13 +98,14 @@
             }
         }
 
-            // Listen for messages from iframes
-            window.addEventListener('message', (event) => {
-            if (event.data.type === 'gameFinished') {
-                console.log('Game finished!', event.data.data);
-                // Handle the game finished event
-            }
-            });
+        // Listen for messages from iframes
+        window.addEventListener('message', (event) => {
+        if (event.data.type === 'gameFinished') {
+            console.log('Game finished!', event.data.data);
+        }
+        });
+
+            
 
         // Wait for DOM to load before creating the grid
         document.addEventListener('DOMContentLoaded', createGameGrid);
