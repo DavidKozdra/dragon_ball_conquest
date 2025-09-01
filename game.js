@@ -4,7 +4,7 @@ import { charController } from './Charictar_controller.js';
 import { AI } from './AI.js';
 import { Fist } from './fist.js';
 import { characters } from './characters.js';
-import { add, generateUUID } from './utils.js';
+import { add } from './utils.js';
 import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
 
 import { GameStateManager } from "./gameState.js"
@@ -40,7 +40,7 @@ let timerOValue = 5;
 let timer = timerOValue;
 let winner = '';
 
-let params = {}
+let AIparams = {}
 
 let player1, player2;
 const AICombos = [
@@ -81,14 +81,17 @@ const AICombos = [
   { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
 ];
 let currentGenome = createRandomGenome(AICombos);
-let game_id = generateUUID()
+const params = new URLSearchParams(window.location.search);
+const game_id = params.get('game_id');
 
+console.log("my id ", game_id)
 function setup() {
 
   window.addEventListener('newGenome', (event) => {
     // currentGenome = createRandomGenome(event.params)
     currentGenome = event.data.params
   }, false);
+
 
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
