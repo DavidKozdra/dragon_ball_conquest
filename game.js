@@ -7,10 +7,10 @@ import { characters } from './characters.js';
 import { add } from './utils.js';
 import { SetUpClusters, drawClouds, checkBoundsClouds } from './clouds.js';
 
-import {GameStateManager} from "./gameState.js"
+import { GameStateManager } from "./gameState.js"
 
-import {UIManager} from "./UI_Manager.js"
-import {initUI} from "./ui.js"
+import { UIManager } from "./UI_Manager.js"
+import { initUI } from "./ui.js"
 
 import { runGeneticAlgorithm, createRandomGenome } from './ga.js';
 
@@ -23,9 +23,9 @@ const GameStates = {
   VIEW_EDIT: "viewEdit",
   PAUSED: "paused",
   SETTINGS: "settings",
-  GAMELOSE : "lose",
-  GAMEWON:"won",
-  CHAR_SELECT:"char_select"
+  GAMELOSE: "lose",
+  GAMEWON: "won",
+  CHAR_SELECT: "char_select"
 };
 
 let gameStateManager = new GameStateManager();
@@ -83,8 +83,8 @@ const AICombos = [
 let currentGenome = createRandomGenome(AICombos)
 
 
-function setup() {  
-  
+function setup() {
+
   window.addEventListener('newGenome', (event) => {
     currentGenome = createRandomGenome(event.params)
   }, false);
@@ -104,7 +104,7 @@ function setup() {
   gameStateManager.addState(GameStates.GAMEWON, {});
 
   gameStateManager.addState(GameStates.CHAR_SELECT, {});
-  initUI(uiManager, gameStateManager,GameStates)
+  initUI(uiManager, gameStateManager, GameStates)
   gameStateManager.onChange((from, to) => uiManager.onGameStateChange(to));
   gameStateManager.setState(GameStates.MAIN_MENU);
 
@@ -142,13 +142,13 @@ function startGame() {
   });
 
   //{ left: 65, right: 68, up: 87, down: 83 },
-  player1 = team1.some(char => char.isControllable) 
-    ? new Player(88, 67,  { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW },90, team1[0], team1) 
+  player1 = team1.some(char => char.isControllable)
+    ? new Player(88, 67, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 90, team1[0], team1)
     : new AI(selectedCharacters[0][0], team1, currentGenome);
 
-  player2 = team2.some(char => char.isControllable) 
-    ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 } , 77, team2[0], team2) 
-    : new AI(team2[0], team2,currentGenome);
+  player2 = team2.some(char => char.isControllable)
+    ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 }, 77, team2[0], team2)
+    : new AI(team2[0], team2, currentGenome);
 
   ///console.log("Player1:", player1);
   //console.log("Player2:", player2);
@@ -158,10 +158,10 @@ function startGame() {
 }
 
 function resetGame() {
-  //SetUpClusters();
-  winner = '';
-  timer = timerOValue;
-  menus[currentMenu].onselect();
+  console.log("restart")
+  winner = null
+  startGame()
+
 }
 
 function checkCollisions() {
@@ -169,7 +169,7 @@ function checkCollisions() {
   for (let i = 0; i < allObjects.length; i++) {
     for (let j = i + 1; j < allObjects.length; j++) {
       if (collides(allObjects[i], allObjects[j])) {
-       
+
         allObjects[i].onCollision(allObjects[j]);
         allObjects[j].onCollision(allObjects[i]);
       }
@@ -190,10 +190,10 @@ function draw() {
 
     setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
 
-        window.parent.postMessage({
-        type: 'gameFinished',
-        data: { population: 100, mutationRate: 0.1 }
-      }, '*');
+    window.parent.postMessage({
+      type: 'gameFinished',
+      data: { population: 100, mutationRate: 0.1 }
+    }, '*');
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -203,8 +203,8 @@ function draw() {
     player1.update();
     if (player1.char) {
       player1.char.update();
-    
-      if(!headless)player1.char.draw();
+
+      if (!headless) player1.char.draw();
     } else {
       return;
     }
@@ -212,74 +212,74 @@ function draw() {
     player2.update();
     if (player2.char) {
       player2.char.update();
-      if(!headless)player2.char.draw();
+      if (!headless) player2.char.draw();
     } else {
       return;
     }
 
-    if(!headless){
-    for (let i = 0; i < player1.char.projectiles.length; i++) {
-      player1.char.projectiles[i].draw();
+    if (!headless) {
+      for (let i = 0; i < player1.char.projectiles.length; i++) {
+        player1.char.projectiles[i].draw();
+      }
+
+      for (let i = 0; i < player2.char.projectiles.length; i++) {
+        player2.char.projectiles[i].draw();
+      }
+
+      // Ground
+      fill(0, 100, 0);
+      rect(0, 350, canvasWidth, 50);
+
+      // UI
+      fill(0);
+      rect(0, 0, 100, 40);
+      textSize(16);
+      fill(255);
+      noStroke();
+      textAlign(LEFT, CENTER);
+      text(player1.char.name, 20, 20);
+
+      fill(0);
+      rect(canvasWidth - 100, 0, 100, 40);
+      textAlign(RIGHT, CENTER);
+      fill(255);
+      text(player2.char.name, canvasWidth - 20, 20);
+
+      // Player1 health
+      fill(10, 10, 10);
+      rect(0, 30, player1.char.maxHealth, 10);
+      fill(200, 0, 0);
+      rect(0, 30, player1.char.health, 10);
+
+      // Player1 ki
+      fill(10, 10, 10);
+      rect(0, 50, player1.char.maxKi, 10);
+      fill(10, 0, 200);
+      rect(0, 50, player1.char.ki, 10);
+
+      // Player2 health
+      fill(10, 10, 10);
+      rect(canvasWidth - player2.char.maxHealth, 30, player2.char.maxHealth, 10);
+      fill(200, 0, 0);
+      rect(canvasWidth - player2.char.health, 30, player2.char.health, 10);
+
+      // Player2 ki
+      fill(10, 10, 10);
+      rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
+      fill(10, 0, 255);
+      rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
+
+      // Timer
+      fill(255);
+      stroke(0);
+      strokeWeight(2);
+      textSize(32);
+      textAlign(CENTER, CENTER);
+      text(timer, canvasWidth / 2, 50);
+
+      //checkBoundsClouds();
+      checkCollisions();
     }
-
-    for (let i = 0; i < player2.char.projectiles.length; i++) {
-      player2.char.projectiles[i].draw();
-    }
-
-    // Ground
-    fill(0, 100, 0);
-    rect(0, 350, canvasWidth, 50);
-
-    // UI
-    fill(0);
-    rect(0, 0, 100, 40);
-    textSize(16);
-    fill(255);
-    noStroke();
-    textAlign(LEFT, CENTER);
-    text(player1.char.name, 20, 20);
-
-    fill(0);
-    rect(canvasWidth - 100, 0, 100, 40);
-    textAlign(RIGHT, CENTER);
-    fill(255);
-    text(player2.char.name, canvasWidth - 20, 20);
-
-    // Player1 health
-    fill(10, 10, 10);
-    rect(0, 30, player1.char.maxHealth, 10);
-    fill(200, 0, 0);
-    rect(0, 30, player1.char.health, 10);
-
-    // Player1 ki
-    fill(10, 10, 10);
-    rect(0, 50, player1.char.maxKi, 10);
-    fill(10, 0, 200);
-    rect(0, 50, player1.char.ki, 10);
-
-    // Player2 health
-    fill(10, 10, 10);
-    rect(canvasWidth - player2.char.maxHealth, 30, player2.char.maxHealth, 10);
-    fill(200, 0, 0);
-    rect(canvasWidth - player2.char.health, 30, player2.char.health, 10);
-
-    // Player2 ki
-    fill(10, 10, 10);
-    rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
-    fill(10, 0, 255);
-    rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
-
-    // Timer
-    fill(255);
-    stroke(0);
-    strokeWeight(2);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text(timer, canvasWidth / 2, 50);
-
-    //checkBoundsClouds();
-    checkCollisions();
-  }
   }
 
 
@@ -292,12 +292,8 @@ function draw() {
     textSize(16);
     text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
 
-    if (keyIsPressed && keyCode === 13) {
-
-      resetGame();
-    }
+ 
   }
-
   // Handle continuous movement
   if (gameStateManager.is(GameStates.PLAYING)) {
     if (player1.char.isControllable) {
@@ -320,14 +316,18 @@ function draw() {
       if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
     }
   }
+     if (keyIsPressed && keyCode === 13) {
+
+      resetGame();
+    }
 }
 
 function keyPressed() {
   if (keyCode === 32) { // Space bar for pause
     if (gameStateManager.is(GameStates.PAUSED)) {
-  gameStateManager.setState(GameStates.PLAYING)
+      gameStateManager.setState(GameStates.PLAYING)
     } else if (gameStateManager.is(GameStates.PLAYING)) {
-  gameStateManager.setState(GameStates.PAUSED)
+      gameStateManager.setState(GameStates.PAUSED)
     }
   }
   if (gameStateManager.is(GameStates.PAUSED)) return; // Skip updates if game is paused
@@ -380,7 +380,7 @@ function keyReleased() {
 }
 
 
-export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameStateManager,GameStates, setWinner, startGame };
+export { setup, draw, keyPressed, keyReleased, resetGame, canvasWidth, canvasHeight, player1, player2, gameStateManager, GameStates, setWinner, startGame };
 
 
 
