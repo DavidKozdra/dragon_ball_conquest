@@ -123,7 +123,7 @@ function setWinner(player) {
   winner = player;
 }
 
-function startGame() {
+function startGame(player1Genome=currentGenome, player2Genome=currentGenome) {
   frameRate(1000)
   SetUpClusters()
 
@@ -145,11 +145,11 @@ function startGame() {
   //{ left: 65, right: 68, up: 87, down: 83 },
   player1 = team1.some(char => char.isControllable)
     ? new Player(88, 67, { left: LEFT_ARROW, right: RIGHT_ARROW, up: UP_ARROW, down: DOWN_ARROW }, 90, team1[0], team1)
-    : new AI(selectedCharacters[0][0], team1, currentGenome);
+    : new AI(selectedCharacters[0][0], team1, player1Genome);
 
   player2 = team2.some(char => char.isControllable)
     ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 }, 77, team2[0], team2)
-    : new AI(team2[0], team2, currentGenome);
+    : new AI(team2[0], team2, player2Genome);
 
   ///console.log("Player1:", player1);
   //console.log("Player2:", player2);

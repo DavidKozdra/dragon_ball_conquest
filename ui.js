@@ -61,7 +61,8 @@ uiManager.registerScreen("mainMenu", {
 
     if (isAIOnly) {
       console.log("AI Only mode detected. Starting game automatically.");
-      
+
+
       // Select two random characters for the AI teams
       // Make sure 'characters' array is globally available
       window.selectedCharacters = [
@@ -69,8 +70,9 @@ uiManager.registerScreen("mainMenu", {
         [{ ...characters[1], isControllable: false }]
       ];
       
-      // Transition directly to the game screen without showing the menu
-      startGame();
+     window.addEventListener('newGenome', (event) => {
+        startGame(event.data.player1Genome,event.data.player1Genome )
+      }, false);
       
       // Hide the menu immediately
       m.hide();
