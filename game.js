@@ -87,12 +87,10 @@ const game_id = params.get('game_id');
 console.log("my id ", game_id)
 function setup() {
 
-  window.addEventListener('newGenome', (event) => {
-    // currentGenome = createRandomGenome(event.params)
-    currentGenome = event.data.params
-  }, false);
 
-
+     window.addEventListener('newGenome'+game_id, (event) => {
+        startGame(event.data.player1Genome,event.data.player1Genome )
+      }, false);
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.id('game-canvas');

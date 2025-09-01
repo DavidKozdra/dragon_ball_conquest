@@ -70,9 +70,6 @@ uiManager.registerScreen("mainMenu", {
         [{ ...characters[1], isControllable: false }]
       ];
       
-     window.addEventListener('newGenome', (event) => {
-        startGame(event.data.player1Genome,event.data.player1Genome )
-      }, false);
       
       // Hide the menu immediately
       m.hide();
