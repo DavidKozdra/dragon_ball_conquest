@@ -89,7 +89,7 @@ function setup() {
 
 
      window.addEventListener('newGenome'+game_id, (event) => {
-        startGame(event.data.player1Genome,event.data.player1Genome )
+        startGame(event.data.player1Genome,event.data.player2Genome )
       }, false);
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
