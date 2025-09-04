@@ -157,7 +157,11 @@
                 console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
                 results.set(id, [player1Health, player2Health]);
 
-
+                  let game = games.find(g => g.id === id);
+                    if (game) {
+                        game.done = true;
+                    }
+             
                 if(checkIfDone()){
                     batch_idx++;
                     // calculate all results 
