@@ -189,6 +189,8 @@ function draw() {
   if (timer === 0) {
       let player1Health = player1.team.reduce(add, 0);
       let player2Health = player2.team.reduce(add, 0);
+
+    // console.log( "Health Print: ", player1Health, player2Health );
     winner = () => {
       return player1Health > player2Health;
     };
@@ -197,7 +199,7 @@ function draw() {
 
       window.parent.postMessage({
         type: 'gameFinished',
-        data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
+        data: { player1Health: player1, player2Health: player2, id: game_id }
       }, '*');
   }
 

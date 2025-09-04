@@ -118,17 +118,37 @@
                 });
             }
             
-            setTimeout(() => {
-        for (let i = 0; i < ids.length; i++) {
-            postNewGenome(ids[i], list_genomes[i], list_genomes[i + 1]);
+        setTimeout(() => {
+            for (let i = 0; i < ids.length; i++) {
+                postNewGenome(ids[i], list_genomes[i], list_genomes[i + 1]);
+            }
+            }, 1000);
         }
-    }, 1000);
+
+        //         type: 'gameFinished',
+        // data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
+        function gaMath(results_map){
+
         }
 
-
-
-
+        let results = new Map();
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'gameFinished') {
+                console.log('Game finished!', event.data.data );
+                let {player1Health, player2Health, id} = event.data.data;
+                console.log("player1Data: ", player1Health, "player2Data: ", player2Health);
+                
+                player1Health = player1Health.team[0]._health;
+                player2Health = player2Health.team[0]._health;
+                console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
+                results.set(id, [player1Health, player2Health]);
+            }
+        });
         
+
+
+
+
 
         // Wait for DOM to load before creating the grid
 
