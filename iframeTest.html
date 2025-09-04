@@ -93,6 +93,8 @@
                 game_id: id,
                 data: { player1Genome, player2Genome }
             }, '*');
+
+            games.push({id,player1Genome, player2Genome, done:false})
             
         }
         
@@ -105,6 +107,7 @@
             }
         }
         let ids = [];
+        let games = []
             // Function to create and append iframes
         function createGameGrid() {
             const url = './index.html?aiOnly=true';
@@ -133,28 +136,7 @@
                 });
             }
             
-        // setTimeout(() => {
-        //         postNewGenomestoBatch(ids, batches)
-        //     }, 1000);
-        }
 
-        // //         type: 'gameFinished',
-        // // data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
-        // function gaMath(results_map){
-
-        // }
-
-        function wait(){
-
-        }
-        let NUM_epochs = 10;
-        for (let epoch = 0; epoch < NUM_epochs; epoch++){
-            for (let batch_idx = 0; batch_idx < batches.length; batche_idx++){
-                postNewGenometoBatch(ids, batches, batch_idx);
-                // ??? Wait for all results from batch ???
-            }
-            metrics();
-        }
 
         let results = new Map();
         window.addEventListener('message', (event) => {
@@ -167,10 +149,25 @@
                 player2Health = player2Health.team[0]._health;
                 console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
                 results.set(id, [player1Health, player2Health]);
+
+                if(checkIfDone()){
+                    // calculate all results 
+                    games = []
+                }
             }
         });
         
 
+
+        function checkIfDone(){
+            for(let i =0; i < games.length; i++){
+                if(!games[i].done){
+                    return false
+                }
+            }
+
+            return true
+        }
 
 
 
