@@ -86,15 +86,24 @@
         // }
 
 
-        // console.log(list_genomes);
+        let batch_idx = 0;
         function postNewGenome(id, player1Genome, player2Genome) {
             window.frames[`iframe-${id}`].contentWindow.postMessage({
                 type: 'newGenome',
                 game_id: id,
                 data: { player1Genome, player2Genome }
             }, '*');
+            
         }
-
+        
+        function postNewGenomestoBatch(ids, batches, batch_idx){
+            if (batches.length !== ids.length){
+                console.error("batches.length and ids.length are not equal");
+            }
+            for (let i = 0; i < ids.length; i++) {
+                postNewGenome(ids[i], batches[batch_idx][i], batches[batch_idx][i + 1]);
+            }
+        }
         let ids = [];
             // Function to create and append iframes
         function createGameGrid() {
@@ -124,17 +133,27 @@
                 });
             }
             
-        setTimeout(() => {
-            for (let i = 0; i < ids.length; i++) {
-                postNewGenome(ids[i], list_genomes[i], list_genomes[i + 1]);
-            }
-            }, 1000);
+        // setTimeout(() => {
+        //         postNewGenomestoBatch(ids, batches)
+        //     }, 1000);
         }
 
-        //         type: 'gameFinished',
-        // data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
-        function gaMath(results_map){
+        // //         type: 'gameFinished',
+        // // data: { player1Health: JSON.stringify(player1Health), player2Health: JSON.stringify(player2Health) }
+        // function gaMath(results_map){
 
+        // }
+
+        function wait(){
+
+        }
+        let NUM_epochs = 10;
+        for (let epoch = 0; epoch < NUM_epochs; epoch++){
+            for (let batch_idx = 0; batch_idx < batches.length; batche_idx++){
+                postNewGenometoBatch(ids, batches, batch_idx);
+                // ??? Wait for all results from batch ???
+            }
+            metrics();
         }
 
         let results = new Map();
