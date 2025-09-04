@@ -92,6 +92,7 @@ window.addEventListener('message', (event) => {
         startGame(player1Genome, player2Genome);
     }
 });
+console.log("WTF?");
 function setup() {
 
   const canvas = createCanvas(canvasWidth, canvasHeight);

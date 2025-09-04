@@ -86,28 +86,29 @@
         // }
 
 
-        let batch_idx = 0;
+        // let batch_idx = 0;
         function postNewGenome(id, player1Genome, player2Genome) {
             window.frames[`iframe-${id}`].contentWindow.postMessage({
                 type: 'newGenome',
                 game_id: id,
                 data: { player1Genome, player2Genome }
             }, '*');
+            console.log("HELLO postNewGenome");
 
             games.push({id,player1Genome, player2Genome, done:false})
             
         }
         
         function postNewGenomestoBatch(ids, batches, batch_idx){
-            if (batches.length !== ids.length){
-                console.error("batches.length and ids.length are not equal");
+            if (batches[0].length !== ids.length){
+                console.error(`batches length: ${batches[0].length} and ids length: ${ids.length} are not equal`);
             }
             for (let i = 0; i < ids.length; i++) {
-                postNewGenome(ids[i], batches[batch_idx][i], batches[batch_idx][i + 1]);
+                console.log("Batches", batches[batch_idx][i][1])
+                postNewGenome(ids[i], batches[batch_idx][i][0], batches[batch_idx][i][1]);
             }
         }
         let ids = [];
-        let games = []
             // Function to create and append iframes
         function createGameGrid() {
             const url = './index.html?aiOnly=true';
@@ -135,10 +136,16 @@
                     iframeId: iframe.id
                 });
             }
-            
+
+            setTimeout(() => postNewGenomestoBatch(ids, batches, 0), 1000);
+
+        }
 
 
         let results = new Map();
+        let batch_idx = 1;
+        let games = [];
+
         window.addEventListener('message', (event) => {
             if (event.data.type === 'gameFinished') {
                 console.log('Game finished!', event.data.data );
@@ -150,9 +157,20 @@
                 console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
                 results.set(id, [player1Health, player2Health]);
 
+
                 if(checkIfDone()){
+                    batch_idx++;
                     // calculate all results 
-                    games = []
+                    games = [];
+                    /// Send new genomes
+                    postNewGenomestoBatch(ids, batches, batch_idx);
+                    
+                    if (batch_idx === batches.length){
+                        batch_idx = 0;
+                        results = new Map()
+                    }
+
+
                 }
             }
         });
