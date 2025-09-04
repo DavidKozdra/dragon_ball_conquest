@@ -33,7 +33,7 @@
 </head>
 <body>
     <script type="module">
-        import { runGeneticAlgorithm, createRandomGenome } from './ga.js';
+        import { runGeneticAlgorithm, createRandomGenome, generatePairsInBatches } from './ga.js';
 
         import { generateUUID } from './utils.js';
         const AICombos = [
@@ -73,14 +73,21 @@
             { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
             { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
         ];
+        const numGames = 5;
 
         let list_genomes = [];
         for (let i = 0; i < 100; i++){
             list_genomes.push(createRandomGenome(AICombos));
         }
+        const batches = generatePairsInBatches(list_genomes, numGames);
+        // console.log(batches);
+        // for (let i = 0; i < batches.length; i++){
+        //     console.log(`Batch ${i}: ${batches[i]}\n`);
+        // }
 
-        console.log(list_genomes);
-            function postNewGenome(id, player1Genome, player2Genome) {
+
+        // console.log(list_genomes);
+        function postNewGenome(id, player1Genome, player2Genome) {
             window.frames[`iframe-${id}`].contentWindow.postMessage({
                 type: 'newGenome',
                 game_id: id,
@@ -92,7 +99,6 @@
             // Function to create and append iframes
         function createGameGrid() {
             const url = './index.html?aiOnly=true';
-            const numGames = 5;
             const body = document.querySelector('body');
             
             for (let i = 0; i < numGames; i++) {

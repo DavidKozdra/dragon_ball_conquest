@@ -216,5 +216,29 @@ const result = runGeneticAlgorithm({
 
 console.log("Best solution:", result.bestGenome, "Fitness:", result.bestFitness);
 */
+function generatePairs(subjects) {
+  const pairs = [];
+  const N = subjects.length;
 
-export {runGeneticAlgorithm,createRandomGenome}
+  for (let i = 0; i < N; i++) {
+    for (let j = i + 1; j < N; j++) {
+      pairs.push([subjects[i], subjects[j]]);
+    }
+  }
+  // console.log("Pairs: ", pairs);
+  return pairs;
+}
+
+function generatePairsInBatches(subjects, batchSize) {
+  const allPairs = generatePairs(subjects);
+  const batches = [];
+
+  for (let i = 0; i < allPairs.length; i += batchSize) {
+    // console.log("allpairs: ", allPairs.slice(i, i + batchSize));
+    batches.push(allPairs.slice(i, i + batchSize));
+  }
+  // console.log("Batches??? ", batches.length)
+  return batches;
+}
+
+export {runGeneticAlgorithm,createRandomGenome, generatePairsInBatches}
