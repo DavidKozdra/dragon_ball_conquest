@@ -192,7 +192,8 @@ function runGeneticAlgorithm({
 
   return {
     bestGenome: decodeGenome(bestGenome, paramDefs),
-    bestFitness
+    bestFitness,
+    population
   };
 }
 
@@ -225,7 +226,7 @@ function generatePairs(subjects) {
       pairs.push([subjects[i], subjects[j]]);
     }
   }
-  console.log("Pairs: ", pairs);
+  // console.log("Pairs: ", pairs);
   return pairs;
 }
 

@@ -79,7 +79,7 @@
         for (let i = 0; i < 100; i++){
             list_genomes.push(createRandomGenome(AICombos));
         }
-        const batches = generatePairsInBatches(list_genomes, numGames);
+        var batches = generatePairsInBatches(list_genomes, numGames);
         // console.log(batches);
         // for (let i = 0; i < batches.length; i++){
         //     console.log(`Batch ${i}: ${batches[i]}\n`);
@@ -166,19 +166,27 @@
                     batch_idx++;
                     // calculate all results 
                     games = [];
-                    /// Send new genomes
-                    postNewGenomestoBatch(ids, batches, batch_idx);
-                    
+
                     if (batch_idx === batches.length){
+                       let {bestGenome, bestFitness, population } = runGeneticAlgorithm(AICombos, fitness(player1Health,player2Health), genomes.length)
                         batch_idx = 0;
                         results = new Map()
+                        console.log(bestGenome, bestFitness)
+                        list_genomes = population
                     }
 
-
+                    batches = generatePairsInBatches(list_genomes, numGames);
+              
+                    /// Send new genomes
+                    postNewGenomestoBatch(ids, batches, batch_idx);
                 }
             }
         });
         
+
+        function fitness(player1Health,player2Health){
+            return player1Health - player2Health
+        }
 
 
         function checkIfDone(){
