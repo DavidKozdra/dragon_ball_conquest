@@ -138,6 +138,8 @@ function runGeneticAlgorithm({
   tournamentSize = 3,
   verbose = false
 }) {
+
+  console.log("params", paramDefs)
   // 1. Initialize random population
   let population = Array.from({ length: populationSize },
     () => createRandomGenome(paramDefs)); // l:list = [ createRandomGenome(param_defs) for i in range(0, populationSize) ]

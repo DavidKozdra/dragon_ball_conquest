@@ -75,8 +75,9 @@
         ];
         const numGames = 5;
 
+        const numGenomes = 15;
         let list_genomes = [];
-        for (let i = 0; i < 100; i++){
+        for (let i = 0; i < numGenomes; i++){
             list_genomes.push(createRandomGenome(AICombos));
         }
         var batches = generatePairsInBatches(list_genomes, numGames);
@@ -168,7 +169,12 @@
                     games = [];
 
                     if (batch_idx === batches.length){
-                       let {bestGenome, bestFitness, population } = runGeneticAlgorithm(AICombos, fitness(player1Health,player2Health), genomes.length)
+                        let { bestGenome, bestFitness, population } = runGeneticAlgorithm({
+                            paramDefs: AICombos,
+                            fitnessFunction: fitness(player1Health, player2Health),
+                            populationSize: list_genomes.length
+                            });
+
                         batch_idx = 0;
                         results = new Map()
                         console.log(bestGenome, bestFitness)
