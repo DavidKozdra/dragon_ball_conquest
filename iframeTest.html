@@ -74,8 +74,8 @@
             { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
         ];
         const numGames = 5;
-        const numGenomes = 5;
-        const numEpochs = 2;
+        const numGenomes = 10;
+        const numEpochs = 100;
         let list_genomes = [];
         for (let i = 0; i < numGenomes; i++){
             list_genomes.push(createRandomGenome(AICombos));
@@ -184,6 +184,7 @@
         var epoch_idx = 0;
         let games = [];
         let batch_results = new Map();
+        var results_to_save = {}
         function createEpochResults(){
             let epoch_results = new Map();
 
@@ -195,8 +196,10 @@
         let epoch_results = createEpochResults();
         window.addEventListener('message', (event) => {
             if (event.data.type === 'gameFinished') {
+                console.log("NEW !!!!!!!!!!!")
                 if (epoch_idx > numEpochs) {
-                    console.log("Epoch?", epoch_idx, epoch_idx > numEpochs);    
+                    console.log("Epoch?", epoch_idx, epoch_idx > numEpochs); 
+                    localstorage.setItem("Results", results_to_save)
                     return;
                 }
                 // console.log('Game finished!', event.data.data );
@@ -225,7 +228,6 @@
                     
                     if (batch_idx === batches.length){
                         console.log("Epochs Results", epoch_results);
-                        // let {bestGenome, bestFitness, population } =  // runGeneticAlgorithm(AICombos, fitness(player1Health,player2Health), genomes.length);
                         let averaged_scores = new Map(
                             [...epoch_results].map(([key, arr]) => [
                                 key,
@@ -244,6 +246,7 @@
                         });
 
                         console.log(bestGenome,bestFitness)
+                        results_to_save = {bestGenome,bestFitness}
 
                         // newPopulation is an array of genomes you can assign back to list_genomes:
                         list_genomes = newPopulation;

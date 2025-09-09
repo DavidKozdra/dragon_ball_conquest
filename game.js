@@ -39,6 +39,7 @@ let canvasHeight = 400;
 let timerOValue = 1;
 let timer = timerOValue;
 let winner = '';
+let gameEnded = false
 
 let AIparams = {}
 
@@ -86,11 +87,11 @@ const game_id = params.get('game_id');
 
 
 window.addEventListener('message', (event) => {
-    if (event.data.type === 'newGenome' && event.data.game_id === game_id) {
-        const { player1Genome, player2Genome } = event.data.data;
-        // console.log("Running new Genome for", game_id, player1Genome, player2Genome);
-        startGame(player1Genome, player2Genome);
-    }
+  if (event.data.type === 'newGenome' && event.data.game_id === game_id) {
+    const { player1Genome, player2Genome } = event.data.data;
+    // console.log("Running new Genome for", game_id, player1Genome, player2Genome);
+    startGame(player1Genome, player2Genome);
+  }
 });
 // console.log("WTF?");
 function setup() {
@@ -127,7 +128,7 @@ function setWinner(player) {
   winner = player;
 }
 
-function startGame(player1Genome=currentGenome, player2Genome=currentGenome) {
+function startGame(player1Genome = currentGenome, player2Genome = currentGenome) {
   frameRate(1000)
   SetUpClusters()
 
@@ -165,6 +166,7 @@ function startGame(player1Genome=currentGenome, player2Genome=currentGenome) {
 
 function resetGame() {
   console.log("restart")
+  gameEnded = false
   winner = null
   startGame()
 
@@ -187,9 +189,10 @@ function draw() {
 
 
   uiManager.updateAll();
-  if (timer === 0) {
-      let player1Health = player1.team.reduce(add, 0);
-      let player2Health = player2.team.reduce(add, 0);
+  if (timer == 0 || gameEnded) {
+    console.log("RESET !!!")
+    let player1Health = player1.team.reduce(add, 0);
+    let player2Health = player2.team.reduce(add, 0);
 
     // console.log( "Health Print: ", player1Health, player2Health );
     winner = () => {
@@ -198,10 +201,12 @@ function draw() {
 
     setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
 
-      window.parent.postMessage({
-        type: 'gameFinished',
-        data: { player1Health: player1, player2Health: player2, id: game_id }
-      }, '*');
+    window.parent.postMessage({
+      type: 'gameFinished',
+      data: { player1Health: player1, player2Health: player2, id: game_id }
+    }, '*');
+
+    gameEnded = false
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -299,8 +304,13 @@ function draw() {
 
     textSize(16);
     text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
+    gameEnded = true
 
- 
+  }
+
+  if (gameStateManager.is(GameStates.GAMEWON)) {
+    gameEnded = true
+
   }
   // Handle continuous movement
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -324,10 +334,10 @@ function draw() {
       if (keyIsDown(player2.meleeKey)) player2.char.applyMelee();
     }
   }
-     if (keyIsPressed && keyCode === 13) {
+  if (keyIsPressed && keyCode === 13) {
 
-      resetGame();
-    }
+    resetGame();
+  }
 }
 
 function keyPressed() {
