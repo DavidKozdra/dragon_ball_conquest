@@ -73,7 +73,7 @@
             { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
             { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
         ];
-        const numGames = 20;
+        const numGames = 10;
         const numGenomes = 5;
         const numEpochs = 100;
         let list_genomes = [];
@@ -242,6 +242,8 @@
                             tournamentSize: 3,
                             verbose: true
                         });
+
+                        console.log(bestGenome,bestFitness)
 
                         // newPopulation is an array of genomes you can assign back to list_genomes:
                         list_genomes = newPopulation;
