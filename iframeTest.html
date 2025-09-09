@@ -89,6 +89,8 @@
 
         // let batch_idx = 0;
         function postNewGenome(id, player1Genome, player2Genome) {
+
+            console.log("NEW GENOME")
             window.frames[`iframe-${id}`].contentWindow.postMessage({
                 type: 'newGenome',
                 game_id: id,
@@ -202,27 +204,22 @@
                     localstorage.setItem("Results", results_to_save)
                     return;
                 }
-                // console.log('Game finished!', event.data.data );
                 let {player1Health, player2Health, id} = event.data.data;
-                // console.log("player1Data: ", player1Health, "player2Data: ", player2Health);
-                // console.log("batch_idx: ", batch_idx, "batches length", batches.length, batch_idx === batches.length)
                 
                 player1Health = player1Health.team[0]._health;
                 player2Health = player2Health.team[0]._health;
-                // console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
+
                 batch_results.set(id, [player1Health, player2Health]);
 
-                  let game = games.find(g => g.id === id);
-                    if (game) {
-                        game.done = true;
-                    }
+                let game = games.find(g => g.id === id);
+                if (game) {
+                    game.done = true;
+                }
              
                 if(checkIfDone()){
                     epoch_results = batch_to_epoch_results(batch_results, epoch_results);
                     batch_results = new Map();
-                    
-                    
-                    
+
                     games = [];
                     
                     
@@ -260,7 +257,6 @@
 
                     }
                     batch_results = new Map();
-                    
                     
                     /// Send new genomes
                     postNewGenomestoBatch(ids, batches, batch_idx);

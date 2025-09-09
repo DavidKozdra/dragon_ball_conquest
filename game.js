@@ -36,7 +36,7 @@ var notificationManager;
 let delta = 1;
 let canvasWidth = 400;
 let canvasHeight = 400;
-let timerOValue = 1;
+let timerOValue = 25;
 let timer = timerOValue;
 let winner = '';
 let gameEnded = false
@@ -89,6 +89,8 @@ const game_id = params.get('game_id');
 window.addEventListener('message', (event) => {
   if (event.data.type === 'newGenome' && event.data.game_id === game_id) {
     const { player1Genome, player2Genome } = event.data.data;
+    gameEnded = false
+    winner = null
     // console.log("Running new Genome for", game_id, player1Genome, player2Genome);
     startGame(player1Genome, player2Genome);
   }
@@ -155,10 +157,6 @@ function startGame(player1Genome = currentGenome, player2Genome = currentGenome)
   player2 = team2.some(char => char.isControllable)
     ? new Player(78, 66, { left: 65, right: 68, up: 87, down: 83 }, 77, team2[0], team2)
     : new AI(team2[0], team2, player2Genome);
-
-  ///console.log("Player1:", player1);
-  //console.log("Player2:", player2);
-  // console.log("START GAME");
 
   gameStateManager.setState(GameStates.PLAYING);
 
