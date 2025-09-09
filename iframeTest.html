@@ -73,15 +73,15 @@
             { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
             { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
         ];
-        const numGames = 10;
+        const numGames = 5;
         const numGenomes = 5;
-        const numEpochs = 100;
+        const numEpochs = 2;
         let list_genomes = [];
         for (let i = 0; i < numGenomes; i++){
             list_genomes.push(createRandomGenome(AICombos));
         }
         var batches = generatePairsInBatches(list_genomes, numGames);
-        // console.log(batches);
+        console.log("Batches: \n", batches);
         // for (let i = 0; i < batches.length; i++){
         //     console.log(`Batch ${i}: ${batches[i]}\n`);
         // }
@@ -101,10 +101,10 @@
         }
         
         function postNewGenomestoBatch(ids, batches, batch_idx){
-            if (batches[0].length !== ids.length){
-                console.error(`batches length: ${batches[0].length} and ids length: ${ids.length} are not equal`);
+            if (batches[0].length > ids.length){
+                console.error(`batches length: ${batches[0].length} cannot be greater than ids length: ${ids.length}`);
             }
-            for (let i = 0; i < ids.length; i++) {
+            for (let i = 0; i < batches[batch_idx].length; i++) {
                 // console.log("Batches", batches[batch_idx][i][1])
                 postNewGenome(ids[i], batches[batch_idx][i][0], batches[batch_idx][i][1]);
             }
