@@ -127,84 +127,181 @@ function mutate(genome, paramDefs, mutationRate = 0.1, mutationStrength = 0.1) {
 // Main GA
 // --------------------------------------------------
 
+// function runGeneticAlgorithm({
+//   paramDefs,
+//   fitnessFunction,
+//   populationSize = 50,
+//   generations = 100,
+//   mutationRate = 0.1,
+//   mutationStrength = 0.1,
+//   elitism = 1,
+//   tournamentSize = 3,
+//   verbose = false
+// }) {
+//   // 1. Initialize random population
+//   let population = Array.from({ length: populationSize },
+//     () => createRandomGenome(paramDefs)); // l:list = [ createRandomGenome(param_defs) for i in range(0, populationSize) ]
+
+//   let bestGenome = null;
+//   let bestFitness = -Infinity;
+
+//   // 2. Evolution loop
+//   for (let gen = 0; gen < generations; gen++) {
+//     // Evaluate all genomes
+//     const fitnesses = population.map(genome =>
+//       fitnessFunction(decodeGenome(genome, paramDefs))); // (Run Simulation and get fitness function value)
+
+//     // Track best (Strange location for this :|)
+//     for (let i = 0; i < population.length; i++) {
+//       if (fitnesses[i] > bestFitness) {
+//         bestFitness = fitnesses[i];
+//         bestGenome = [...population[i]];
+//       }
+//     }
+
+//     if (verbose) {
+//       const avgFitness = fitnesses.reduce((a, b) => a + b, 0) / fitnesses.length;
+//       console.log(`Generation ${gen}: Best = ${bestFitness.toFixed(4)}, Avg = ${avgFitness.toFixed(4)}`);
+//     }
+
+//     // Sort population by fitness (best first)
+//     const sortedIndices = fitnesses
+//       .map((fitness, index) => [fitness, index]) 
+//       .sort((a, b) => b[0] - a[0])
+//       .map(pair => pair[1]);
+
+//     // Create next generation
+//     const newPopulation = [];
+
+//     // 3. Elitism: copy top N individuals to new Population
+//     for (let i = 0; i < elitism; i++) {
+//       newPopulation.push([...population[sortedIndices[i]]]);
+//     }
+
+//     // 4. Fill rest of population with children
+//     while (newPopulation.length < populationSize) {
+//       const parentA = selectParent(population, fitnesses, tournamentSize);
+//       const parentB = selectParent(population, fitnesses, tournamentSize);
+//       let child = crossover(parentA, parentB, paramDefs);
+//       child = mutate(child, paramDefs, mutationRate, mutationStrength);
+//       newPopulation.push(child);
+//     }
+
+//     population = newPopulation;
+//   }
+
+//   return {
+//     bestGenome: decodeGenome(bestGenome, paramDefs),
+//     bestFitness,
+//     population
+//   };
+// }
+// Replace the old runGeneticAlgorithm with this function (exports if needed)
 function runGeneticAlgorithm({
   paramDefs,
-  fitnessFunction,
-  populationSize = 50,
-  generations = 100,
+  population,
+  scoresMap, // Map<index, number | number[]>
   mutationRate = 0.1,
   mutationStrength = 0.1,
   elitism = 1,
   tournamentSize = 3,
   verbose = false
 }) {
-  // 1. Initialize random population
-  let population = Array.from({ length: populationSize },
-    () => createRandomGenome(paramDefs)); // l:list = [ createRandomGenome(param_defs) for i in range(0, populationSize) ]
-
-  let bestGenome = null;
-  let bestFitness = -Infinity;
-
-  // 2. Evolution loop
-  for (let gen = 0; gen < generations; gen++) {
-    // Evaluate all genomes
-    const fitnesses = population.map(genome =>
-      fitnessFunction(decodeGenome(genome, paramDefs))); // (Run Simulation and get fitness function value)
-
-    // Track best (Strange location for this :|)
-    for (let i = 0; i < population.length; i++) {
-      if (fitnesses[i] > bestFitness) {
-        bestFitness = fitnesses[i];
-        bestGenome = [...population[i]];
-      }
-    }
-
-    if (verbose) {
-      const avgFitness = fitnesses.reduce((a, b) => a + b, 0) / fitnesses.length;
-      console.log(`Generation ${gen}: Best = ${bestFitness.toFixed(4)}, Avg = ${avgFitness.toFixed(4)}`);
-    }
-
-    // Sort population by fitness (best first)
-    const sortedIndices = fitnesses
-      .map((fitness, index) => [fitness, index]) 
-      .sort((a, b) => b[0] - a[0])
-      .map(pair => pair[1]);
-
-    // Create next generation
-    const newPopulation = [];
-
-    // 3. Elitism: copy top N individuals to new Population
-    for (let i = 0; i < elitism; i++) {
-      newPopulation.push([...population[sortedIndices[i]]]);
-    }
-
-    // 4. Fill rest of population with children
-    while (newPopulation.length < populationSize) {
-      const parentA = selectParent(population, fitnesses, tournamentSize);
-      const parentB = selectParent(population, fitnesses, tournamentSize);
-      let child = crossover(parentA, parentB, paramDefs);
-      child = mutate(child, paramDefs, mutationRate, mutationStrength);
-      newPopulation.push(child);
-    }
-
-    population = newPopulation;
+  if (!Array.isArray(population) || population.length === 0) {
+    throw new Error("population must be a non-empty array of genomes");
   }
 
+  const popSize = population.length;
+  console.log("RunGA Scores", scoresMap);
+
+  // 1) Build fitness array from scoresMap.
+  // scoresMap value can be a single number or an array of numbers (we average arrays).
+  const fitnesses = new Array(popSize).fill(-Infinity);
+  // after building `fitnesses` array
+  for (const [idx, val] of scoresMap.entries()) {
+    if (idx < 0 || idx >= popSize) continue;
+    let f;
+    if (Array.isArray(val)) {
+      if (val.length === 0) { f = -Infinity; }
+      else f = val.reduce((s, x) => s + x, 0) / val.length;
+    } else {
+      f = Number(val);
+    }
+    fitnesses[idx] = f;
+  }
+  
+  const validFitnesses = fitnesses.filter(f => Number.isFinite(f));
+  if (validFitnesses.length === 0) {
+    throw new Error("runGeneticAlgorithm: no evaluated fitnesses provided — scoresMap must contain at least one numeric fitness for a genome index.");
+  }
+  // 2) Find best genome & fitness (handle case where none evaluated)
+  let bestFitness = -Infinity;
+  let bestIndex = -1;
+  for (let i = 0; i < popSize; i++) {
+    if (Number.isFinite(fitnesses[i]) && fitnesses[i] > bestFitness) {
+      bestFitness = fitnesses[i];
+      bestIndex = i;
+    }
+  }
+  if (bestIndex === -1) {
+    // fallback: pick the first genome if no fitnesses were provided
+    bestIndex = 0;
+    bestFitness = fitnesses[0] === -Infinity ? -Infinity : fitnesses[0];
+  }
+
+  // 3) Sort indices by fitness (desc) for elitism
+  const sortedIndices = fitnesses
+    .map((f, i) => [f, i])
+    .sort((a, b) => b[0] - a[0])
+    .map(pair => pair[1]);
+
+  // 4) Build next generation population
+  const newPopulation = [];
+
+  // Add elites (clone genomes)
+  for (let i = 0; i < Math.min(elitism, popSize); i++) {
+    const idx = sortedIndices[i];
+    if (idx === undefined || !Array.isArray(population[idx])) {
+      // if something is odd, fallback to a random genome clone
+      const r = Math.floor(Math.random() * popSize);
+      newPopulation.push([...population[r]]);
+    } else {
+      newPopulation.push([...population[idx]]);
+    }
+  }
+
+  // Fill the rest with children
+  while (newPopulation.length < popSize) {
+    const parentA = selectParent(population, fitnesses, tournamentSize);
+    const parentB = selectParent(population, fitnesses, tournamentSize);
+
+    // If selection failed (e.g., all -Infinity), fallback to random parents
+    const pa = Array.isArray(parentA) ? parentA : [...population[Math.floor(Math.random() * popSize)]];
+    const pb = Array.isArray(parentB) ? parentB : [...population[Math.floor(Math.random() * popSize)]];
+
+    let child = crossover(pa, pb, paramDefs);
+    child = mutate(child, paramDefs, mutationRate, mutationStrength);
+    newPopulation.push(child);
+  }
+
+  // Optionally print some info
+  if (verbose) {
+    const validFitnesses = fitnesses.filter(f => Number.isFinite(f));
+    const avgFitness = validFitnesses.length ? (validFitnesses.reduce((a,b) => a+b, 0) / validFitnesses.length) : NaN;
+    console.log(`Epoch result: Best=${bestFitness}, Avg=${avgFitness}`);
+  }
+
+  // 5) return decoded best genome and new population
+  const bestGenomeDecoded = decodeGenome(newPopulation[0] && bestIndex >= 0 ? newPopulation.find((g, i) => i === 0 && bestIndex === 0 ? newPopulation[0] : population[bestIndex]) || population[bestIndex] : population[bestIndex], paramDefs);
+  // the above ensures decodeGenome has a genome array to decode; simpler: decode the original best genome:
+  const bestGenomeArray = Array.isArray(population[bestIndex]) ? population[bestIndex] : newPopulation[0];
   return {
-    bestGenome: decodeGenome(bestGenome, paramDefs),
+    bestGenome: decodeGenome(bestGenomeArray, paramDefs),
     bestFitness,
-    population
+    population: newPopulation
   };
 }
 
-const params = [
-  { name: "x", type: "continuous", min: -5, max: 5 },
-  { name: "y", type: "continuous", min: -5, max: 5 }
-];
-
-function fitness({ x, y }) {
-  return -(x*x + y*y); // maximize (best is at x=0, y=0)
-}
 
 /*
 const result = runGeneticAlgorithm({

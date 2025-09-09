@@ -88,11 +88,11 @@ const game_id = params.get('game_id');
 window.addEventListener('message', (event) => {
     if (event.data.type === 'newGenome' && event.data.game_id === game_id) {
         const { player1Genome, player2Genome } = event.data.data;
-        console.log("Running new Genome for", game_id, player1Genome, player2Genome);
+        // console.log("Running new Genome for", game_id, player1Genome, player2Genome);
         startGame(player1Genome, player2Genome);
     }
 });
-console.log("WTF?");
+// console.log("WTF?");
 function setup() {
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
@@ -132,7 +132,7 @@ function startGame(player1Genome=currentGenome, player2Genome=currentGenome) {
   SetUpClusters()
 
   timer = timerOValue;
-  console.log(selectedCharacters[0], selectedCharacters[1]);
+  // console.log(selectedCharacters[0], selectedCharacters[1]);
 
   let team1 = selectedCharacters[0].map(charData => {
     let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
@@ -157,7 +157,7 @@ function startGame(player1Genome=currentGenome, player2Genome=currentGenome) {
 
   ///console.log("Player1:", player1);
   //console.log("Player2:", player2);
-  console.log("START GAME");
+  // console.log("START GAME");
 
   gameStateManager.setState(GameStates.PLAYING);
 

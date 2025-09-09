@@ -157,12 +157,12 @@ class AI extends Playing_Agent {
       for (let i=0; i < x.length; i++){
         sum.push(weights[i][0]); // Bias added
         for (let j=1; j < x[i].length; j++){
-          console.log(weights[i][j], "I J !")
+          // console.log(weights[i][j], "I J !")
           sum[i] += weights[i][j] * x[i][j];
         }
       }
 
-      console.log("sum: ", sum, "weights: ", weights)
+      // console.log("sum: ", sum, "weights: ", weights)
 
       return sum;
     }

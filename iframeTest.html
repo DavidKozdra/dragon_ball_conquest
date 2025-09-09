@@ -74,9 +74,10 @@
             { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
         ];
         const numGames = 5;
-
+        const numGenomes = 5;
+        const numEpochs = 2;
         let list_genomes = [];
-        for (let i = 0; i < 100; i++){
+        for (let i = 0; i < numGenomes; i++){
             list_genomes.push(createRandomGenome(AICombos));
         }
         var batches = generatePairsInBatches(list_genomes, numGames);
@@ -93,9 +94,9 @@
                 game_id: id,
                 data: { player1Genome, player2Genome }
             }, '*');
-            console.log("HELLO postNewGenome");
+            // console.log("HELLO postNewGenome");
 
-            games.push({id,player1Genome, player2Genome, done:false})
+            games.push({id, player1Genome, player2Genome, done:false})
             
         }
         
@@ -104,7 +105,7 @@
                 console.error(`batches length: ${batches[0].length} and ids length: ${ids.length} are not equal`);
             }
             for (let i = 0; i < ids.length; i++) {
-                console.log("Batches", batches[batch_idx][i][1])
+                // console.log("Batches", batches[batch_idx][i][1])
                 postNewGenome(ids[i], batches[batch_idx][i][0], batches[batch_idx][i][1]);
             }
         }
@@ -142,20 +143,71 @@
         }
 
 
-        let results = new Map();
-        let batch_idx = 1;
-        let games = [];
+        
+        function batch_to_epoch_results(batch_results, epoch_results){
+            // context:     batch_results.set(id, [player1Health, player2Health]);
+            // games.push({id, player1Genome, player2Genome, done:false})
+            for (let i = 0; i < games.length; i++){
+                // take playerGenomes and locate id in list_genomes...
+                let target_game = games[i];
+                // console.log("target_game", target_game.player1Genome);
+                let target_id = target_game.id;
+                let p1idx = list_genomes.findIndex(item => 
+                    item.toString() == target_game.player1Genome.toString()
+                );
+                let p2idx = list_genomes.findIndex(item => 
+                    item.toString() == target_game.player2Genome.toString()
+                );
+                // console.log("batch_results", batch_results.get(target_id));
+                let p1gh = batch_results.get(target_id)[0];
+                let p2gh = batch_results.get(target_id)[1];
 
+                let p1Score = p1gh - p2gh;
+                let p2Score = p2gh - p1gh;
+
+                // console.log("score: ", p1Score, p2Score);
+
+                epoch_results.get(p1idx).push(p1Score);
+                epoch_results.get(p2idx).push(p2Score);
+
+                // console.log("HERE", i, target_game);
+            }
+            
+            // loop through iframe ids.
+            // Isolate player1 and 2 genomes
+            // save player 1 and 2 genomes health differences. player1health = p1genome - p2genome, player2health = p2genome - p1genome
+            
+            return epoch_results
+        }
+        
+        var batch_idx = 1;
+        var epoch_idx = 0;
+        let games = [];
+        let batch_results = new Map();
+        function createEpochResults(){
+            let epoch_results = new Map();
+
+            for (let i = 0; i < list_genomes.length; i++){
+                epoch_results.set(i, []);
+            }
+            return epoch_results;
+        }
+        let epoch_results = createEpochResults();
         window.addEventListener('message', (event) => {
             if (event.data.type === 'gameFinished') {
-                console.log('Game finished!', event.data.data );
+                if (epoch_idx > numEpochs) {
+                    console.log("Epoch?", epoch_idx, epoch_idx > numEpochs);    
+                    return;
+                }
+                // console.log('Game finished!', event.data.data );
                 let {player1Health, player2Health, id} = event.data.data;
-                console.log("player1Data: ", player1Health, "player2Data: ", player2Health);
+                // console.log("player1Data: ", player1Health, "player2Data: ", player2Health);
+                // console.log("batch_idx: ", batch_idx, "batches length", batches.length, batch_idx === batches.length)
                 
                 player1Health = player1Health.team[0]._health;
                 player2Health = player2Health.team[0]._health;
-                console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
-                results.set(id, [player1Health, player2Health]);
+                // console.log(`player1Data: ${player1Health}\n\nplayer2Data: ${player2Health}\n\nid: ${id}`);
+                batch_results.set(id, [player1Health, player2Health]);
 
                   let game = games.find(g => g.id === id);
                     if (game) {
@@ -163,22 +215,51 @@
                     }
              
                 if(checkIfDone()){
-                    batch_idx++;
-                    // calculate all results 
+                    epoch_results = batch_to_epoch_results(batch_results, epoch_results);
+                    batch_results = new Map();
+                    
+                    
+                    
                     games = [];
-
+                    
+                    
                     if (batch_idx === batches.length){
-                       let {bestGenome, bestFitness, population } = runGeneticAlgorithm(AICombos, fitness(player1Health,player2Health), genomes.length)
-                        batch_idx = 0;
-                        results = new Map()
-                        console.log(bestGenome, bestFitness)
-                        list_genomes = population
-                    }
+                        console.log("Epochs Results", epoch_results);
+                        // let {bestGenome, bestFitness, population } =  // runGeneticAlgorithm(AICombos, fitness(player1Health,player2Health), genomes.length);
+                        let averaged_scores = new Map(
+                            [...epoch_results].map(([key, arr]) => [
+                                key,
+                                arr.reduce((sum, x) => sum + x, 0) / arr.length
+                            ])
+                        );
+                        const { bestGenome, bestFitness, population: newPopulation } = runGeneticAlgorithm({
+                            paramDefs: AICombos,
+                            population: list_genomes,
+                            scoresMap: averaged_scores,
+                            mutationRate: 0.1,
+                            mutationStrength: 0.12,
+                            elitism: 1,
+                            tournamentSize: 3,
+                            verbose: true
+                        });
 
-                    batches = generatePairsInBatches(list_genomes, numGames);
-              
+                        // newPopulation is an array of genomes you can assign back to list_genomes:
+                        list_genomes = newPopulation;
+
+                        // console.log("Averaged!", averaged);
+                        batch_idx = 0;
+                        epoch_results = createEpochResults();
+                        // Modify Fitness function??
+                        batches = generatePairsInBatches(list_genomes, numGames);
+                        epoch_idx++;
+
+                    }
+                    batch_results = new Map();
+                    
+                    
                     /// Send new genomes
                     postNewGenomestoBatch(ids, batches, batch_idx);
+                    batch_idx++;
                 }
             }
         });
