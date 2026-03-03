@@ -34,7 +34,7 @@ let uiManager = new UIManager();
 var notificationManager;
 
 let delta = 1;
-let canvasWidth = 400;
+let canvasWidth = 800;
 let canvasHeight = 400;
 let timerOValue = 25;
 let timer = timerOValue;
@@ -81,7 +81,7 @@ const AICombos = [
   { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
   { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
 ];
-let currentGenome = createRandomGenome(AICombos);
+let currentGenome = [-0.16943415730991926,0.26424323741331934,0.28499519599444273,-3.2260340703831503,-3.0082171969401132,1.9555752252938154,0.35042685536423485,1.6648539904601918,-2.763856064519005,-3.3860223552189392,-3.7753456537483228,-0.34082302306703177,0.4646492965309484,-3.2470351677856524,1.934743183467694,0.7177936934034023,0.09137450772918264,-1.6338871622840725,-2.274934431736818,-1.5716877868846544,-1.4176487740600552,1.480286124568698,0.8454998182012496,3.7520025537723836,1.947357736717016,2.8595598762587087,1.1722189703877852,1.6861600307978009,-2.8430473338271405,-1.0134929668052521]
 const params = new URLSearchParams(window.location.search);
 const game_id = params.get('game_id');
 
@@ -134,18 +134,20 @@ function startGame(player1Genome = currentGenome, player2Genome = currentGenome)
   frameRate(1000)
   SetUpClusters()
 
+  const savedTime = parseInt(localStorage.getItem('time_limit') ?? '60');
+  timerOValue = savedTime === 0 ? Infinity : savedTime;
   timer = timerOValue;
   // console.log(selectedCharacters[0], selectedCharacters[1]);
 
   let team1 = selectedCharacters[0].map(charData => {
     let char = new charController(0, 200, charData.isControllable, charData.spirit, charData.name);
-    char.fists = [new Fist(char, 5, 5)];
+    char.fists = [new Fist(char)];
     return char;
   });
 
   let team2 = selectedCharacters[1].map(charData => {
-    let char = new charController(300, 200, charData.isControllable, charData.spirit, charData.name);
-    char.fists = [new Fist(char, 5, 5)];
+    let char = new charController(700, 200, charData.isControllable, charData.spirit, charData.name);
+    char.fists = [new Fist(char)];
     return char;
   });
 
@@ -170,6 +172,99 @@ function resetGame() {
 
 }
 
+function drawHUD() {
+  const PAD = 14;
+  const BAR_W = 320;
+  const BAR_Y = 30;
+  const BAR_H = 14;
+  const KI_Y = 50;
+  const KI_H = 9;
+  const cx = canvasWidth / 2;
+
+  // HUD background strip
+  fill(0, 0, 0, 170);
+  noStroke();
+  rect(0, 0, canvasWidth, 70);
+
+  // --- Player 1 ---
+  const p1 = player1.char;
+  const p1HP = constrain(p1.health / p1.maxHealth, 0, 1);
+  const p1Ki = constrain(p1.ki / p1.maxKi, 0, 1);
+
+  // Name
+  fill(220, 220, 220);
+  noStroke();
+  textSize(11);
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+  text(p1.name.toUpperCase(), PAD, 9);
+  textStyle(NORMAL);
+
+  // Health bar track
+  fill(25, 25, 25);
+  rect(PAD, BAR_Y, BAR_W, BAR_H, 3);
+  // Health bar fill — green → red as HP falls
+  const p1hColor = lerpColor(color(220, 50, 50), color(50, 200, 80), p1HP);
+  fill(p1hColor);
+  rect(PAD, BAR_Y, BAR_W * p1HP, BAR_H, 3);
+
+  // Ki bar track
+  fill(15, 15, 40);
+  rect(PAD, KI_Y, BAR_W, KI_H, 3);
+  fill(45, 100, 230);
+  rect(PAD, KI_Y, BAR_W * p1Ki, KI_H, 3);
+
+  // --- Player 2 ---
+  const p2 = player2.char;
+  const p2HP = constrain(p2.health / p2.maxHealth, 0, 1);
+  const p2Ki = constrain(p2.ki / p2.maxKi, 0, 1);
+  const p2X = canvasWidth - PAD - BAR_W;
+
+  // Name
+  fill(220, 220, 220);
+  textAlign(RIGHT, TOP);
+  textStyle(BOLD);
+  text(p2.name.toUpperCase(), canvasWidth - PAD, 9);
+  textStyle(NORMAL);
+
+  // Health bar track
+  fill(25, 25, 25);
+  rect(p2X, BAR_Y, BAR_W, BAR_H, 3);
+  // Fill from the right
+  const p2hColor = lerpColor(color(220, 50, 50), color(50, 200, 80), p2HP);
+  fill(p2hColor);
+  rect(p2X + BAR_W * (1 - p2HP), BAR_Y, BAR_W * p2HP, BAR_H, 3);
+
+  // Ki bar track
+  fill(15, 15, 40);
+  rect(p2X, KI_Y, BAR_W, KI_H, 3);
+  fill(220, 120, 20);
+  rect(p2X + BAR_W * (1 - p2Ki), KI_Y, BAR_W * p2Ki, KI_H, 3);
+
+  // --- Timer circle (center) ---
+  const urgent = timer !== Infinity && timer <= 10;
+  fill(0, 0, 0, 190);
+  noStroke();
+  circle(cx, 35, 52);
+  stroke(urgent ? color(220, 50, 50) : color(80, 80, 80));
+  strokeWeight(2);
+  noFill();
+  circle(cx, 35, 52);
+
+  fill(urgent ? color(220, 50, 50) : color(240, 240, 240));
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textStyle(BOLD);
+  if (timer === Infinity) {
+    textSize(22);
+    text('∞', cx, 35);
+  } else {
+    textSize(20);
+    text(timer, cx, 35);
+  }
+  textStyle(NORMAL);
+}
+
 function checkCollisions() {
   let allObjects = [...player1.char.projectiles, ...player2.char.projectiles, ...player1.char.fists, ...player2.char.fists, player1.char, player2.char];
   for (let i = 0; i < allObjects.length; i++) {
@@ -184,27 +279,27 @@ function checkCollisions() {
 }
 
 function draw() {
-
+  background(9, 9, 15); // always clear to match the CSS bg color
 
   uiManager.updateAll();
-  if (timer == 0 || gameEnded) {
-    console.log("RESET !!!")
+  if ((timer == 0 || gameEnded) && gameStateManager.is(GameStates.PLAYING)) {
     let player1Health = player1.team.reduce(add, 0);
     let player2Health = player2.team.reduce(add, 0);
 
-    // console.log( "Health Print: ", player1Health, player2Health );
-    winner = () => {
-      return player1Health > player2Health;
-    };
-
-    setWinner(winner() ? gameStateManager.setState(GameStates.GAMEWON) : gameStateManager.setState(GameStates.GAMELOSE));
+    const p1wins = player1Health >= player2Health;
+    if (p1wins) {
+      gameStateManager.setState(GameStates.GAMEWON);
+    } else {
+      gameStateManager.setState(GameStates.GAMELOSE);
+    }
 
     window.parent.postMessage({
       type: 'gameFinished',
       data: { player1Health: player1, player2Health: player2, id: game_id }
     }, '*');
 
-    gameEnded = false
+    gameEnded = false;
+    timer = timerOValue;
   }
 
   if (gameStateManager.is(GameStates.PLAYING)) {
@@ -238,78 +333,20 @@ function draw() {
       }
 
       // Ground
-      fill(0, 100, 0);
-      rect(0, 350, canvasWidth, 50);
-
-      // UI
-      fill(0);
-      rect(0, 0, 100, 40);
-      textSize(16);
-      fill(255);
+      fill(30, 110, 40);
       noStroke();
-      textAlign(LEFT, CENTER);
-      text(player1.char.name, 20, 20);
+      rect(0, 350, canvasWidth, 50);
+      fill(20, 80, 30);
+      rect(0, 350, canvasWidth, 6);
 
-      fill(0);
-      rect(canvasWidth - 100, 0, 100, 40);
-      textAlign(RIGHT, CENTER);
-      fill(255);
-      text(player2.char.name, canvasWidth - 20, 20);
+      // HUD
+      drawHUD();
 
-      // Player1 health
-      fill(10, 10, 10);
-      rect(0, 30, player1.char.maxHealth, 10);
-      fill(200, 0, 0);
-      rect(0, 30, player1.char.health, 10);
-
-      // Player1 ki
-      fill(10, 10, 10);
-      rect(0, 50, player1.char.maxKi, 10);
-      fill(10, 0, 200);
-      rect(0, 50, player1.char.ki, 10);
-
-      // Player2 health
-      fill(10, 10, 10);
-      rect(canvasWidth - player2.char.maxHealth, 30, player2.char.maxHealth, 10);
-      fill(200, 0, 0);
-      rect(canvasWidth - player2.char.health, 30, player2.char.health, 10);
-
-      // Player2 ki
-      fill(10, 10, 10);
-      rect(canvasWidth - player2.char.maxKi, 50, player2.char.maxKi, 10);
-      fill(10, 0, 255);
-      rect(canvasWidth - player2.char.ki, 50, player2.char.ki, 10);
-
-      // Timer
-      fill(255);
-      stroke(0);
-      strokeWeight(2);
-      textSize(32);
-      textAlign(CENTER, CENTER);
-      text(timer, canvasWidth / 2, 50);
-
-      //checkBoundsClouds();
       checkCollisions();
     }
   }
 
 
-  if (gameStateManager.is(GameStates.GAMELOSE)) {
-    fill(255);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text(`${winner} Wins!`, canvasWidth / 2, canvasHeight / 2);
-
-    textSize(16);
-    text('Press enter to restart', canvasWidth / 2, canvasHeight / 2 + 30);
-    gameEnded = true
-
-  }
-
-  if (gameStateManager.is(GameStates.GAMEWON)) {
-    gameEnded = true
-
-  }
   // Handle continuous movement
   if (gameStateManager.is(GameStates.PLAYING)) {
     if (player1.char.isControllable) {

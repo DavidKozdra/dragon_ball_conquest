@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dragon ball conquest </title>
-  <!-- Link to external stylesheet if you have one -->
-  <!-- <link rel="stylesheet" href="style.css"> -->
-  <!-- Include p5.js library -->
+  <title>Dragon Ball Conquest</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   <script type="module">
     import { setup, draw, keyPressed, keyReleased } from './game.js';
@@ -16,88 +14,14 @@
     window.keyPressed = keyPressed;
     window.keyReleased = keyReleased;
 
-    window.addEventListener('keydown', function(e) {
-  const keysToPrevent = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-
-  if (keysToPrevent.includes(e.code)) {
-    e.preventDefault();
-  }
-});
-
-
+    window.addEventListener('keydown', e => {
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+      }
+    });
   </script>
-  <style>
-    body {
-      margin: 0;
-      padding-top: 2%;
-      background-color: #f0f0f0;
-      font-family: 'Arial', sans-serif;
-      flex-direction: column-reverse;
-      display: flex;
-    }
-    #game-container {
-      text-align: center;
-      margin: 0 auto;
-    }
-    #instructions {
-      margin: 100px auto;
-      width: 80%;
-      max-width: 800px;
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-    }
-    .key {
-      display: inline-block;
-      padding: 2px 6px;
-      margin: 0 3px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      background-color: #eee;
-      font-family: monospace;
-      font-size: 0.9em;
-    }
-    details {
-      width: 100%;
-    }
-    summary {
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    details[open] summary::after {
-      content: "▲";
-      float: right;
-    }
-    summary::after {
-      content: "▼";
-      float: right;
-    }
-    a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    /* Additional styling for a professional look */
-    h3 {
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-    }
-    p {
-      line-height: 1.6;
-    }
-  </style>
-  
-  <link rel="stylesheet" href="style.css" >
 </head>
 <body>
-  <div id="game-container">
-    <!-- The game canvas will be inserted here -->
-  </div>
-
-
+  <div id="game-container"></div>
 </body>
 </html>
