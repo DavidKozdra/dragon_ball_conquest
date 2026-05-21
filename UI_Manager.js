@@ -7,7 +7,7 @@ export class UIManager {
 
     registerScreen(name, { create, show = () => {}, hide = () => {}, update = () => {}, validStates = [] }) {
 
-        console.log(name, "register")
+        //console.log(name, "register")
         this.screens[name] = {
             initialized: false,
             container: null,
@@ -21,7 +21,6 @@ export class UIManager {
 
     onGameStateChange(newState) {
         this.currentState = newState;
-        console.log("NEW STATE")
         for (const name in this.screens) {
             const screen = this.screens[name];
             const shouldBeVisible = screen.validStates.includes(newState);
@@ -59,7 +58,7 @@ export class UIManager {
         }
     }
 
-    // 🔄 Add this: called from draw() or game loop
+    // Called from draw() or the game loop.
     updateAll() {
         for (const name of this.activeScreens) {
             const screen = this.screens[name];

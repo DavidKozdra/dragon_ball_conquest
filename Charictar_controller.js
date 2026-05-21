@@ -23,7 +23,7 @@ class charController extends GameObject {
     this.accelerationX = 0;
     this.accelerationY = 0;
     this.projectiles = [];
-    this.fists = [new Fist(this, 5, 5)]; // Create fists once and reuse them
+    this.fists = [new Fist(this)];
     this.currentAttackPower = 0;
     this.spirit =spirit;
     this.jumpForce = 20;
@@ -40,6 +40,9 @@ class charController extends GameObject {
     this.isJumping = false;
     this.isControllable = controllable;
     this.dashSpeed = 200;
+
+    this.meleeCooldown = 0;
+    this.MELEE_COOLDOWN = 30; // frames between punches (~0.5s at 60fps)
 
     this.name = name;
   }
@@ -84,9 +87,8 @@ class charController extends GameObject {
     this.applyMovement();
     this.checkGrounded();
 
-    if (this.flyToggleCooldown > 0) {
-      this.flyToggleCooldown--;
-    }
+    if (this.flyToggleCooldown > 0) this.flyToggleCooldown--;
+    if (this.meleeCooldown > 0) this.meleeCooldown--;
     if (this.isFlying && this.ki > 0 && !this.grounded) {
       this.ki -= this.costOfFlying;
     } else if (this.isFlying && this.ki <= 0) {
@@ -191,21 +193,26 @@ class charController extends GameObject {
   
 
   applyMelee() {
-    for (let fist of this.fists) {
-      // Set the fist to be alive
-      fist.alive = true;
-  
-      // Clear any existing timeout to avoid conflicts
-      if (fist.timeout) {
-        clearTimeout(fist.timeout);
-      }
-  
-      // Set the fist to be not alive after the specified duration
-      fist.timeout = setTimeout(() => {
-        fist.alive = false;
-        fist.timeout = null; // Clear the reference to the timeout
-      }, 100); // 3.5 minutes
+    if (this.meleeCooldown > 0) return;
+
+    // Determine direction toward the opponent
+    let targetPlayer = (this === player1.char) ? player2.char : player1.char;
+    let dx = targetPlayer.x - this.x;
+    let dy = targetPlayer.y - this.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 0) {
+      dx /= dist;
+      dy /= dist;
+    } else {
+      dx = 1; dy = 0; // fallback
     }
+
+    for (let fist of this.fists) {
+      fist.activate(dx, dy);
+    }
+
+    this.meleeCooldown = this.MELEE_COOLDOWN;
   }
 
   releaseKiAttack() {

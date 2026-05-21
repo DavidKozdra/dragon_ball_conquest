@@ -1,11 +1,9 @@
-import { GameObject } from './GameObject.js';
-import { canvasWidth, canvasHeight, player1, player2, gameState, gameStateManager, setWinner, GameStates } from './game.js';
-import { Projectile } from './Projectile.js';
-import { Fist } from './fist.js';
+
+import { player1, gameStateManager, setWinner, GameStates } from './game.js';
+
 
 class Playing_Agent {
   constructor(charictarController, team) {
-    console.log(team, "team")
     this.team = team || [charictarController];
     this.char = charictarController || team[0];
     this.currentChar = 0;
@@ -15,7 +13,6 @@ class Playing_Agent {
 
   update() {
     if (!this.team[this.currentChar].alive && millis() - this.removedTimer > 100) {
-      console.log("remove", this)
       this.removeChar(this.currentChar);
       this.removedTimer = millis();
     }
@@ -31,8 +28,6 @@ class Playing_Agent {
   nextChar() {
     this.currentChar = (this.currentChar + 1) % this.team.length;
     this.char = this.team[this.currentChar];
-    console.log("new char ", this.team[this.currentChar]);
-    console.log('current char', this.currentChar);
   }
 
   removeChar(indexToRemove) {

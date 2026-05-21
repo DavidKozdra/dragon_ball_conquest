@@ -1,64 +1,73 @@
 import { GameObject } from './GameObject.js';
 
 class Fist extends GameObject {
-  constructor(player, offsetX, offsetY) {
-    super('fist', player.x + offsetX, player.y + offsetY);
+  constructor(player) {
+    super('fist', player.x, player.y);
     this.player = player;
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
-    this.size = 5; // Size of the fist
-    this.alive = false; // Initially inactive
-    this.direction = 1;
-    this.oscillateDistance = 5; // Distance to oscillate left and right
+    this.width = 10;
+    this.height = 10;
 
-    this.width = 8;
-    this.height = 8;
+    this.alive = false;
+    this.hasHit = false;
+
+    // Direction the punch travels (unit vector, set on activate)
+    this.dx = 1;
+    this.dy = 0;
+
+    // Frame-based lifetime
+    this.lifetime = 0;
+    this.LIFETIME = 10; // frames the punch extends outward
+    this.speed = 5;     // pixels per frame of extension
+
+    this.damage = 15;
+    this.knockbackForce = 7;
+  }
+
+  activate(dx, dy) {
+    this.alive = true;
+    this.hasHit = false;
+    this.lifetime = this.LIFETIME;
+    this.dx = dx;
+    this.dy = dy;
   }
 
   update() {
-    if (this.alive) {
+    if (!this.alive) return;
 
-      this.x += 1 + (this.direction * random(1, this.oscillateDistance));
-      this.y += 1;
-      this.direction = -this.direction; // Toggle direction to oscillate
-
-      
-      // Ensure the fist stays within the player's bounds
-      this.x = Math.max(this.player.x + 5, Math.min(this.x, this.player.x + this.player.width - this.width));
-      this.y = Math.max(this.player.y, Math.min(this.y, this.player.y + this.player.height - this.height));
+    this.lifetime--;
+    if (this.lifetime <= 0) {
+      this.alive = false;
+      return;
     }
+
+    // Extend outward from the player's center each frame
+    const reach = this.speed * (this.LIFETIME - this.lifetime);
+    const cx = this.player.x + this.player.width / 2;
+    const cy = this.player.y + this.player.height / 2;
+    this.x = cx + this.dx * reach - this.width / 2;
+    this.y = cy + this.dy * reach - this.height / 2;
   }
 
   draw() {
-    if (this.alive) {
-      fill(255, 0, 0); // Color of the fist
-      rect(this.x, this.y, this.size, this.size);
-    }
+    if (!this.alive) return;
+    // Brighten as it extends, fade on the way back
+    const t = 1 - this.lifetime / this.LIFETIME;
+    const alpha = 255 * (1 - t * t); // fade out toward end of lifetime
+    fill(255, 200 + 55 * (1 - t), 0, alpha);
+    noStroke();
+    rect(this.x, this.y, this.width, this.height, 3);
   }
 
   onCollision(other) {
-    if (this.alive && other.type === 'player' && other !== this.player) {
-      other.health -= 1; // Damage to the other player
-      this.alive = false; // Deactivate fist after hitting
+    if (!this.alive || this.hasHit) return;
+    if (other.type !== 'player' || other === this.player) return;
 
-      // Apply force knockback
-      let dx = other.x - this.x; // Knockback direction from the fist to the other player
-      let dy = other.y - this.y;
-      let distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance > 0) {
-        dx /= distance;
-        dy /= distance;
-      }
+    other.health -= this.damage;
+    this.hasHit = true;
+    this.alive = false;
 
-      // Apply knockback force
-      other.applyKnockback(dx, dy, random(1,10));
-    }
+    other.applyKnockback(this.dx, this.dy, this.knockbackForce);
   }
-}
-
-// Example random function if not already defined
-function random(min, max) {
-  return Math.random() * (max - min) + min;
 }
 
 export { Fist };

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Grid</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap; /* Allows iframes to wrap to the next row */
+            gap: 20px; /* Space between each iframe */
+            background-color: #222;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 600px;
+            height: 400px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <script type="module">
+        import { runGeneticAlgorithm, createRandomGenome, generatePairsInBatches } from './ga.js';
+
+        import { generateUUID } from './utils.js';
+        const AICombos = [
+            { name: "MELEE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "MELEE_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "CHARGING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "CHARGING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "ATTACKING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "ATTACKING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "DASHING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "DASHING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "CIRCLING_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "CIRCLING_dashTimer", type: "continuous", min: -5, max: 5 },
+
+            { name: "IDLE_distanceToPlayer", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_healthRatio", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_kiRatio", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_distanceToProjectile", type: "continuous", min: -5, max: 5 },
+            { name: "IDLE_dashTimer", type: "continuous", min: -5, max: 5 }
+        ];
+        const numGames = 5;
+        const numGenomes = 25;
+        const numEpochs = 10;
+        let list_genomes = [];
+        for (let i = 0; i < numGenomes; i++){
+            list_genomes.push(createRandomGenome(AICombos));
+        }
+        var batches = generatePairsInBatches(list_genomes, numGames);
+        console.log("Batches: \n", batches);
+        // for (let i = 0; i < batches.length; i++){
+        //     console.log(`Batch ${i}: ${batches[i]}\n`);
+        // }
+
+
+        // let batch_idx = 0;
+        function postNewGenome(id, player1Genome, player2Genome) {
+
+            console.log("NEW GENOME")
+            window.frames[`iframe-${id}`].contentWindow.postMessage({
+                type: 'newGenome',
+                game_id: id,
+                data: { player1Genome, player2Genome }
+            }, '*');
+            // console.log("HELLO postNewGenome");
+
+            games.push({id, player1Genome, player2Genome, done:false})
+            
+        }
+        
+        function postNewGenomestoBatch(ids, batches, batch_idx){
+            if (batches[0].length > ids.length){
+                console.error(`batches length: ${batches[0].length} cannot be greater than ids length: ${ids.length}`);
+            }
+            for (let i = 0; i < batches[batch_idx].length; i++) {
+                // console.log("Batches", batches[batch_idx][i][1])
+                postNewGenome(ids[i], batches[batch_idx][i][0], batches[batch_idx][i][1]);
+            }
+        }
+        let ids = [];
+            // Function to create and append iframes
+        function createGameGrid() {
+            const url = './index.html?aiOnly=true';
+            const body = document.querySelector('body');
+            
+            for (let i = 0; i < numGames; i++) {
+                const game_id = generateUUID(); // unique ID for this instance
+                ids.push(game_id);
+
+                // Create container with ID
+                const container = document.createElement('div');
+                container.className = 'game-container';
+                container.id = `container-${game_id}`;
+
+                // Create iframe with ID
+                const iframe = document.createElement('iframe');
+                iframe.src = `${url}&game_id=${game_id}`; // optional: pass id to game
+                iframe.id = `iframe-${game_id}`;
+
+                container.appendChild(iframe);
+                body.appendChild(container);
+
+                console.log(`Created game:`, {
+                    containerId: container.id,
+                    iframeId: iframe.id
+                });
+            }
+
+            setTimeout(() => postNewGenomestoBatch(ids, batches, 0), 1000);
+
+        }
+
+
+        
+        function batch_to_epoch_results(batch_results, epoch_results){
+            // context:     batch_results.set(id, [player1Health, player2Health]);
+            // games.push({id, player1Genome, player2Genome, done:false})
+            for (let i = 0; i < games.length; i++){
+                // take playerGenomes and locate id in list_genomes...
+                let target_game = games[i];
+                // console.log("target_game", target_game.player1Genome);
+                let target_id = target_game.id;
+                let p1idx = list_genomes.findIndex(item => 
+                    item.toString() == target_game.player1Genome.toString()
+                );
+                let p2idx = list_genomes.findIndex(item => 
+                    item.toString() == target_game.player2Genome.toString()
+                );
+                // console.log("batch_results", batch_results.get(target_id));
+                let p1gh = batch_results.get(target_id)[0];
+                let p2gh = batch_results.get(target_id)[1];
+
+                let p1Score = p1gh - p2gh;
+                let p2Score = p2gh - p1gh;
+
+                // console.log("score: ", p1Score, p2Score);
+
+                epoch_results.get(p1idx).push(p1Score);
+                epoch_results.get(p2idx).push(p2Score);
+
+                // console.log("HERE", i, target_game);
+            }
+            
+            // loop through iframe ids.
+            // Isolate player1 and 2 genomes
+            // save player 1 and 2 genomes health differences. player1health = p1genome - p2genome, player2health = p2genome - p1genome
+            
+            return epoch_results
+        }
+        
+        var batch_idx = 1;
+        var epoch_idx = 0;
+        let games = [];
+        let batch_results = new Map();
+        var results_to_save = {}
+        function createEpochResults(){
+            let epoch_results = new Map();
+
+            for (let i = 0; i < list_genomes.length; i++){
+                epoch_results.set(i, []);
+            }
+            return epoch_results;
+        }
+        let epoch_results = createEpochResults();
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'gameFinished') {
+                console.log("NEW !!!!!!!!!!!")
+             if (epoch_idx >= numEpochs) {
+                console.log("Training finished at epoch:", epoch_idx);
+                localStorage.setItem("Results", JSON.stringify(results_to_save));
+                return;
+            }
+
+                let {player1Health, player2Health, id} = event.data.data;
+                
+                player1Health = player1Health.team[0]._health;
+                player2Health = player2Health.team[0]._health;
+
+                batch_results.set(id, [player1Health, player2Health]);
+
+                let game = games.find(g => g.id === id);
+                if (game) {
+                    game.done = true;
+                }
+             
+                if(checkIfDone()){
+                    epoch_results = batch_to_epoch_results(batch_results, epoch_results);
+                    batch_results = new Map();
+
+                    games = [];
+                    
+                    
+                    if (batch_idx === batches.length){
+                        console.log("Epochs Results", epoch_results);
+                        let averaged_scores = new Map(
+                            [...epoch_results].map(([key, arr]) => [
+                                key,
+                                arr.reduce((sum, x) => sum + x, 0) / arr.length
+                            ])
+                        );
+                        const { bestGenome, bestFitness, population: newPopulation } = runGeneticAlgorithm({
+                            paramDefs: AICombos,
+                            population: list_genomes,
+                            scoresMap: averaged_scores,
+                            mutationRate: 0.1,
+                            mutationStrength: 0.12,
+                            elitism: 1,
+                            tournamentSize: 3,
+                            verbose: true
+                        });
+
+                        console.log(bestGenome,bestFitness)
+                        results_to_save = {bestGenome,bestFitness}
+
+                        // newPopulation is an array of genomes you can assign back to list_genomes:
+                        list_genomes = newPopulation;
+
+                        // console.log("Averaged!", averaged);
+                        batch_idx = 0;
+                        epoch_results = createEpochResults();
+                        // Modify Fitness function??
+                        batches = generatePairsInBatches(list_genomes, numGames);
+                        epoch_idx++;
+
+                    }
+                    batch_results = new Map();
+                    
+                    /// Send new genomes
+                    postNewGenomestoBatch(ids, batches, batch_idx);
+                    batch_idx++;
+                }
+            }
+        });
+        
+
+        function fitness(player1Health,player2Health){
+            return player1Health - player2Health
+        }
+
+
+        function checkIfDone(){
+            for(let i =0; i < games.length; i++){
+                if(!games[i].done){
+                    return false
+                }
+            }
+
+            return true
+        }
+
+
+
+
+        // Wait for DOM to load before creating the grid
+
+        const all_game_containers  = document.getElementsByClassName("game-container")
+
+        console.log(all_game_containers)
+
+        document.addEventListener('DOMContentLoaded', createGameGrid);
+    </script>
+</body>
+</html>
