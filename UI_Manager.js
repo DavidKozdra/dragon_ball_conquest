@@ -58,7 +58,7 @@ export class UIManager {
         }
     }
 
-    // 🔄 Add this: called from draw() or game loop
+    // Called from draw() or the game loop.
     updateAll() {
         for (const name of this.activeScreens) {
             const screen = this.screens[name];

@@ -8,6 +8,36 @@ function showScreen(id) {
   return el;
 }
 
+const resultIcons = {
+  victory: `
+    <svg viewBox="0 0 64 64" role="img" aria-label="Victory trophy" focusable="false">
+      <path d="M22 10h20v8c0 9.4-3.6 16-10 19.2C25.6 34 22 27.4 22 18v-8Z" />
+      <path d="M22 16H10v4c0 8 4.7 13.4 13.2 15.2" />
+      <path d="M42 16h12v4c0 8-4.7 13.4-13.2 15.2" />
+      <path d="M32 37.2V48" />
+      <path d="M22 54h20" />
+      <path d="M26 48h12l2 6H24l2-6Z" />
+    </svg>
+  `,
+  defeat: `
+    <svg viewBox="0 0 64 64" role="img" aria-label="Defeat skull" focusable="false">
+      <path d="M16 30c0-10.5 6.3-18 16-18s16 7.5 16 18c0 6.2-2.4 10.4-6.8 13.2V52H22.8v-8.8C18.4 40.4 16 36.2 16 30Z" />
+      <circle cx="25" cy="31" r="4" />
+      <circle cx="39" cy="31" r="4" />
+      <path d="M32 37l-3 5h6l-3-5Z" />
+      <path d="M25 52v-5" />
+      <path d="M32 52v-5" />
+      <path d="M39 52v-5" />
+    </svg>
+  `
+};
+
+function createResultIcon(type) {
+  return createElement('div')
+    .addClass(`result-icon ${type}`)
+    .html(resultIcons[type]);
+}
+
 function initUI(uiManager, gameStateManager, GameStates) {
 
   // ==================== MAIN MENU ====================
@@ -317,7 +347,7 @@ function initUI(uiManager, gameStateManager, GameStates) {
       const screen = createDiv().id('gameWonMenu').class('screen');
       const card = createDiv().addClass('card').parent(screen);
 
-      createElement('div', '🏆').addClass('result-icon').parent(card);
+      createResultIcon('victory').parent(card);
       createElement('h1', 'Victory').addClass('result-title victory').parent(card);
       createElement('p', 'Your team wins the battle').addClass('result-sub').parent(card);
 
@@ -354,7 +384,7 @@ function initUI(uiManager, gameStateManager, GameStates) {
       const screen = createDiv().id('gameLoseMenu').class('screen');
       const card = createDiv().addClass('card').parent(screen);
 
-      createElement('div', '💀').addClass('result-icon').parent(card);
+      createResultIcon('defeat').parent(card);
       createElement('h1', 'Defeat').addClass('result-title defeat').parent(card);
       createElement('p', 'Your team has been defeated').addClass('result-sub').parent(card);
 
